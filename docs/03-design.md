@@ -13,17 +13,27 @@
 5. **Progressive disclosure.** Score → reason → detailed chart → raw data.
 6. **Dark first,** with a light theme.
 
-## 2. Visual language
-- **Type:** one family, e.g. *Inter* or *IBM Plex Sans* (tabular figures for numbers).
-  Display 56 sp for the hero value, Title 22, Body 15, Label 12 uppercase-spaced for
-  units.
-- **Palette (dark):** background `#0E1012`, surface `#16191C`, text `#E8EAED` /
-  secondary `#9AA0A6`, lines `#2A2E33`.
-  Condition scale (one hue family, colour-blind safe): `#5B6670` poor · `#4F8FBF` ok ·
-  `#3FB8A4` good · `#E9C46A` epic. Warnings: amber `#F2A541`, red `#E5534B`.
-- **Shape:** 20 dp cards, no shadows, 1 dp hairlines; 8 dp grid; generous whitespace.
-- **Motion:** a 200 ms fade or slide; the wind arrow eases to its new direction; no
-  bouncing.
+## 2. Visual language (v2: warm, natural, pastel)
+Mockups: `design/mockups-v2.html` (+ `daily.js`), rendered to `design/mockups-v2.png`.
+
+- **Type:** DM Sans, tabular figures. Hero 64 Light, title 22–24 Semibold, body 15/13,
+  label 11 uppercase-spaced.
+- **Neutrals (warm espresso):** bg `#15130F`, surface `#1E1B17`, surface-2 `#27231E`,
+  line `#36312A`, text `#F1EBE2` / `#B0A596` / `#7E7468`.
+- **Weather accents (pastel, one meaning each):** wind `#62C7A2` sage-teal · heat
+  `#F39A70` apricot · water (rain, waves) `#8AAEF2` sea blue · sun `#EAC160` honey ·
+  storm and lightning `#BA9BF1` lavender · snow and cold `#D7E3F0` frost · cloud `#A79E92`.
+  Checked with the dataviz validator on `#1E1B17`: chroma, colour-blind and normal-vision
+  separation and contrast all pass. The lightness band check fails on purpose, because
+  pastels are lighter than the mid-tone band. Charts are direct-labelled, so the
+  wind/heat pair (deutan ΔE 8.0) has secondary encoding.
+- **Condition rating (ordinal ramp, sage):** `#4E5246 #667A5A #86A276 #A9C895 #D6EBC3`;
+  always paired with the dot count.
+- **Wind speed on map (ordinal ramp, teal):** `#35584C #3F7D68 #4FA184 #62C7A2 #B0EBD5`.
+- **Warnings (strong, reserved):** yellow `#F4D266` · orange `#EF8440` · red `#CF3A78`;
+  always with a triangle icon and the level name.
+- **Shape and motion:** 20 dp cards, no shadows, 1 dp hairlines, 8 dp grid; 200 ms
+  fades.
 
 ## 3. Signature visual components
 | Component | Shows | Used in |
@@ -85,6 +95,25 @@ year, "best wing months at this spot" computed from our archive + XEMA statistic
 ### Home-screen widgets (home_widget: native layouts fed from Flutter)
 - Small: live wind at the main spot (number + arrow + gust).
 - Medium: today's scores for 3 chosen activities.
+
+## 4b. Daily planners (one per sport)
+Day tabs (3 days hourly + 5-day outlook, each tab with a rating tick) → verdict card
+(rating, best window, why, confidence) → **hour-by-hour chart**: one SVG where every
+variable is a row on the same hour columns, with night shaded and the best window
+framed → planning cards:
+- **Wing:** gear by rider weight, forecast vs station (spot bias), pressure trend,
+  water, sunset, lightning, pre-warnings.
+- **Surf:** swell window compass, buoy 24 h trend, warning, water, wetsuit.
+- **Bike:** ride-length picker → best departure, wind along the saved route
+  (tail/cross/head), roads and trails (rain observed, ET₀, soil moisture), what to wear.
+- **Run:** run-length picker, feels-like vs comfort band, humidity, UV and irradiance
+  (sun vs shade), body cards.
+- **Hike:** plan timeline with turn-back limit, summit chart (storm %, wind, temp,
+  precipitation, snow level), temperature by altitude, snow depth, county lightning,
+  daylight.
+
+Each planner ends with its data sources. The data coverage table in the mockups maps
+every endpoint to where it is shown.
 
 ## 5. Activity scoring engine (backend, transparent and configurable)
 Each activity = a set of **factors** that map to 0–1, a hard-stop list, and a weighted
