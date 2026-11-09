@@ -1,0 +1,553 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Oratge — mockups v1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* neutrals (monochrome UI) */
+  --bg:#0E1012; --surface:#16191C; --surface-2:#1D2125; --line:#2A2E33;
+  --text:#E8EAED; --text-2:#9AA0A6; --text-3:#6B7178;
+  /* weather accents — validated categorical set, dark mode */
+  --wind:#199e70; --heat:#d95926; --rain:#3987e5; --sun:#c98500; --storm:#9085e9;
+  --cloud:#8A9096; --wave:#3987e5;
+  /* condition rating — validated ordinal ramp (1 → 5) */
+  --r1:#3d5a53; --r2:#2f7f6b; --r3:#1f9e7d; --r4:#35c095; --r5:#8ee6c2; --r0:#2A2E33;
+  /* warnings — status palette, Meteocat levels */
+  --w-yellow:#fab219; --w-orange:#ec835a; --w-red:#d03b3b;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#08090A;color:var(--text);font-family:Inter,system-ui,sans-serif;
+  font-feature-settings:"tnum" 1,"cv11" 1;padding:48px;-webkit-font-smoothing:antialiased}
+h1.page{font-weight:600;font-size:28px;letter-spacing:-.02em}
+.sub{color:var(--text-2);font-size:14px;margin:6px 0 36px}
+.grid{display:grid;grid-template-columns:repeat(3,390px);gap:48px 56px}
+.cap{font-size:13px;color:var(--text-2);margin:0 0 12px 4px;letter-spacing:.02em}
+.cap b{color:var(--text);font-weight:600}
+.phone{width:390px;height:844px;background:var(--bg);border-radius:44px;overflow:hidden;
+  position:relative;border:1px solid #23272b;box-shadow:0 0 0 8px #121416}
+.status{height:44px;display:flex;justify-content:space-between;align-items:center;padding:0 28px;
+  font-size:13px;font-weight:600;color:var(--text)}
+.scr{padding:4px 20px 0;height:calc(100% - 44px - 72px);overflow:hidden}
+.nav{position:absolute;bottom:0;left:0;right:0;height:72px;border-top:1px solid var(--line);
+  display:flex;justify-content:space-around;align-items:center;background:var(--bg)}
+.nav div{font-size:11px;color:var(--text-3);display:flex;flex-direction:column;align-items:center;gap:5px}
+.nav div.on{color:var(--text)}
+.nav svg{width:22px;height:22px}
+.lbl{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--text-3);font-weight:500}
+.muted{color:var(--text-2)} .faint{color:var(--text-3)}
+.card{background:var(--surface);border-radius:20px;padding:16px}
+.hair{height:1px;background:var(--line);margin:14px 0}
+.row{display:flex;align-items:center}
+.sp{flex:1}
+.dots{display:inline-flex;gap:4px}
+.dots i{width:8px;height:8px;border-radius:50%;background:var(--r0);display:block}
+.big-dots i{width:12px;height:12px}
+.pill{font-size:11px;border-radius:999px;padding:3px 9px;border:1px solid var(--line);color:var(--text-2)}
+.chip{font-size:12px;border-radius:999px;padding:6px 12px;background:var(--surface);color:var(--text-2)}
+.chip.on{background:var(--text);color:var(--bg);font-weight:600}
+svg text{font-family:Inter,system-ui,sans-serif}
+.warn{display:flex;gap:10px;align-items:flex-start;border-radius:16px;padding:12px 14px;
+  background:color-mix(in srgb,var(--w-orange) 12%,var(--surface));border:1px solid color-mix(in srgb,var(--w-orange) 40%,transparent)}
+.warn .t{font-size:13px;font-weight:600}
+.warn .d{font-size:12px;color:var(--text-2);margin-top:2px}
+.act{display:flex;align-items:center;padding:11px 0;border-bottom:1px solid var(--line)}
+.act:last-child{border-bottom:0}
+.act{padding:8px 0}
+.act .n{font-size:14px;font-weight:500}
+.act .w{font-size:13px;font-weight:600;text-align:right;margin-left:auto}
+.act .why{font-size:11.5px;color:var(--text-2);margin-top:1px}
+.act .mid{flex:1}
+.fact{background:var(--surface);border-radius:16px;padding:12px}
+.fact .v{font-size:20px;font-weight:600;margin-top:6px;letter-spacing:-.01em}
+.fact .s{font-size:11px;color:var(--text-2);margin-top:2px}
+.f2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.f4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.day{display:flex;align-items:center;font-size:13px;padding:7px 0}
+.legend{display:flex;gap:14px;font-size:11px;color:var(--text-2);flex-wrap:wrap}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:10px;height:10px;border-radius:3px;display:inline-block}
+/* system board */
+.board{grid-column:1 / span 3;display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr;gap:28px;
+  background:#0E1012;border:1px solid #23272b;border-radius:28px;padding:28px}
+.board h3{font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--text-3);font-weight:500;margin-bottom:14px}
+.swl{display:flex;align-items:center;gap:10px;font-size:12.5px;margin-bottom:9px}
+.swl .c{width:26px;height:26px;border-radius:8px}
+.swl code{color:var(--text-3);font-size:11px;margin-left:auto;font-family:ui-monospace,monospace}
+</style>
+</head>
+<body>
+<h1 class="page">Oratge — design mockups v1</h1>
+<p class="sub">Monochrome interface · colour only where it means something: weather icons, data marks, condition ratings, warnings. Dark theme · Inter · 390 × 844.</p>
+
+<div class="grid">
+
+<!-- ===================== 1. TODAY ===================== -->
+<div>
+<p class="cap"><b>1 · Today</b> — current weather, an active warning, and today's rating for each sport</p>
+<div class="phone">
+ <div class="status"><span>9:41</span><span>●●● 5G ▮</span></div>
+ <div class="scr">
+  <div class="row" style="margin-top:6px">
+    <div><div style="font-size:17px;font-weight:600">Barcelona</div>
+    <div class="faint" style="font-size:11px;margin-top:2px">Meteocat · Zoo station · 8 min ago</div></div>
+    <div class="sp"></div>
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9AA0A6" stroke-width="1.6"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg>
+  </div>
+
+  <div class="row" style="margin-top:18px;gap:14px">
+    <div id="ico-hero"></div>
+    <div>
+      <div style="font-size:64px;font-weight:300;letter-spacing:-.04em;line-height:1">18°</div>
+    </div>
+    <div style="margin-left:6px">
+      <div style="font-size:15px;font-weight:500">Mostly sunny</div>
+      <div class="muted" style="font-size:12.5px;margin-top:4px">Feels 17° · ↓11° ↑21°</div>
+      <div class="muted" style="font-size:12.5px;margin-top:2px"><span style="color:var(--wind)">➚</span> SW 14 kn · gusts 21</div>
+    </div>
+  </div>
+
+  <div class="warn" style="margin-top:16px">
+    <svg width="18" height="18" viewBox="0 0 24 24" style="flex:none;margin-top:1px"><path d="M12 3l10 18H2z" fill="var(--w-orange)"/><path d="M12 10v5M12 17.5v.5" stroke="#0E1012" stroke-width="2" stroke-linecap="round"/></svg>
+    <div><div class="t">Orange warning · Sea state</div><div class="d">Maresme coast · Thu 12–20 h · waves up to 2.5 m</div></div>
+  </div>
+
+  <div class="lbl" style="margin:18px 0 2px">Today for you</div>
+  <div id="acts"></div>
+
+  <div class="lbl" style="margin:12px 0 8px">Next 24 h</div>
+  <svg id="t24" width="350" height="118"></svg>
+  <div class="lbl" style="margin:10px 0 2px">7 days</div>
+  <div id="week"></div>
+ </div>
+ <div class="nav" id="nav1"></div>
+</div>
+</div>
+
+<!-- ===================== 2. WING ===================== -->
+<div>
+<p class="cap"><b>2 · Wing foil detail</b> — wind with gust band, your wind range, best time to go, live compass</p>
+<div class="phone">
+ <div class="status"><span>9:41</span><span>●●● 5G ▮</span></div>
+ <div class="scr">
+  <div class="row muted" style="font-size:13px;gap:8px;margin-top:4px"><span style="font-size:18px">‹</span> Activities</div>
+  <div class="row" style="margin-top:10px">
+    <div><div style="font-size:22px;font-weight:600;letter-spacing:-.01em">Wing foil</div>
+      <div class="muted" style="font-size:13px;margin-top:2px">Castelldefels · flatwater</div></div>
+    <div class="sp"></div>
+    <div style="text-align:right"><div class="dots big-dots" id="wing-dots"></div>
+      <div style="font-size:12px;margin-top:6px;color:var(--r4);font-weight:600">Good</div></div>
+  </div>
+
+  <div class="card" style="margin-top:14px;padding:14px 14px 10px">
+    <div class="row"><div><div style="font-size:15px;font-weight:600">Best: Thu 16–19 h</div>
+      <div class="muted" style="font-size:12px;margin-top:2px">side-shore SW · 15–19 kn · gusts ≤ 24</div></div></div>
+    <svg id="wind" width="322" height="182" style="margin-top:8px"></svg>
+    <div class="legend" style="margin-top:4px">
+      <span><i class="sw" style="background:var(--wind);height:3px;border-radius:2px"></i>mean wind</span>
+      <span><i class="sw" style="background:color-mix(in srgb,var(--wind) 30%,transparent)"></i>gusts</span>
+      <span><i class="sw" style="background:repeating-linear-gradient(45deg,#3a3f45 0 2px,transparent 2px 5px)"></i>your range 14–24 kn</span>
+    </div>
+  </div>
+
+  <div class="lbl" style="margin:16px 0 8px">Go window · next 3 days</div>
+  <svg id="go" width="350" height="64"></svg>
+
+  <div class="row" style="gap:12px;margin-top:14px">
+    <div class="card" style="padding:10px;width:150px;height:150px"><svg id="compass" width="130" height="130"></svg></div>
+    <div class="f2" style="flex:1;grid-template-columns:1fr">
+      <div class="fact" style="padding:9px 12px"><div class="lbl">Gust factor</div><div class="v" style="font-size:17px;margin-top:3px">1.3 <span class="faint" style="font-size:11px;font-weight:400">steady</span></div></div>
+      <div class="fact" style="padding:9px 12px"><div class="lbl">Water</div><div class="v" style="font-size:17px;margin-top:3px">19° <span class="faint" style="font-size:11px;font-weight:400">→ 3/2 wetsuit</span></div></div>
+      <div class="fact" style="padding:9px 12px"><div class="lbl">Sunset</div><div class="v" style="font-size:17px;margin-top:3px">17:41</div></div>
+    </div>
+  </div>
+ </div>
+ <div class="nav" id="nav2"></div>
+</div>
+</div>
+
+<!-- ===================== 3. SURF ===================== -->
+<div>
+<p class="cap"><b>3 · Surf detail</b> — live buoy readings, wave height and period, wind direction, wetsuit advice</p>
+<div class="phone">
+ <div class="status"><span>9:41</span><span>●●● 5G ▮</span></div>
+ <div class="scr">
+  <div class="row muted" style="font-size:13px;gap:8px;margin-top:4px"><span style="font-size:18px">‹</span> Activities</div>
+  <div class="row" style="margin-top:10px">
+    <div><div style="font-size:22px;font-weight:600;letter-spacing:-.01em">Surf</div>
+      <div class="muted" style="font-size:13px;margin-top:2px">Ocata · El Masnou · faces E–SE</div></div>
+    <div class="sp"></div>
+    <div style="text-align:right"><div class="dots big-dots" id="surf-dots"></div>
+      <div style="font-size:12px;margin-top:6px;color:var(--r3);font-weight:600">Fair</div></div>
+  </div>
+
+  <div class="lbl" style="margin:16px 0 8px">Buoy now · 25 min ago</div>
+  <div class="f4">
+    <div class="fact"><div class="lbl">Height</div><div class="v">0.8<span class="faint" style="font-size:12px"> m</span></div></div>
+    <div class="fact"><div class="lbl">Period</div><div class="v">8<span class="faint" style="font-size:12px"> s</span></div></div>
+    <div class="fact"><div class="lbl">From</div><div class="v"><span style="color:var(--wave);display:inline-block;transform:rotate(275deg)">➜</span> E</div></div>
+    <div class="fact"><div class="lbl">Sea</div><div class="v">19.4°</div></div>
+  </div>
+
+  <div class="card" style="margin-top:14px;padding:14px 14px 10px">
+    <div style="font-size:15px;font-weight:600">Best: Thu 08–11 h</div>
+    <div class="muted" style="font-size:12px;margin-top:2px">1.1 m @ 9 s from E · light offshore wind</div>
+    <svg id="waves" width="322" height="214" style="margin-top:10px"></svg>
+    <div class="legend" style="margin-top:6px">
+      <span><i class="sw" style="background:var(--wave)"></i>wave height (m) · period on top</span>
+      <span><span style="color:var(--wind)">➜</span> wind</span>
+    </div>
+  </div>
+
+  <div class="card row" style="margin-top:12px;gap:12px;padding:12px 14px">
+    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--wave)" stroke-width="1.6" stroke-linecap="round"><path d="M2 15c2.5 0 2.5-2 5-2s2.5 2 5 2 2.5-2 5-2 2.5 2 5 2"/><path d="M2 19c2.5 0 2.5-2 5-2s2.5 2 5 2 2.5-2 5-2 2.5 2 5 2"/><path d="M12 3v6M9.5 6.5L12 9l2.5-2.5"/></svg>
+    <div><div style="font-size:14px;font-weight:600">3/2 mm full suit</div><div class="muted" style="font-size:12px">Water 19.4° · air 16° at dawn</div></div>
+  </div>
+ </div>
+ <div class="nav" id="nav3"></div>
+</div>
+</div>
+
+<!-- ===================== 4. MAP ===================== -->
+<div>
+<p class="cap"><b>4 · Map</b> — live wind at every station, lightning in the last hour, warning areas</p>
+<div class="phone">
+ <div class="status"><span>9:41</span><span>●●● 5G ▮</span></div>
+ <svg id="map" width="390" height="728" style="position:absolute;top:44px;left:0"></svg>
+ <div style="position:absolute;top:56px;left:16px;right:16px;display:flex;gap:6px">
+   <span class="chip on">Wind</span><span class="chip">Temp</span><span class="chip">Rain 1 h</span><span class="chip">⚡ 60 min</span>
+ </div>
+ <div class="card" style="position:absolute;left:12px;right:12px;bottom:84px;padding:14px 16px;background:#16191Cf2">
+   <div class="row"><div><div style="font-size:15px;font-weight:600">Castelldefels</div>
+     <div class="faint" style="font-size:11px;margin-top:2px">XEMA station · 3 m · updated 09:30</div></div><div class="sp"></div>
+     <div style="text-align:right"><div style="font-size:22px;font-weight:600"><span style="color:var(--wind);font-size:18px;display:inline-block;transform:rotate(-135deg)">➜</span> 14 <span class="faint" style="font-size:12px">kn</span></div>
+     <div class="muted" style="font-size:11px">gusts 21 · SW</div></div></div>
+   <svg id="spark" width="334" height="40" style="margin-top:8px"></svg>
+   <div class="row faint" style="font-size:10.5px;margin-top:2px"><span>06 h</span><div class="sp"></div><span>last 4 h, 10 m wind</span><div class="sp"></div><span>now</span></div>
+ </div>
+ <div class="nav" id="nav4"></div>
+</div>
+</div>
+
+<!-- ===================== 5. SPOTS ===================== -->
+<div>
+<p class="cap"><b>5 · Spots</b> — your places with live readings and today's best window</p>
+<div class="phone">
+ <div class="status"><span>9:41</span><span>●●● 5G ▮</span></div>
+ <div class="scr">
+  <div class="row" style="margin-top:6px"><div style="font-size:22px;font-weight:600">Spots</div><div class="sp"></div>
+  <span class="pill" style="font-size:12px">+ Add</span></div>
+  <div id="spots" style="margin-top:14px;display:flex;flex-direction:column;gap:10px"></div>
+ </div>
+ <div class="nav" id="nav5"></div>
+</div>
+</div>
+
+<!-- ===================== 6. HISTORY ===================== -->
+<div>
+<p class="cap"><b>6 · History</b> — station archive: rideable days per day and month, unusual readings, records</p>
+<div class="phone">
+ <div class="status"><span>9:41</span><span>●●● 5G ▮</span></div>
+ <div class="scr">
+  <div class="row muted" style="font-size:13px;gap:8px;margin-top:4px"><span style="font-size:18px">‹</span> Castelldefels</div>
+  <div style="font-size:22px;font-weight:600;margin-top:10px">Wind history</div>
+  <div class="muted" style="font-size:12.5px;margin-top:2px">XEMA station · 10 m · since 2009</div>
+
+  <div class="card" style="margin-top:14px;padding:12px 14px">
+    <div class="row"><span style="color:var(--heat);font-size:14px">▲</span>
+      <div style="margin-left:10px;font-size:13px">Today is the <b>windiest 9 Nov</b> in 7 years</div></div>
+  </div>
+
+  <div class="lbl" style="margin:16px 0 8px">Rideable hours per day · last 26 weeks</div>
+  <svg id="heat" width="350" height="128"></svg>
+
+  <div class="lbl" style="margin:14px 0 8px">Rideable days per month · avg 2009–2025</div>
+  <svg id="months" width="350" height="150"></svg>
+
+  <div class="f2" style="margin-top:12px">
+    <div class="fact"><div class="lbl">Max gust</div><div class="v">38 kn</div><div class="s">12 Mar 2019 · N</div></div>
+    <div class="fact"><div class="lbl">Best month</div><div class="v">April</div><div class="s">12.4 rideable days</div></div>
+  </div>
+ </div>
+ <div class="nav" id="nav6"></div>
+</div>
+</div>
+
+<!-- ===================== DESIGN SYSTEM BOARD ===================== -->
+<div class="board">
+  <div>
+    <h3>Weather accents · icons + chart marks</h3>
+    <div id="icons" style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px 8px"></div>
+    <p class="faint" style="font-size:11.5px;margin-top:14px;line-height:1.5">Colour is used only for things with a meaning. Text stays neutral. Each hue has one meaning everywhere: aqua = wind, orange = heat, blue = water (rain, waves), yellow = sun, violet = storm and lightning.</p>
+  </div>
+  <div>
+    <h3>Condition rating · 1 → 5</h3>
+    <div id="ramp"></div>
+    <p class="faint" style="font-size:11.5px;margin-top:10px;line-height:1.5">One hue, getting brighter as the rating improves. The number of filled dots also shows the rating, so it never depends on colour alone.</p>
+  </div>
+  <div>
+    <h3>Warnings · Meteocat levels</h3>
+    <div class="swl"><span class="c" style="background:var(--w-yellow)"></span>Yellow · moderate<code>#fab219</code></div>
+    <div class="swl"><span class="c" style="background:var(--w-orange)"></span>Orange · high<code>#ec835a</code></div>
+    <div class="swl"><span class="c" style="background:var(--w-red)"></span>Red · very high<code>#d03b3b</code></div>
+    <p class="faint" style="font-size:11.5px;margin-top:10px;line-height:1.5">Reserved for warnings only, and always shown with a triangle icon and the level name.</p>
+  </div>
+  <div>
+    <h3>Neutrals · type</h3>
+    <div class="swl"><span class="c" style="background:#0E1012;border:1px solid #2A2E33"></span>Background<code>#0E1012</code></div>
+    <div class="swl"><span class="c" style="background:#16191C"></span>Surface<code>#16191C</code></div>
+    <div class="swl"><span class="c" style="background:#2A2E33"></span>Line<code>#2A2E33</code></div>
+    <div class="swl"><span class="c" style="background:#9AA0A6"></span>Text 2<code>#9AA0A6</code></div>
+    <div style="margin-top:12px;font-size:12px" class="muted">Inter · 64 Light hero · 22 Semibold title · 15/13 body · 11 caps label · tabular figures</div>
+  </div>
+</div>
+
+</div>
+
+<script>
+const C = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const R = ['--r1','--r2','--r3','--r4','--r5'].map(C);
+const NS='http://www.w3.org/2000/svg';
+function el(p,tag,a={},txt){const e=document.createElementNS(NS,tag);for(const k in a)e.setAttribute(k,a[k]);if(txt!=null)e.textContent=txt;p.appendChild(e);return e;}
+const LINE='#2A2E33', T2='#9AA0A6', T3='#6B7178';
+
+/* ---------- icons ---------- */
+function icon(kind,s=40){
+  const sun=C('--sun'),cl=C('--cloud'),rain=C('--rain'),st=C('--storm'),w=C('--wind'),h=C('--heat');
+  const sw=`stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" fill="none"`;
+  const cloud=(x=0,y=0,col=cl)=>`<path transform="translate(${x} ${y})" d="M7 18h10a4 4 0 0 0 .4-8 5.5 5.5 0 0 0-10.6 1.5A3.3 3.3 0 0 0 7 18z" stroke="${col}" ${sw}/>`;
+  const sunG=(cx,cy,r)=>`<circle cx="${cx}" cy="${cy}" r="${r}" fill="${sun}"/>`+[0,45,90,135,180,225,270,315].map(a=>{const q=a*Math.PI/180;return `<line x1="${cx+Math.cos(q)*(r+2.2)}" y1="${cy+Math.sin(q)*(r+2.2)}" x2="${cx+Math.cos(q)*(r+4)}" y2="${cy+Math.sin(q)*(r+4)}" stroke="${sun}" stroke-width="1.6" stroke-linecap="round"/>`}).join('');
+  const m={
+    sun: sunG(12,12,4.2),
+    partly: sunG(9,9,3.4)+`<path d="M8 20h9.5a3.6 3.6 0 0 0 .3-7.2 5 5 0 0 0-9.6 1.4A3 3 0 0 0 8 20z" fill="#0E1012" stroke="${cl}" ${sw.replace('fill="none"','')}/>`,
+    cloud: cloud(0,0),
+    rain: cloud(0,-3)+[7,11,15].map(x=>`<line x1="${x}" y1="18" x2="${x-1.2}" y2="21.5" stroke="${rain}" stroke-width="1.8" stroke-linecap="round"/>`).join(''),
+    storm: cloud(0,-3)+`<path d="M12.5 15l-2.5 4h3l-2 4" stroke="${st}" stroke-width="1.8" ${sw.replace('stroke-width="1.7"','')}/>`,
+    wind: `<path d="M3 9h11a3 3 0 1 0-3-3M3 13h15a3 3 0 1 1-3 3M3 17h7" stroke="${w}" ${sw}/>`,
+    wave: `<path d="M2 12c2.5 0 2.5-2.2 5-2.2s2.5 2.2 5 2.2 2.5-2.2 5-2.2 2.5 2.2 5 2.2M2 17c2.5 0 2.5-2.2 5-2.2s2.5 2.2 5 2.2 2.5-2.2 5-2.2 2.5 2.2 5 2.2" stroke="${rain}" ${sw}/>`,
+    heat: `<path d="M12 4v10.5" stroke="${h}" stroke-width="1.7" stroke-linecap="round"/><circle cx="12" cy="17.5" r="3" fill="${h}"/><path d="M10 4a2 2 0 0 1 4 0v10.6a4.2 4.2 0 1 1-4 0z" stroke="${T2}" ${sw}/>`,
+    snow: [0,60,120].map(a=>`<line x1="12" y1="4" x2="12" y2="20" transform="rotate(${a} 12 12)" stroke="#BFD6EE" stroke-width="1.7" stroke-linecap="round"/>`).join(''),
+    uv: sunG(12,12,3.2)+`<text x="12" y="23.6" font-size="5" text-anchor="middle" fill="${sun}" font-weight="700">UV</text>`,
+    bolt: `<path d="M13 2L5 14h6l-1 8 8-12h-6z" fill="${st}"/>`,
+    night: `<path d="M19 14.5A7.5 7.5 0 0 1 9.5 5a7.5 7.5 0 1 0 9.5 9.5z" fill="#AEB5BD"/>`,
+  };
+  return `<svg width="${s}" height="${s}" viewBox="0 0 24 24">${m[kind]}</svg>`;
+}
+document.getElementById('ico-hero').innerHTML=icon('partly',62);
+document.getElementById('icons').innerHTML=[['sun','Sun'],['partly','Partly'],['cloud','Cloud'],['rain','Rain'],['storm','Storm'],['bolt','Lightning'],['wind','Wind'],['wave','Waves'],['heat','Heat'],['snow','Snow'],['uv','UV'],['night','Clear night']]
+  .map(([k,n])=>`<div style="text-align:center">${icon(k,30)}<div class="faint" style="font-size:10.5px;margin-top:4px">${n}</div></div>`).join('');
+document.getElementById('ramp').innerHTML=['Poor','Marginal','Fair','Good','Epic'].map((n,i)=>
+  `<div class="swl"><span class="c" style="background:${R[i]}"></span><span class="dots">${[0,1,2,3,4].map(j=>`<i style="background:${j<=i?R[i]:C('--r0')}"></i>`).join('')}</span>${n}<code>${R[i]}</code></div>`).join('');
+
+/* ---------- dots + nav ---------- */
+const dots=(n)=>[0,1,2,3,4].map(j=>`<i style="background:${j<n?R[n-1]:C('--r0')}"></i>`).join('');
+document.getElementById('wing-dots').innerHTML=dots(4);
+document.getElementById('surf-dots').innerHTML=dots(3);
+const navIcons={Today:'<circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>',
+  Activities:'<path d="M4 18l5-6 4 3 7-9"/>',Map:'<path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/>',Spots:'<path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/>'};
+[['nav1','Today'],['nav2','Activities'],['nav3','Activities'],['nav4','Map'],['nav5','Spots'],['nav6','Spots']].forEach(([id,on])=>{
+  document.getElementById(id).innerHTML=Object.entries(navIcons).map(([n,p])=>`<div class="${n===on?'on':''}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${p}</svg>${n}</div>`).join('');
+});
+
+/* ---------- activities list ---------- */
+const acts=[['Wing',4,'16–19 h','side-shore SW 15–19 kn','wind'],['Surf',1,'—','flat · 0.3 m','wave'],
+  ['Bike',5,'all day','dry roads · light wind','sun'],['Run',4,'before 11 h','UV 6 from noon','uv'],['Hike',2,'until 14 h','storms likely after 15 h','storm']];
+document.getElementById('acts').innerHTML=acts.map(([n,r,w,why,ic])=>`<div class="act"><span style="margin-right:10px">${icon(ic,18)}</span><div class="mid"><div class="n">${n}</div><div class="why">${why}</div></div>
+  <span class="dots" style="margin-right:14px">${dots(r)}</span><span class="w" style="color:${r>=3?R[r-1]:T3};width:76px">${w}</span></div>`).join('');
+
+/* ---------- 24 h temperature + rain (two strips, no dual axis) ---------- */
+(()=>{const s=document.getElementById('t24');const W=350;
+ const temps=[17,16,15,14,14,13,13,14,16,18,19,20,21,21,20,19,18,17,16,15,15,14,14,13];
+ const rain=[0,0,0,0,0,0,0,0,0,0,0,5,10,20,45,60,40,20,10,5,0,0,0,0];
+ const sky=['night','night','night','night','night','night','partly','partly','sun','sun','sun','partly','partly','cloud','storm','rain','rain','cloud','cloud','night','night','night','night','night'];
+ const x=i=>8+i*(W-16)/23, y=t=>58-(t-12)/(22-12)*36;
+ [0,6,12,18].forEach(i=>{const lab=['10 h','16 h','22 h','04 h'][i/6];el(s,'text',{x:x(i),y:116,'font-size':10,fill:T3,'text-anchor':'middle'},lab)});
+ // sky icons every 3 h
+ for(let i=0;i<24;i+=3){const g=el(s,'g',{transform:`translate(${x(i)-8} 0)`});g.innerHTML=icon(sky[i],16).replace(/^<svg[^>]*>|<\/svg>$/g,'').replace(/<path/g,'<path').trim();g.setAttribute('transform',`translate(${x(i)-8} 0) scale(.6667)`);}
+ const d=temps.map((t,i)=>(i?'L':'M')+x(i)+' '+y(t)).join(' ');
+ el(s,'path',{d,stroke:C('--heat'),'stroke-width':2,fill:'none','stroke-linejoin':'round','stroke-linecap':'round'});
+ const iMax=12,iMin=23;
+ [[iMax,'21°',-7],[0,'17°',-7],[iMin,'13°',14]].forEach(([i,l,dy])=>{el(s,'circle',{cx:x(i),cy:y(temps[i]),r:3.5,fill:C('--heat'),stroke:'#0E1012','stroke-width':2});
+   el(s,'text',{x:x(i),y:y(temps[i])+dy,'font-size':11,fill:'#E8EAED','text-anchor':i==iMin?'end':'middle','font-weight':600},l)});
+ // rain strip
+ el(s,'line',{x1:0,x2:W,y1:100,y2:100,stroke:LINE});
+ rain.forEach((p,i)=>{ if(!p) return; const h=p/100*26; el(s,'rect',{x:x(i)-4.5,y:100-h,width:9,height:h,rx:2,fill:C('--rain')});});
+ el(s,'text',{x:x(15)+8,y:78,'font-size':10.5,fill:T2},'60% rain 15 h');
+})();
+
+/* ---------- 7 days ---------- */
+(()=>{const d=[['Today','partly',0,11,21],['Thu','storm',60,13,19],['Fri','rain',80,12,16],['Sat','partly',20,10,17],['Sun','sun',0,9,18],['Mon','sun',0,10,19],['Tue','cloud',10,11,18]];
+ const lo=8,hi=22,bw=120;
+ document.getElementById('week').innerHTML=d.map(([n,ic,p,a,b])=>`<div class="day"><span style="width:52px">${n}</span>${icon(ic,20)}
+  <span style="width:46px;text-align:right;font-size:12px;color:${p?C('--rain'):'transparent'}">${p}%</span>
+  <span class="sp"></span><span class="muted" style="width:28px;text-align:right">${a}°</span>
+  <span style="width:${bw}px;height:4px;border-radius:2px;background:#1F2327;margin:0 10px;position:relative">
+   <i style="position:absolute;left:${(a-lo)/(hi-lo)*bw}px;width:${(b-a)/(hi-lo)*bw}px;height:4px;border-radius:2px;background:linear-gradient(90deg,#c98500,${C('--heat')})"></i></span>
+  <span style="width:26px">${b}°</span></div>`).join('');})();
+
+/* ---------- wind band ---------- */
+const H=72;
+const mean=[...Array(H)].map((_,i)=>{const h=i%24;const day=Math.floor(i/24);const base=[9,11,15][day];
+  return Math.max(3,base+7*Math.exp(-Math.pow((h-17)/3.2,2))+2*Math.sin(i/3.1)-(h<8?3:0));});
+const gust=mean.map((m,i)=>m*1.28+2+1.5*Math.sin(i/2.3));
+const dir=mean.map((_,i)=>{const h=i%24;return h>11&&h<21?225:(h<9?330:280);});
+(()=>{const s=document.getElementById('wind');const W=322,top=22,bot=150;
+ const x=i=>4+i*(W-30)/(H-1), y=k=>bot-k/35*(bot-top);
+ // night shading
+ [[0,7],[19,31],[43,55],[67,71]].forEach(([a,b])=>el(s,'rect',{x:x(a),y:top,width:x(b)-x(a),height:bot-top,fill:'#121417'}));
+ // hatch pattern for the user's range
+ const defs=el(s,'defs');const p=el(defs,'pattern',{id:'hatch',width:5,height:5,patternUnits:'userSpaceOnUse',patternTransform:'rotate(45)'});
+ el(p,'rect',{width:2,height:5,fill:'#30353b'});
+ el(s,'rect',{x:x(0),y:y(24),width:x(H-1)-x(0),height:y(14)-y(24),fill:'url(#hatch)'});
+ [0,10,20,30].forEach(k=>{el(s,'line',{x1:x(0),x2:x(H-1),y1:y(k),y2:y(k),stroke:LINE,'stroke-width':k?0.6:1});
+   el(s,'text',{x:W,y:y(k)+3.5,'font-size':10,fill:T3,'text-anchor':'end'},k)});
+ el(s,'text',{x:W,y:y(35)+4,'font-size':9.5,fill:T3,'text-anchor':'end'},'kn');
+ // gust band
+ const up=gust.map((g,i)=>(i?'L':'M')+x(i)+' '+y(g)).join(' ');
+ const dn=mean.slice().reverse().map((m,j)=>'L'+x(H-1-j)+' '+y(m)).join(' ');
+ el(s,'path',{d:up+' '+dn+' Z',fill:C('--wind'),'fill-opacity':.28});
+ el(s,'path',{d:mean.map((m,i)=>(i?'L':'M')+x(i)+' '+y(m)).join(' '),stroke:C('--wind'),'stroke-width':2,fill:'none','stroke-linejoin':'round'});
+ // best window highlight Thu 16–19 (day 2 ⇒ hours 40..43)
+ el(s,'rect',{x:x(40),y:top-2,width:x(43)-x(40),height:bot-top+2,fill:'none',stroke:'#E8EAED','stroke-width':1,rx:4,'stroke-dasharray':'2 2'});
+ // arrows every 6 h
+ for(let i=2;i<H;i+=6){const g=el(s,'g',{transform:`translate(${x(i)} 9) rotate(${dir[i]+180})`});
+   el(g,'path',{d:'M0 -6 L0 6 M-3.2 2.5 L0 6 L3.2 2.5',stroke:T2,'stroke-width':1.5,fill:'none','stroke-linecap':'round','stroke-linejoin':'round'});}
+ ['Wed','Thu','Fri'].forEach((d,k)=>{el(s,'text',{x:x(k*24+12),y:bot+16,'font-size':11,fill:T2,'text-anchor':'middle','font-weight':500},d);
+   if(k) el(s,'line',{x1:x(k*24),x2:x(k*24),y1:top,y2:bot+6,stroke:LINE});});
+ el(s,'text',{x:x(41.5),y:bot+29,'font-size':10,fill:'#E8EAED','text-anchor':'middle'},'best');
+})();
+
+/* ---------- go window strip ---------- */
+(()=>{const s=document.getElementById('go');const W=350;const rowH=14;
+ const score=mean.map((m,i)=>{const h=i%24;if(h<8||h>=18+ (i>40?1:0)) return 0;const g=gust[i]/m;
+   let r=m<12?1:m<14?2:m<=24?(g<1.4?4:3):2; if(m>15&&m<20&&g<1.35)r=5;return r;});
+ ['Wed','Thu','Fri'].forEach((d,k)=>{const y=k*(rowH+6);
+   el(s,'text',{x:0,y:y+11,'font-size':11,fill:T2},d);
+   for(let h=6;h<22;h++){const i=k*24+h;const r=score[i];const cw=(W-40)/16;
+     el(s,'rect',{x:36+(h-6)*cw,y,width:cw-2,height:rowH,rx:3,fill:r?R[r-1]:'#1A1D21'});}
+ });
+})();
+
+/* ---------- compass ---------- */
+(()=>{const s=document.getElementById('compass');const c=65,r=52;
+ // shoreline orientation: beach faces S (sea to the south). Sectors relative to wind FROM-direction
+ const arc=(a0,a1,rr,col,op)=>{const p=(a)=>[c+rr*Math.sin(a*Math.PI/180),c-rr*Math.cos(a*Math.PI/180)];
+   const [x0,y0]=p(a0),[x1,y1]=p(a1);el(s,'path',{d:`M${c} ${c} L${x0} ${y0} A${rr} ${rr} 0 ${(a1-a0+360)%360>180?1:0} 1 ${x1} ${y1} Z`,fill:col,'fill-opacity':op});};
+ arc(250,110,r,'#E8EAED',.04);  // offshore (from land, N side)
+ arc(110,250,r,C('--wind'),.10); // onshore/side (from sea)
+ el(s,'circle',{cx:c,cy:c,r,fill:'none',stroke:LINE});
+ for(let a=0;a<360;a+=30) {const q=a*Math.PI/180;el(s,'line',{x1:c+(r-4)*Math.sin(q),y1:c-(r-4)*Math.cos(q),x2:c+r*Math.sin(q),y2:c-r*Math.cos(q),stroke:T3});}
+ [['N',0],['E',90],['S',180],['W',270]].forEach(([t,a])=>{const q=a*Math.PI/180;el(s,'text',{x:c+(r-13)*Math.sin(q),y:c-(r-13)*Math.cos(q)+3.5,'font-size':9.5,fill:T3,'text-anchor':'middle'},t)});
+ // shoreline
+ el(s,'line',{x1:c-r-4,x2:c+r+4,y1:c+6,y2:c+6,stroke:'#C9A86A','stroke-width':1.2,'stroke-dasharray':'3 3','transform':`rotate(-12 ${c} ${c})`});
+ // wind arrow from SW (225) pointing toward NE
+ const g=el(s,'g',{transform:`rotate(${225+180} ${c} ${c})`});
+ el(g,'path',{d:`M${c} ${c+30} L${c} ${c-26} M${c-6} ${c-18} L${c} ${c-27} L${c+6} ${c-18}`,stroke:C('--wind'),'stroke-width':2.6,fill:'none','stroke-linecap':'round','stroke-linejoin':'round'});
+ el(s,'circle',{cx:c,cy:c,r:15,fill:'#16191C'});
+ el(s,'text',{x:c,y:c+5,'font-size':14,'font-weight':700,fill:'#E8EAED','text-anchor':'middle'},'14');
+ el(s,'text',{x:c,y:c+r+9,'font-size':0,fill:T3,'text-anchor':'middle'},'');
+ el(s,'text',{x:6,y:126,'font-size':9,fill:T3},'live · side-shore');
+})();
+
+/* ---------- waves ---------- */
+(()=>{const s=document.getElementById('waves');const W=322,top=28,bot=150;
+ const n=24; // every 3 h for 3 days
+ const hs=[...Array(n)].map((_,i)=>0.35+0.75*Math.exp(-Math.pow((i-10.5)/4,2))+0.15*Math.sin(i/1.7));
+ const per=hs.map((h,i)=>Math.round(5+h*3.6+(i>8&&i<14?1:0)));
+ const wd=[...Array(n)].map((_,i)=>i%8<3?330:(i%8<6?150:200)); // from-direction
+ const bw=(W-30)/n, x=i=>4+i*bw, y=v=>bot-v/1.6*(bot-top);
+ [0.5,1,1.5].forEach(k=>{el(s,'line',{x1:0,x2:W-22,y1:y(k),y2:y(k),stroke:LINE,'stroke-width':.6});el(s,'text',{x:W,y:y(k)+3.5,'font-size':10,fill:T3,'text-anchor':'end'},k)});
+ el(s,'line',{x1:0,x2:W-22,y1:bot,y2:bot,stroke:LINE});
+ hs.forEach((h,i)=>{const best=i>=8&&i<=9;
+   el(s,'rect',{x:x(i)+1,y:y(h),width:bw-2,height:bot-y(h),rx:3,fill:C('--wave'),'fill-opacity':best?1:.55});
+   if(i%2===0) el(s,'text',{x:x(i)+bw/2,y:y(h)-5,'font-size':9.5,fill:best?'#E8EAED':T2,'text-anchor':'middle','font-weight':best?700:400},per[i]+'s');
+   if(i%2===1){const g=el(s,'g',{transform:`translate(${x(i)} ${bot+16}) rotate(${wd[i]+180})`});
+     el(g,'path',{d:'M0 -5 L0 5 M-2.8 2 L0 5 L2.8 2',stroke:C('--wind'),'stroke-width':1.5,fill:'none','stroke-linecap':'round'});}
+ });
+ ['Wed','Thu','Fri'].forEach((d,k)=>{el(s,'text',{x:x(k*8+4),y:bot+40,'font-size':11,fill:T2,'text-anchor':'middle','font-weight':500},d);if(k)el(s,'line',{x1:x(k*8),x2:x(k*8),y1:top-10,y2:bot+28,stroke:LINE})});
+ el(s,'text',{x:0,y:12,'font-size':10,fill:T3},'m');
+ el(s,'text',{x:W-22,y:bot+20,'font-size':9.5,fill:T3,'text-anchor':'end'},'');
+})();
+
+/* ---------- map ---------- */
+(()=>{const s=document.getElementById('map');
+ el(s,'rect',{width:390,height:728,fill:'#0B0D0F'});
+ // sea
+ el(s,'path',{d:'M390 120 C 350 190, 330 260, 300 330 C 270 400, 210 430, 160 470 C 120 500, 70 540, 40 600 C 25 640, 10 690, 0 728 L 390 728 Z',fill:'#0F1418'});
+ el(s,'path',{d:'M390 120 C 350 190, 330 260, 300 330 C 270 400, 210 430, 160 470 C 120 500, 70 540, 40 600 C 25 640, 10 690, 0 728',fill:'none',stroke:'#2A3036','stroke-width':1.2});
+ // county borders
+ ['M0 260 C 80 250, 150 270, 210 240','M150 100 C 160 200, 190 300, 230 420','M0 420 C 60 410, 120 440, 170 470','M240 80 C 250 160, 280 220, 320 260'].forEach(d=>el(s,'path',{d,fill:'none',stroke:'#1E2328','stroke-width':1}));
+ // warning area (orange, coastal county) with texture + label
+ const defs=el(s,'defs');const p=el(defs,'pattern',{id:'wh',width:6,height:6,patternUnits:'userSpaceOnUse',patternTransform:'rotate(45)'});
+ el(p,'rect',{width:2,height:6,fill:C('--w-orange'),'fill-opacity':.45});
+ el(s,'path',{d:'M320 260 C 280 220, 250 160, 240 80 L 300 70 L 390 60 L 390 120 C 350 190, 335 230, 320 260 Z',fill:'url(#wh)',stroke:C('--w-orange'),'stroke-opacity':.7});
+ el(s,'rect',{x:262,y:104,width:96,height:22,rx:11,fill:'#16191C',stroke:C('--w-orange'),'stroke-opacity':.6});
+ el(s,'text',{x:310,y:119,'font-size':10.5,fill:'#E8EAED','text-anchor':'middle'},'▲ Orange · sea');
+ // stations w/ wind arrows coloured by speed (sequential aqua ramp)
+ const st=[[110,170,8,250],[180,150,6,270],[70,330,11,240],[200,330,13,225],[250,300,16,220],[150,410,14,230],[95,470,18,225],[205,250,10,240],[300,200,12,200],[40,520,15,230],[130,250,7,260],[260,380,9,215]];
+ const sc=k=>k<8?R[0]:k<11?R[1]:k<14?R[2]:k<17?R[3]:R[4];
+ st.forEach(([x,y,k,d])=>{const g=el(s,'g',{transform:`translate(${x} ${y}) rotate(${d+180})`});
+   el(g,'path',{d:'M0 -11 L0 9 M-5 4 L0 10 L5 4',stroke:sc(k),'stroke-width':2.4,fill:'none','stroke-linecap':'round','stroke-linejoin':'round'});
+   el(s,'text',{x:x+(x===150?20:11),y:y+4,'font-size':10.5,fill:'#C9CDD1','font-weight':600},k);});
+ // selected station ring
+ el(s,'circle',{cx:150,cy:410,r:15,fill:'none',stroke:'#E8EAED','stroke-width':1.2});
+ // lightning dots (fading by age)
+ [[60,120,1],[75,108,.85],[52,140,.7],[90,95,.55],[40,100,.4],[68,152,.3],[100,130,.25]].forEach(([x,y,o])=>{
+   el(s,'circle',{cx:x,cy:y,r:4.5,fill:C('--storm'),'fill-opacity':o,stroke:'#0B0D0F','stroke-width':1.5});});
+ el(s,'text',{x:28,y:86,'font-size':10,fill:'#B9B3F2'},'⚡ 23 strikes');
+ // legend
+ const lg=el(s,'g',{transform:'translate(206 520)'});
+ el(lg,'rect',{x:-6,y:-14,width:168,height:40,rx:10,fill:'#16191Ce6'});
+ el(lg,'text',{x:0,y:0,'font-size':9.5,fill:T3},'wind kn');
+ ['<8','8','11','14','17+'].forEach((t,i)=>{el(lg,'rect',{x:i*30,y:6,width:26,height:6,rx:2,fill:R[i]});el(lg,'text',{x:i*30,y:22,'font-size':9,fill:T2},t)});
+ // labels
+ [['Barcelona',245,262],['Castelldefels',150,440],['Sitges',95,500],['Vic',140,72]].forEach(([t,x,y])=>el(s,'text',{x,y,'font-size':10,fill:'#6B7178','text-anchor':'middle'},t));
+})();
+(()=>{const s=document.getElementById('spark');const v=[8,9,9,10,11,11,12,13,12,13,14,14];const g=v.map(k=>k*1.4+1);
+ const x=i=>2+i*(330/11),y=k=>36-k/24*32;
+ el(s,'path',{d:g.map((k,i)=>(i?'L':'M')+x(i)+' '+y(k)).join(' ')+' '+v.slice().reverse().map((k,j)=>'L'+x(11-j)+' '+y(k)).join(' ')+'Z',fill:C('--wind'),'fill-opacity':.25});
+ el(s,'path',{d:v.map((k,i)=>(i?'L':'M')+x(i)+' '+y(k)).join(' '),stroke:C('--wind'),'stroke-width':2,fill:'none'});
+ el(s,'circle',{cx:x(11),cy:y(14),r:3.5,fill:C('--wind'),stroke:'#16191C','stroke-width':2});
+})();
+
+/* ---------- spots ---------- */
+(()=>{const spots=[
+ ['Castelldefels','Wing · flatwater',14,21,225,4,[0,0,1,2,3,4,4,3],'16–19 h'],
+ ['Ocata','Surf · beach',6,9,330,3,[3,3,2,1,1,1,0,0],'08–11 h'],
+ ['Sant Pol','Wing · waves',9,13,200,2,[0,1,1,2,2,2,1,0],'14–16 h'],
+ ['Collserola loop','Bike · 42 km',7,12,240,5,[5,5,5,5,5,4,4,4],'all day'],
+ ['Montseny · Turó de l\'Home','Hike · 1706 m',22,34,300,2,[3,3,2,1,1,0,0,0],'until 13 h'],
+];
+ document.getElementById('spots').innerHTML=spots.map(([n,t,k,g,d,r,strip,w])=>`
+ <div class="card" style="padding:13px 14px">
+  <div class="row"><div><div style="font-size:15px;font-weight:600">${n}</div><div class="faint" style="font-size:11.5px;margin-top:2px">${t}</div></div><div class="sp"></div>
+   <div style="text-align:right"><div style="font-size:17px;font-weight:600"><span style="color:${C('--wind')};display:inline-block;transform:rotate(${d+90}deg);font-size:14px">➜</span> ${k}<span class="faint" style="font-size:11px"> kn</span></div>
+   <div class="faint" style="font-size:11px">gusts ${g}</div></div></div>
+  <div class="row" style="margin-top:10px;gap:3px">${strip.map(s=>`<i style="flex:1;height:8px;border-radius:2px;background:${s?R[s-1]:'#1F2327'}"></i>`).join('')}
+   <span style="margin-left:10px;font-size:12px;font-weight:600;color:${r>=3?R[r-1]:T2}">${w}</span></div>
+ </div>`).join('')+`<div class="faint" style="font-size:10.5px;display:flex;justify-content:space-between;padding:0 4px"><span>08 h</span><span>bars = today's rating, 08–22 h</span><span>22 h</span></div>`;
+})();
+
+/* ---------- history: heatmap + months ---------- */
+(()=>{const s=document.getElementById('heat');const cw=12.4,ch=12.4;let seed=7;const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
+ ['M','','W','','F','','S'].forEach((d,i)=>el(s,'text',{x:0,y:i*(ch+2)+10,'font-size':9,fill:T3},d));
+ for(let w=0;w<26;w++)for(let d=0;d<7;d++){const season=0.5+0.5*Math.sin((w-2)/26*Math.PI*1.1);const v=rnd()*season*1.6;
+   const k=v<0.35?-1:Math.min(4,Math.floor((v-0.35)*4));
+   el(s,'rect',{x:14+w*cw,y:d*(ch+2),width:cw-2,height:ch,rx:2.5,fill:k<0?'#1A1D21':R[k]});}
+ ['May','Jun','Jul','Aug','Sep','Oct','Nov'].forEach((m,i)=>el(s,'text',{x:14+i*4.33*cw,y:112,'font-size':9.5,fill:T3},m));
+ const lg=el(s,'g',{transform:'translate(214 118)'});el(lg,'text',{x:0,y:8,'font-size':9,fill:T3},'0 h');
+ R.forEach((c,i)=>el(lg,'rect',{x:22+i*13,y:0,width:11,height:9,rx:2,fill:c}));el(lg,'text',{x:90,y:8,'font-size':9,fill:T3},'6+ h');
+})();
+(()=>{const s=document.getElementById('months');const v=[6.1,7.8,10.2,12.4,10.9,8.3,7.1,6.4,7.0,8.8,8.1,6.6];const W=350,bot=124,top=10;
+ const bw=W/12,y=k=>bot-k/14*(bot-top);
+ [5,10].forEach(k=>{el(s,'line',{x1:0,x2:W,y1:y(k),y2:y(k),stroke:LINE,'stroke-width':.6});el(s,'text',{x:W,y:y(k)-3,'font-size':9.5,fill:T3,'text-anchor':'end'},k)});
+ v.forEach((k,i)=>{const now=i===10;el(s,'rect',{x:i*bw+3,y:y(k),width:bw-6,height:bot-y(k),rx:3,fill:C('--wind'),'fill-opacity':i===3?1:.5});
+   el(s,'text',{x:i*bw+bw/2,y:bot+14,'font-size':9.5,fill:now?'#E8EAED':T3,'text-anchor':'middle','font-weight':now?700:400},'JFMAMJJASOND'[i]);});
+ el(s,'text',{x:3*bw+bw/2,y:y(12.4)-5,'font-size':10,fill:'#E8EAED','text-anchor':'middle','font-weight':600},'12.4');
+ el(s,'line',{x1:0,x2:W,y1:bot,y2:bot,stroke:LINE});
+})();
+</script>
+</body>
+</html>
