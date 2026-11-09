@@ -1,0 +1,926 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Oratge — mockups v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300..700&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* warm neutrals (monochrome UI) */
+  --bg:#15130F; --surface:#1E1B17; --surface-2:#27231E; --line:#36312A;
+  --text:#F1EBE2; --text-2:#B0A596; --text-3:#7E7468;
+  /* weather accents — warm pastel, validated on #1E1B17 */
+  --wind:#62C7A2; --heat:#F39A70; --rain:#8AAEF2; --sun:#EAC160; --storm:#BA9BF1;
+  --cloud:#A79E92; --wave:#8AAEF2; --snow:#D7E3F0;
+  /* condition rating — sage ordinal ramp (1 → 5) */
+  --r1:#4E5246; --r2:#667A5A; --r3:#86A276; --r4:#A9C895; --r5:#D6EBC3; --r0:#2E2A24;
+  /* warnings — Meteocat levels, deliberately stronger than the pastels */
+  --w-yellow:#F4D266; --w-orange:#EF8440; --w-red:#CF3A78;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0F0D0B;color:var(--text);font-family:'DM Sans',system-ui,sans-serif;
+  font-feature-settings:"tnum" 1,"cv11" 1;padding:48px;-webkit-font-smoothing:antialiased}
+h1.page{font-weight:600;font-size:28px;letter-spacing:-.02em}
+.sub{color:var(--text-2);font-size:14px;margin:6px 0 36px}
+.grid{display:grid;grid-template-columns:repeat(3,390px);gap:48px 56px}
+.cap{font-size:13px;color:var(--text-2);margin:0 0 12px 4px;letter-spacing:.02em}
+.cap b{color:var(--text);font-weight:600}
+.phone{width:390px;height:844px;background:var(--bg);border-radius:44px;overflow:hidden;
+  position:relative;border:1px solid #2E2A24;box-shadow:0 0 0 8px #1A1814}
+.status{height:44px;display:flex;justify-content:space-between;align-items:center;padding:0 28px;
+  font-size:13px;font-weight:600;color:var(--text)}
+.scr{padding:4px 20px 0;height:calc(100% - 44px - 72px);overflow:hidden}
+.nav{position:absolute;bottom:0;left:0;right:0;height:72px;border-top:1px solid var(--line);
+  display:flex;justify-content:space-around;align-items:center;background:var(--bg)}
+.nav div{font-size:11px;color:var(--text-3);display:flex;flex-direction:column;align-items:center;gap:5px}
+.nav div.on{color:var(--text)}
+.nav svg{width:22px;height:22px}
+.lbl{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--text-3);font-weight:500}
+.muted{color:var(--text-2)} .faint{color:var(--text-3)}
+.card{background:var(--surface);border-radius:20px;padding:16px}
+.hair{height:1px;background:var(--line);margin:14px 0}
+.row{display:flex;align-items:center}
+.sp{flex:1}
+.dots{display:inline-flex;gap:4px}
+.dots i{width:8px;height:8px;border-radius:50%;background:var(--r0);display:block}
+.big-dots i{width:12px;height:12px}
+.pill{font-size:11px;border-radius:999px;padding:3px 9px;border:1px solid var(--line);color:var(--text-2)}
+.chip{white-space:nowrap;font-size:12px;border-radius:999px;padding:6px 12px;background:var(--surface);color:var(--text-2)}
+.chip.on{background:var(--text);color:var(--bg);font-weight:600}
+svg text{font-family:'DM Sans',system-ui,sans-serif}
+.warn{display:flex;gap:10px;align-items:flex-start;border-radius:16px;padding:12px 14px;
+  background:color-mix(in srgb,var(--w-orange) 12%,var(--surface));border:1px solid color-mix(in srgb,var(--w-orange) 40%,transparent)}
+.warn .t{font-size:13px;font-weight:600}
+.warn .d{font-size:12px;color:var(--text-2);margin-top:2px}
+.act{display:flex;align-items:center;padding:11px 0;border-bottom:1px solid var(--line)}
+.act:last-child{border-bottom:0}
+.act{padding:8px 0}
+.act .n{font-size:14px;font-weight:500}
+.act .w{font-size:13px;font-weight:600;text-align:right;margin-left:auto}
+.act .why{font-size:11.5px;color:var(--text-2);margin-top:1px}
+.act .mid{flex:1}
+.fact{background:var(--surface);border-radius:16px;padding:12px}
+.fact .v{font-size:20px;font-weight:600;margin-top:6px;letter-spacing:-.01em}
+.fact .s{font-size:11px;color:var(--text-2);margin-top:2px}
+.f2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.f4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.day{display:flex;align-items:center;font-size:13px;padding:7px 0}
+.legend{display:flex;gap:14px;font-size:11px;color:var(--text-2);flex-wrap:wrap}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:10px;height:10px;border-radius:3px;display:inline-block}
+/* system board */
+.board{grid-column:1 / span 3;display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr;gap:28px;
+  background:#15130F;border:1px solid #2E2A24;border-radius:28px;padding:28px}
+.board h3{font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--text-3);font-weight:500;margin-bottom:14px}
+.swl{display:flex;align-items:center;gap:10px;font-size:12.5px;margin-bottom:9px}
+.swl .c{width:26px;height:26px;border-radius:8px}
+.swl code{color:var(--text-3);font-size:11px;margin-left:auto;font-family:ui-monospace,monospace}
+
+.phone.long{height:auto}
+.phone.long .scr{height:auto;padding-bottom:22px}
+.phone.long .nav{position:relative}
+.tabs{display:flex;gap:6px;margin-top:14px}
+.tab{flex:1;background:var(--surface);border-radius:12px;padding:6px 0 7px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10px;color:var(--text-2)}
+.tab b{font-size:14px;color:var(--text);font-weight:600}
+.tab i{width:14px;height:4px;border-radius:2px;margin-top:3px}
+.tab.on{background:var(--text);color:#15130F}.tab.on b{color:#15130F}
+.tab.outlook:not(.on){opacity:.55}
+.verdict{margin-top:14px;padding:16px}
+.mg{padding:12px 10px 10px 12px}
+.src{font-size:10.5px;color:var(--text-3);margin-top:16px;line-height:1.5;border-top:1px solid var(--line);padding-top:10px}
+.warn.w-yellow{background:color-mix(in srgb,var(--w-yellow) 12%,var(--surface));border-color:color-mix(in srgb,var(--w-yellow) 40%,transparent)}
+.warn.w-orange{margin-top:12px}
+.section-h{grid-column:1 / span 3;margin-top:24px}
+.section-h h2{font-size:22px;font-weight:600;letter-spacing:-.01em}
+.section-h p{color:var(--text-2);font-size:13.5px;margin-top:4px;max-width:900px;line-height:1.5}
+.cov{grid-column:1 / span 3;background:#15130F;border:1px solid #2E2A24;border-radius:28px;padding:28px}
+.cov table{width:100%;border-collapse:collapse;font-size:12.5px}
+.cov th{text-align:left;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3);font-weight:500;padding:0 10px 10px 0}
+.cov td{padding:8px 10px 8px 0;border-top:1px solid var(--line);vertical-align:top}
+.cov td:first-child{font-family:ui-monospace,monospace;font-size:11.5px;color:var(--text-2);white-space:nowrap}
+.cov .tag{display:inline-block;font-size:10.5px;border-radius:6px;padding:1px 7px;margin:0 4px 3px 0;background:var(--surface-2);color:var(--text-2)}
+</style>
+</head>
+<body>
+<h1 class="page">Oratge — design mockups v2</h1>
+<p class="sub">Warm monochrome interface · pastel accents only where they mean something (weather icons, data marks, ratings); warnings stay strong. DM Sans · 390 pt wide. Daily planners are shown at full scroll length.</p>
+
+<div class="grid">
+
+<!-- ===================== 1. TODAY ===================== -->
+<div>
+<p class="cap"><b>1 · Today</b> — current weather, an active warning, and today's rating for each sport</p>
+<div class="phone">
+ <div class="status"><span>9:41</span><span>●●● 5G ▮</span></div>
+ <div class="scr">
+  <div class="row" style="margin-top:6px">
+    <div><div style="font-size:17px;font-weight:600">Barcelona</div>
+    <div class="faint" style="font-size:11px;margin-top:2px">Meteocat · Zoo station · 8 min ago</div></div>
+    <div class="sp"></div>
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#B0A596" stroke-width="1.6"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg>
+  </div>
+
+  <div class="row" style="margin-top:18px;gap:14px">
+    <div id="ico-hero"></div>
+    <div>
+      <div style="font-size:64px;font-weight:300;letter-spacing:-.04em;line-height:1">18°</div>
+    </div>
+    <div style="margin-left:6px">
+      <div style="font-size:15px;font-weight:500">Mostly sunny</div>
+      <div class="muted" style="font-size:12.5px;margin-top:4px">Feels 17° · ↓11° ↑21°</div>
+      <div class="muted" style="font-size:12.5px;margin-top:2px"><span style="color:var(--wind)">➚</span> SW 14 kn · gusts 21</div>
+    </div>
+  </div>
+
+  <div class="warn" style="margin-top:16px">
+    <svg width="18" height="18" viewBox="0 0 24 24" style="flex:none;margin-top:1px"><path d="M12 3l10 18H2z" fill="var(--w-orange)"/><path d="M12 10v5M12 17.5v.5" stroke="#15130F" stroke-width="2" stroke-linecap="round"/></svg>
+    <div><div class="t">Orange warning · Sea state</div><div class="d">Maresme coast · Wed 12–20 h · waves up to 2.5 m</div></div>
+  </div>
+
+  <div class="lbl" style="margin:18px 0 2px">Today for you</div>
+  <div id="acts"></div>
+
+  <div class="lbl" style="margin:12px 0 8px">Next 24 h</div>
+  <svg id="t24" width="350" height="118"></svg>
+  <div class="lbl" style="margin:10px 0 2px">7 days</div>
+  <div id="week"></div>
+ </div>
+ <div class="nav" id="nav1"></div>
+</div>
+</div>
+
+<!-- ===================== 2. WING ===================== -->
+<div>
+<p class="cap"><b>2 · Wing foil detail</b> — wind with gust band, your wind range, best time to go, live compass</p>
+<div class="phone">
+ <div class="status"><span>9:41</span><span>●●● 5G ▮</span></div>
+ <div class="scr">
+  <div class="row muted" style="font-size:13px;gap:8px;margin-top:4px"><span style="font-size:18px">‹</span> Activities</div>
+  <div class="row" style="margin-top:10px">
+    <div><div style="font-size:22px;font-weight:600;letter-spacing:-.01em">Wing foil</div>
+      <div class="muted" style="font-size:13px;margin-top:2px">Castelldefels · flatwater</div></div>
+    <div class="sp"></div>
+    <div style="text-align:right"><div class="dots big-dots" id="wing-dots"></div>
+      <div style="font-size:12px;margin-top:6px;color:var(--r4);font-weight:600">Good</div></div>
+  </div>
+
+  <div class="card" style="margin-top:14px;padding:14px 14px 10px">
+    <div class="row"><div><div style="font-size:15px;font-weight:600">Best: Tue 13–17 h</div>
+      <div class="muted" style="font-size:12px;margin-top:2px">side-on SW · 16–19 kn · gusts ≤ 24</div></div></div>
+    <svg id="wind" width="322" height="182" style="margin-top:8px"></svg>
+    <div class="legend" style="margin-top:4px">
+      <span><i class="sw" style="background:var(--wind);height:3px;border-radius:2px"></i>mean wind</span>
+      <span><i class="sw" style="background:color-mix(in srgb,var(--wind) 30%,transparent)"></i>gusts</span>
+      <span><i class="sw" style="background:repeating-linear-gradient(45deg,#3A342C 0 2px,transparent 2px 5px)"></i>your range 14–24 kn</span>
+    </div>
+  </div>
+
+  <div class="lbl" style="margin:16px 0 8px">Go window · next 3 days</div>
+  <svg id="go" width="350" height="64"></svg>
+
+  <div class="row" style="gap:12px;margin-top:14px">
+    <div class="card" style="padding:10px;width:150px;height:150px"><svg id="compass" width="130" height="130"></svg></div>
+    <div class="f2" style="flex:1;grid-template-columns:1fr">
+      <div class="fact" style="padding:9px 12px"><div class="lbl">Gust factor</div><div class="v" style="font-size:17px;margin-top:3px">1.3 <span class="faint" style="font-size:11px;font-weight:400">steady</span></div></div>
+      <div class="fact" style="padding:9px 12px"><div class="lbl">Water</div><div class="v" style="font-size:17px;margin-top:3px">19° <span class="faint" style="font-size:11px;font-weight:400">→ 3/2 wetsuit</span></div></div>
+      <div class="fact" style="padding:9px 12px"><div class="lbl">Sunset</div><div class="v" style="font-size:17px;margin-top:3px">17:35</div></div>
+    </div>
+  </div>
+ </div>
+ <div class="nav" id="nav2"></div>
+</div>
+</div>
+
+<!-- ===================== 3. SURF ===================== -->
+<div>
+<p class="cap"><b>3 · Surf detail</b> — live buoy readings, wave height and period, wind direction, wetsuit advice</p>
+<div class="phone">
+ <div class="status"><span>9:41</span><span>●●● 5G ▮</span></div>
+ <div class="scr">
+  <div class="row muted" style="font-size:13px;gap:8px;margin-top:4px"><span style="font-size:18px">‹</span> Activities</div>
+  <div class="row" style="margin-top:10px">
+    <div><div style="font-size:22px;font-weight:600;letter-spacing:-.01em">Surf</div>
+      <div class="muted" style="font-size:13px;margin-top:2px">Ocata · El Masnou · faces E–SE</div></div>
+    <div class="sp"></div>
+    <div style="text-align:right"><div class="dots big-dots" id="surf-dots"></div>
+      <div style="font-size:12px;margin-top:6px;color:var(--r3);font-weight:600">Fair</div></div>
+  </div>
+
+  <div class="lbl" style="margin:16px 0 8px">Buoy now · 25 min ago</div>
+  <div class="f4">
+    <div class="fact"><div class="lbl">Height</div><div class="v">0.8<span class="faint" style="font-size:12px"> m</span></div></div>
+    <div class="fact"><div class="lbl">Period</div><div class="v">8<span class="faint" style="font-size:12px"> s</span></div></div>
+    <div class="fact"><div class="lbl">From</div><div class="v"><span style="color:var(--wave);display:inline-block;transform:rotate(275deg)">➜</span> E</div></div>
+    <div class="fact"><div class="lbl">Sea</div><div class="v">19.4°</div></div>
+  </div>
+
+  <div class="card" style="margin-top:14px;padding:14px 14px 10px">
+    <div style="font-size:15px;font-weight:600">Best: Wed 08–11 h</div>
+    <div class="muted" style="font-size:12px;margin-top:2px">1.1 m @ 9 s from E · light offshore wind</div>
+    <svg id="waves" width="322" height="214" style="margin-top:10px"></svg>
+    <div class="legend" style="margin-top:6px">
+      <span><i class="sw" style="background:var(--wave)"></i>wave height (m) · period on top</span>
+      <span><span style="color:var(--wind)">➜</span> wind</span>
+    </div>
+  </div>
+
+  <div class="card row" style="margin-top:12px;gap:12px;padding:12px 14px">
+    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--wave)" stroke-width="1.6" stroke-linecap="round"><path d="M2 15c2.5 0 2.5-2 5-2s2.5 2 5 2 2.5-2 5-2 2.5 2 5 2"/><path d="M2 19c2.5 0 2.5-2 5-2s2.5 2 5 2 2.5-2 5-2 2.5 2 5 2"/><path d="M12 3v6M9.5 6.5L12 9l2.5-2.5"/></svg>
+    <div><div style="font-size:14px;font-weight:600">3/2 mm full suit</div><div class="muted" style="font-size:12px">Water 19.4° · air 16° at dawn</div></div>
+  </div>
+ </div>
+ <div class="nav" id="nav3"></div>
+</div>
+</div>
+
+<!-- ===================== 4. MAP ===================== -->
+<div>
+<p class="cap"><b>4 · Map</b> — live wind at every station, lightning in the last hour, warning areas</p>
+<div class="phone">
+ <div class="status"><span>9:41</span><span>●●● 5G ▮</span></div>
+ <svg id="map" width="390" height="728" style="position:absolute;top:44px;left:0"></svg>
+ <div style="position:absolute;top:56px;left:16px;right:16px;display:flex;gap:6px">
+   <span class="chip on">Wind</span><span class="chip">Temp</span><span class="chip">Rain 1 h</span><span class="chip">⚡ 60 min</span>
+ </div>
+ <div class="card" style="position:absolute;left:12px;right:12px;bottom:84px;padding:14px 16px;background:#1E1B17f2">
+   <div class="row"><div><div style="font-size:15px;font-weight:600">Castelldefels</div>
+     <div class="faint" style="font-size:11px;margin-top:2px">XEMA station · 3 m · updated 09:30</div></div><div class="sp"></div>
+     <div style="text-align:right"><div style="font-size:22px;font-weight:600"><span style="color:var(--wind);font-size:18px;display:inline-block;transform:rotate(-135deg)">➜</span> 14 <span class="faint" style="font-size:12px">kn</span></div>
+     <div class="muted" style="font-size:11px">gusts 21 · SW</div></div></div>
+   <svg id="spark" width="334" height="40" style="margin-top:8px"></svg>
+   <div class="row faint" style="font-size:10.5px;margin-top:2px"><span>06 h</span><div class="sp"></div><span>last 4 h, 10 m wind</span><div class="sp"></div><span>now</span></div>
+ </div>
+ <div class="nav" id="nav4"></div>
+</div>
+</div>
+
+<!-- ===================== 5. SPOTS ===================== -->
+<div>
+<p class="cap"><b>5 · Spots</b> — your places with live readings and today's best window</p>
+<div class="phone">
+ <div class="status"><span>9:41</span><span>●●● 5G ▮</span></div>
+ <div class="scr">
+  <div class="row" style="margin-top:6px"><div style="font-size:22px;font-weight:600">Spots</div><div class="sp"></div>
+  <span class="pill" style="font-size:12px">+ Add</span></div>
+  <div id="spots" style="margin-top:14px;display:flex;flex-direction:column;gap:10px"></div>
+ </div>
+ <div class="nav" id="nav5"></div>
+</div>
+</div>
+
+<!-- ===================== 6. HISTORY ===================== -->
+<div>
+<p class="cap"><b>6 · History</b> — station archive: rideable days per day and month, unusual readings, records</p>
+<div class="phone">
+ <div class="status"><span>9:41</span><span>●●● 5G ▮</span></div>
+ <div class="scr">
+  <div class="row muted" style="font-size:13px;gap:8px;margin-top:4px"><span style="font-size:18px">‹</span> Castelldefels</div>
+  <div style="font-size:22px;font-weight:600;margin-top:10px">Wind history</div>
+  <div class="muted" style="font-size:12.5px;margin-top:2px">XEMA station · 10 m · since 2009</div>
+
+  <div class="card" style="margin-top:14px;padding:12px 14px">
+    <div class="row"><span style="color:var(--heat);font-size:14px">▲</span>
+      <div style="margin-left:10px;font-size:13px">Today is the <b>windiest 9 Nov</b> in 7 years</div></div>
+  </div>
+
+  <div class="lbl" style="margin:16px 0 8px">Rideable hours per day · last 26 weeks</div>
+  <svg id="heat" width="350" height="128"></svg>
+
+  <div class="lbl" style="margin:14px 0 8px">Rideable days per month · avg 2009–2025</div>
+  <svg id="months" width="350" height="150"></svg>
+
+  <div class="f2" style="margin-top:12px">
+    <div class="fact"><div class="lbl">Max gust</div><div class="v">38 kn</div><div class="s">12 Mar 2019 · N</div></div>
+    <div class="fact"><div class="lbl">Best month</div><div class="v">April</div><div class="s">12.4 rideable days</div></div>
+  </div>
+ </div>
+ <div class="nav" id="nav6"></div>
+</div>
+</div>
+
+<!-- ===================== DESIGN SYSTEM BOARD ===================== -->
+<div class="section-h"><h2>Daily planners · one per sport</h2>
+<p>Pick a day (3 days hour by hour, then a 5-day outlook) and you get a verdict, the best window, a chart that lines up every relevant variable on the same hour columns, and planning cards (gear, route wind, surface, what to wear, safety). The dashed frame marks the recommended window and dark columns mark night. Every screen lists its data sources at the bottom.</p></div>
+<div>
+<p class="cap"><b>7 · Wing foil · day plan</b> — wind and gusts against your range, direction vs shore, chop, gear, forecast bias, pressure</p>
+<div class="phone long">
+ <div class="status"><span>9:41</span><span>●●● 5G ▮</span></div>
+ <div class="scr" id="d-wing"></div>
+ <div class="nav" id="nav-d-wing"></div>
+</div>
+</div>
+<div>
+<p class="cap"><b>8 · Surf · day plan</b> — wave height and period, swell window, offshore/onshore wind, buoy trend, warning</p>
+<div class="phone long">
+ <div class="status"><span>9:41</span><span>●●● 5G ▮</span></div>
+ <div class="scr" id="d-surf"></div>
+ <div class="nav" id="nav-d-surf"></div>
+</div>
+</div>
+<div>
+<p class="cap"><b>9 · Bike · day plan</b> — best start for your ride length, rain and wet roads, wind along the route, what to wear</p>
+<div class="phone long">
+ <div class="status"><span>9:41</span><span>●●● 5G ▮</span></div>
+ <div class="scr" id="d-bike"></div>
+ <div class="nav" id="nav-d-bike"></div>
+</div>
+</div>
+<div>
+<p class="cap"><b>10 · Run · day plan</b> — feels-like vs comfort band, humidity, UV and sun, best slot for your run length</p>
+<div class="phone long">
+ <div class="status"><span>9:41</span><span>●●● 5G ▮</span></div>
+ <div class="scr" id="d-run"></div>
+ <div class="nav" id="nav-d-run"></div>
+</div>
+</div>
+<div>
+<p class="cap"><b>11 · Hike · day plan</b> — summit timeline, storm risk, wind and snow level, temperature by altitude, turn-back time</p>
+<div class="phone long">
+ <div class="status"><span>9:41</span><span>●●● 5G ▮</span></div>
+ <div class="scr" id="d-hike"></div>
+ <div class="nav" id="nav-d-hike"></div>
+</div>
+</div>
+
+<div class="board">
+  <div>
+    <h3>Weather accents · warm pastel</h3>
+    <div id="icons" style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px 8px"></div>
+    <p class="faint" style="font-size:11.5px;margin-top:14px;line-height:1.5">Colour is used only for things with a meaning. Text stays neutral. Each hue has one meaning everywhere: sage-teal = wind, apricot = heat, sea blue = water (rain, waves), honey = sun, lavender = storm and lightning, frost = snow and cold. Accents are pastel; warnings are the only strong colours.</p>
+  </div>
+  <div>
+    <h3>Condition rating · 1 → 5</h3>
+    <div id="ramp"></div>
+    <p class="faint" style="font-size:11.5px;margin-top:10px;line-height:1.5">One hue, getting brighter as the rating improves. The number of filled dots also shows the rating, so it never depends on colour alone.</p>
+  </div>
+  <div>
+    <h3>Warnings · Meteocat levels</h3>
+    <div class="swl"><span class="c" style="background:var(--w-yellow)"></span>Yellow · moderate<code>#F4D266</code></div>
+    <div class="swl"><span class="c" style="background:var(--w-orange)"></span>Orange · high<code>#EF8440</code></div>
+    <div class="swl"><span class="c" style="background:var(--w-red)"></span>Red · very high<code>#CF3A78</code></div>
+    <p class="faint" style="font-size:11.5px;margin-top:10px;line-height:1.5">Reserved for warnings only, and always shown with a triangle icon and the level name.</p>
+  </div>
+  <div>
+    <h3>Neutrals · type</h3>
+    <div class="swl"><span class="c" style="background:#15130F;border:1px solid #2A2E33"></span>Background<code>#15130F</code></div>
+    <div class="swl"><span class="c" style="background:#1E1B17"></span>Surface<code>#1E1B17</code></div>
+    <div class="swl"><span class="c" style="background:#2A2E33"></span>Line<code>#2A2E33</code></div>
+    <div class="swl"><span class="c" style="background:#B0A596"></span>Text 2<code>#B0A596</code></div>
+    <div style="margin-top:12px;font-size:12px" class="muted">DM Sans · 64 Light hero · 22 Semibold title · 15/13 body · 11 caps label · tabular figures</div>
+  </div>
+</div>
+
+<div class="cov"><h3 class="lbl" style="margin-bottom:14px">Data coverage · every Meteocat endpoint and where it is shown</h3>
+<table><tr><th>Endpoint</th><th>Shown as</th><th>Screens</th></tr>
+<tr><td>pronostic/municipalHoraria</td><td>hourly temp, feels, RH, rain, wind, sky → charts and rating</td><td><span class=tag>Today</span><span class=tag>Bike</span><span class=tag>Run</span><span class=tag>Wing</span><span class=tag>Surf</span></td></tr>
+<tr><td>pronostic/municipal</td><td>8-day daily min/max, rain chance, sky → 7-day list, outlook tabs</td><td><span class=tag>Today</span><span class=tag>all day tabs</span></td></tr>
+<tr><td>pronostic/platges/{beach}</td><td>hourly wind, wave height + direction, water temp, UV → wing/surf charts</td><td><span class=tag>Wing</span><span class=tag>Surf</span><span class=tag>Spots</span></td></tr>
+<tr><td>pronostic/pirineu/pics · refugis · pirineu</td><td>summit + hut hourly forecast, Pyrenees area text → hike chart, altitude profile</td><td><span class=tag>Hike</span></td></tr>
+<tr><td>pronostic/uvi/{town}</td><td>hourly UV index → UV bars, sun advice</td><td><span class=tag>Run</span><span class=tag>Bike</span><span class=tag>Surf</span><span class=tag>Wing</span></td></tr>
+<tr><td>pronostic/catalunya · comarcal</td><td>forecaster text → “forecaster's note” on Today</td><td><span class=tag>Today</span></td></tr>
+<tr><td>pronostic/v2/smp/episodis-oberts · preavisos</td><td>warnings + pre-warnings → banner, map hatch, safety cards</td><td><span class=tag>Today</span><span class=tag>Map</span><span class=tag>all planners</span></td></tr>
+<tr><td>xema/variables/mesurades/{var}/ultimes</td><td>live readings for every station → map arrows, spot cards, “now” values</td><td><span class=tag>Map</span><span class=tag>Spots</span><span class=tag>Today</span></td></tr>
+<tr><td>xema/estacions/mesurades/{st}/{date}</td><td>full 30-min day per station → forecast-vs-measured, buoy trend, archive</td><td><span class=tag>Wing</span><span class=tag>Surf</span><span class=tag>History</span></td></tr>
+<tr><td>xema 30/31/50 wind · 46–57 2/6 m</td><td>mean, direction, gusts, gust factor</td><td><span class=tag>Wing</span><span class=tag>Bike</span><span class=tag>Map</span></td></tr>
+<tr><td>xema 32/33/34/36/39</td><td>temp, RH, pressure trend, irradiance (sun vs shade), measured UV</td><td><span class=tag>Today</span><span class=tag>Run</span><span class=tag>Wing</span></td></tr>
+<tr><td>xema 35/70/72</td><td>rain observed + 1-min intensity → wet roads, downpour alert</td><td><span class=tag>Bike</span><span class=tag>Today</span></td></tr>
+<tr><td>xema 38 · 80–87</td><td>snow depth, snow temperature → snow card</td><td><span class=tag>Hike</span></td></tr>
+<tr><td>xema 90–97 buoys</td><td>wave height, period, peak direction, sea temp</td><td><span class=tag>Surf</span><span class=tag>Wing</span></td></tr>
+<tr><td>xema 11–13 asphalt · 60–63 soil · 74–79 fuel</td><td>road-ice risk, trail mud, wildfire dryness (summer)</td><td><span class=tag>Bike</span><span class=tag>Hike</span></td></tr>
+<tr><td>xema/variables/cmv/6006 (ET₀)</td><td>how fast ground dries → trail condition</td><td><span class=tag>Bike</span><span class=tag>Hike</span></td></tr>
+<tr><td>xema/variables/estadistics diaris · mensuals · anuals</td><td>records, climatology, “unusual today”, best months</td><td><span class=tag>History</span><span class=tag>Today</span></td></tr>
+<tr><td>xema/representatives</td><td>picks the best station for each town and variable</td><td><span class=tag>all (behind the scenes)</span></td></tr>
+<tr><td>xema/estacions/metadades · variables/metadades</td><td>station list, altitude, sensors → map, spot setup</td><td><span class=tag>Map</span><span class=tag>Spots</span></td></tr>
+<tr><td>xdde/catalunya/{hour}</td><td>live strikes → map dots, “no lightning within 50 km”</td><td><span class=tag>Map</span><span class=tag>Wing</span><span class=tag>Surf</span><span class=tag>Hike</span></td></tr>
+<tr><td>xdde/informes/comarques</td><td>daily strikes per county → hike lightning bars</td><td><span class=tag>Hike</span></td></tr>
+<tr><td>referencia/municipis · comarques · simbols</td><td>search, county shapes for warnings, sky symbol → own icons</td><td><span class=tag>all</span></td></tr>
+<tr><td>quotes/consum-actual</td><td>data budget → freshness labels, backend scheduler</td><td><span class=tag>Settings</span></td></tr>
+<tr><td>Open-Meteo (gap filler, optional)</td><td>swell period, gust forecast, freezing level, air quality, days 4–8 hourly</td><td><span class=tag>Surf</span><span class=tag>Wing</span><span class=tag>Hike</span><span class=tag>Run</span></td></tr></table></div>
+</div>
+
+<script>
+const C = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const R = ['--r1','--r2','--r3','--r4','--r5'].map(C);
+const NS='http://www.w3.org/2000/svg';
+function el(p,tag,a={},txt){const e=document.createElementNS(NS,tag);for(const k in a)e.setAttribute(k,a[k]);if(txt!=null)e.textContent=txt;p.appendChild(e);return e;}
+const LINE='#36312A', T2='#B0A596', T3='#7E7468';
+
+/* ---------- icons ---------- */
+function icon(kind,s=40){
+  const sun=C('--sun'),cl=C('--cloud'),rain=C('--rain'),st=C('--storm'),w=C('--wind'),h=C('--heat');
+  const sw=`stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" fill="none"`;
+  const cloud=(x=0,y=0,col=cl)=>`<path transform="translate(${x} ${y})" d="M7 18h10a4 4 0 0 0 .4-8 5.5 5.5 0 0 0-10.6 1.5A3.3 3.3 0 0 0 7 18z" stroke="${col}" ${sw}/>`;
+  const sunG=(cx,cy,r)=>`<circle cx="${cx}" cy="${cy}" r="${r}" fill="${sun}"/>`+[0,45,90,135,180,225,270,315].map(a=>{const q=a*Math.PI/180;return `<line x1="${cx+Math.cos(q)*(r+2.2)}" y1="${cy+Math.sin(q)*(r+2.2)}" x2="${cx+Math.cos(q)*(r+4)}" y2="${cy+Math.sin(q)*(r+4)}" stroke="${sun}" stroke-width="1.6" stroke-linecap="round"/>`}).join('');
+  const m={
+    sun: sunG(12,12,4.2),
+    partly: sunG(9,9,3.4)+`<path d="M8 20h9.5a3.6 3.6 0 0 0 .3-7.2 5 5 0 0 0-9.6 1.4A3 3 0 0 0 8 20z" fill="#15130F" stroke="${cl}" ${sw.replace('fill="none"','')}/>`,
+    cloud: cloud(0,0),
+    rain: cloud(0,-3)+[7,11,15].map(x=>`<line x1="${x}" y1="18" x2="${x-1.2}" y2="21.5" stroke="${rain}" stroke-width="1.8" stroke-linecap="round"/>`).join(''),
+    storm: cloud(0,-3)+`<path d="M12.5 15l-2.5 4h3l-2 4" stroke="${st}" stroke-width="1.8" ${sw.replace('stroke-width="1.7"','')}/>`,
+    wind: `<path d="M3 9h11a3 3 0 1 0-3-3M3 13h15a3 3 0 1 1-3 3M3 17h7" stroke="${w}" ${sw}/>`,
+    wave: `<path d="M2 12c2.5 0 2.5-2.2 5-2.2s2.5 2.2 5 2.2 2.5-2.2 5-2.2 2.5 2.2 5 2.2M2 17c2.5 0 2.5-2.2 5-2.2s2.5 2.2 5 2.2 2.5-2.2 5-2.2 2.5 2.2 5 2.2" stroke="${rain}" ${sw}/>`,
+    heat: `<path d="M12 4v10.5" stroke="${h}" stroke-width="1.7" stroke-linecap="round"/><circle cx="12" cy="17.5" r="3" fill="${h}"/><path d="M10 4a2 2 0 0 1 4 0v10.6a4.2 4.2 0 1 1-4 0z" stroke="${T2}" ${sw}/>`,
+    snow: [0,60,120].map(a=>`<line x1="12" y1="4" x2="12" y2="20" transform="rotate(${a} 12 12)" stroke="#D7E3F0" stroke-width="1.7" stroke-linecap="round"/>`).join(''),
+    uv: sunG(12,12,3.2)+`<text x="12" y="23.6" font-size="5" text-anchor="middle" fill="${sun}" font-weight="700">UV</text>`,
+    bolt: `<path d="M13 2L5 14h6l-1 8 8-12h-6z" fill="${st}"/>`,
+    night: `<path d="M19 14.5A7.5 7.5 0 0 1 9.5 5a7.5 7.5 0 1 0 9.5 9.5z" fill="#CFC6B8"/>`,
+  };
+  return `<svg width="${s}" height="${s}" viewBox="0 0 24 24">${m[kind]}</svg>`;
+}
+document.getElementById('ico-hero').innerHTML=icon('partly',62);
+document.getElementById('icons').innerHTML=[['sun','Sun'],['partly','Partly'],['cloud','Cloud'],['rain','Rain'],['storm','Storm'],['bolt','Lightning'],['wind','Wind'],['wave','Waves'],['heat','Heat'],['snow','Snow'],['uv','UV'],['night','Clear night']]
+  .map(([k,n])=>`<div style="text-align:center">${icon(k,30)}<div class="faint" style="font-size:10.5px;margin-top:4px">${n}</div></div>`).join('');
+document.getElementById('ramp').innerHTML=['Poor','Marginal','Fair','Good','Epic'].map((n,i)=>
+  `<div class="swl"><span class="c" style="background:${R[i]}"></span><span class="dots">${[0,1,2,3,4].map(j=>`<i style="background:${j<=i?R[i]:C('--r0')}"></i>`).join('')}</span>${n}<code>${R[i]}</code></div>`).join('');
+
+/* ---------- dots + nav ---------- */
+const dots=(n)=>[0,1,2,3,4].map(j=>`<i style="background:${j<n?R[n-1]:C('--r0')}"></i>`).join('');
+document.getElementById('wing-dots').innerHTML=dots(4);
+document.getElementById('surf-dots').innerHTML=dots(3);
+const navIcons={Today:'<circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>',
+  Activities:'<path d="M4 18l5-6 4 3 7-9"/>',Map:'<path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/>',Spots:'<path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/>'};
+[['nav1','Today'],['nav2','Activities'],['nav3','Activities'],['nav4','Map'],['nav5','Spots'],['nav6','Spots']].forEach(([id,on])=>{
+  document.getElementById(id).innerHTML=Object.entries(navIcons).map(([n,p])=>`<div class="${n===on?'on':''}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${p}</svg>${n}</div>`).join('');
+});
+
+/* ---------- activities list ---------- */
+const acts=[['Wing',4,'13–17 h','side-on SW 16–19 kn','wind'],['Surf',1,'—','flat · 0.3 m','wave'],
+  ['Bike',5,'all day','dry roads · light wind','sun'],['Run',4,'before 11 h','UV 6 from noon','uv'],['Hike',2,'until 14 h','storms likely after 15 h','storm']];
+document.getElementById('acts').innerHTML=acts.map(([n,r,w,why,ic])=>`<div class="act"><span style="margin-right:10px">${icon(ic,18)}</span><div class="mid"><div class="n">${n}</div><div class="why">${why}</div></div>
+  <span class="dots" style="margin-right:14px">${dots(r)}</span><span class="w" style="color:${r>=3?R[r-1]:T3};width:76px">${w}</span></div>`).join('');
+
+/* ---------- 24 h temperature + rain (two strips, no dual axis) ---------- */
+(()=>{const s=document.getElementById('t24');const W=350;
+ const temps=[17,16,15,14,14,13,13,14,16,18,19,20,21,21,20,19,18,17,16,15,15,14,14,13];
+ const rain=[0,0,0,0,0,0,0,0,0,0,0,5,10,20,45,60,40,20,10,5,0,0,0,0];
+ const sky=['night','night','night','night','night','night','partly','partly','sun','sun','sun','partly','partly','cloud','storm','rain','rain','cloud','cloud','night','night','night','night','night'];
+ const x=i=>8+i*(W-16)/23, y=t=>58-(t-12)/(22-12)*36;
+ [0,6,12,18].forEach(i=>{const lab=['10 h','16 h','22 h','04 h'][i/6];el(s,'text',{x:x(i),y:116,'font-size':10,fill:T3,'text-anchor':'middle'},lab)});
+ // sky icons every 3 h
+ for(let i=0;i<24;i+=3){const g=el(s,'g',{transform:`translate(${x(i)-8} 0)`});g.innerHTML=icon(sky[i],16).replace(/^<svg[^>]*>|<\/svg>$/g,'').replace(/<path/g,'<path').trim();g.setAttribute('transform',`translate(${x(i)-8} 0) scale(.6667)`);}
+ const d=temps.map((t,i)=>(i?'L':'M')+x(i)+' '+y(t)).join(' ');
+ el(s,'path',{d,stroke:C('--heat'),'stroke-width':2,fill:'none','stroke-linejoin':'round','stroke-linecap':'round'});
+ const iMax=12,iMin=23;
+ [[iMax,'21°',-7],[0,'17°',-7],[iMin,'13°',14]].forEach(([i,l,dy])=>{el(s,'circle',{cx:x(i),cy:y(temps[i]),r:3.5,fill:C('--heat'),stroke:'#15130F','stroke-width':2});
+   el(s,'text',{x:x(i),y:y(temps[i])+dy,'font-size':11,fill:'#F1EBE2','text-anchor':i==iMin?'end':'middle','font-weight':600},l)});
+ // rain strip
+ el(s,'line',{x1:0,x2:W,y1:100,y2:100,stroke:LINE});
+ rain.forEach((p,i)=>{ if(!p) return; const h=p/100*26; el(s,'rect',{x:x(i)-4.5,y:100-h,width:9,height:h,rx:2,fill:C('--rain')});});
+ el(s,'text',{x:x(15)+8,y:78,'font-size':10.5,fill:T2},'60% rain 15 h');
+})();
+
+/* ---------- 7 days ---------- */
+(()=>{const d=[['Today','partly',0,11,21],['Thu','storm',60,13,19],['Fri','rain',80,12,16],['Sat','partly',20,10,17],['Sun','sun',0,9,18],['Mon','sun',0,10,19],['Tue','cloud',10,11,18]];
+ const lo=8,hi=22,bw=120;
+ document.getElementById('week').innerHTML=d.map(([n,ic,p,a,b])=>`<div class="day"><span style="width:52px">${n}</span>${icon(ic,20)}
+  <span style="width:46px;text-align:right;font-size:12px;color:${p?C('--rain'):'transparent'}">${p}%</span>
+  <span class="sp"></span><span class="muted" style="width:28px;text-align:right">${a}°</span>
+  <span style="width:${bw}px;height:4px;border-radius:2px;background:#2A261F;margin:0 10px;position:relative">
+   <i style="position:absolute;left:${(a-lo)/(hi-lo)*bw}px;width:${(b-a)/(hi-lo)*bw}px;height:4px;border-radius:2px;background:linear-gradient(90deg,#EAC160,${C('--heat')})"></i></span>
+  <span style="width:26px">${b}°</span></div>`).join('');})();
+
+/* ---------- wind band ---------- */
+const H=72;
+const mean=[...Array(H)].map((_,i)=>{const h=i%24;const day=Math.floor(i/24);const base=[9,11,15][day];
+  return Math.max(3,base+7*Math.exp(-Math.pow((h-14.5)/2.6,2))+2*Math.sin(i/3.1)-(h<8?3:0));});
+const gust=mean.map((m,i)=>m*1.28+2+1.5*Math.sin(i/2.3));
+const dir=mean.map((_,i)=>{const h=i%24;return h>11&&h<21?225:(h<9?330:280);});
+(()=>{const s=document.getElementById('wind');const W=322,top=22,bot=150;
+ const x=i=>4+i*(W-30)/(H-1), y=k=>bot-k/35*(bot-top);
+ // night shading
+ [[0,7.5],[17.6,31.5],[41.6,55.5],[65.6,71]].forEach(([a,b])=>el(s,'rect',{x:x(a),y:top,width:x(b)-x(a),height:bot-top,fill:'#1A1814'}));
+ // hatch pattern for the user's range
+ const defs=el(s,'defs');const p=el(defs,'pattern',{id:'hatch',width:5,height:5,patternUnits:'userSpaceOnUse',patternTransform:'rotate(45)'});
+ el(p,'rect',{width:2,height:5,fill:'#3A342C'});
+ el(s,'rect',{x:x(0),y:y(24),width:x(H-1)-x(0),height:y(14)-y(24),fill:'url(#hatch)'});
+ [0,10,20,30].forEach(k=>{el(s,'line',{x1:x(0),x2:x(H-1),y1:y(k),y2:y(k),stroke:LINE,'stroke-width':k?0.6:1});
+   el(s,'text',{x:W,y:y(k)+3.5,'font-size':10,fill:T3,'text-anchor':'end'},k)});
+ el(s,'text',{x:W,y:y(35)+4,'font-size':9.5,fill:T3,'text-anchor':'end'},'kn');
+ // gust band
+ const up=gust.map((g,i)=>(i?'L':'M')+x(i)+' '+y(g)).join(' ');
+ const dn=mean.slice().reverse().map((m,j)=>'L'+x(H-1-j)+' '+y(m)).join(' ');
+ el(s,'path',{d:up+' '+dn+' Z',fill:C('--wind'),'fill-opacity':.28});
+ el(s,'path',{d:mean.map((m,i)=>(i?'L':'M')+x(i)+' '+y(m)).join(' '),stroke:C('--wind'),'stroke-width':2,fill:'none','stroke-linejoin':'round'});
+ // best window highlight Thu 16–19 (day 2 ⇒ hours 40..43)
+ el(s,'rect',{x:x(37),y:top-2,width:x(41)-x(37),height:bot-top+2,fill:'none',stroke:'#F1EBE2','stroke-width':1,rx:4,'stroke-dasharray':'2 2'});
+ // arrows every 6 h
+ for(let i=2;i<H;i+=6){const g=el(s,'g',{transform:`translate(${x(i)} 9) rotate(${dir[i]+180})`});
+   el(g,'path',{d:'M0 -6 L0 6 M-3.2 2.5 L0 6 L3.2 2.5',stroke:T2,'stroke-width':1.5,fill:'none','stroke-linecap':'round','stroke-linejoin':'round'});}
+ ['Mon','Tue','Wed'].forEach((d,k)=>{el(s,'text',{x:x(k*24+12),y:bot+16,'font-size':11,fill:T2,'text-anchor':'middle','font-weight':500},d);
+   if(k) el(s,'line',{x1:x(k*24),x2:x(k*24),y1:top,y2:bot+6,stroke:LINE});});
+ el(s,'text',{x:x(39),y:bot+29,'font-size':10,fill:'#F1EBE2','text-anchor':'middle'},'best');
+})();
+
+/* ---------- go window strip ---------- */
+(()=>{const s=document.getElementById('go');const W=350;const rowH=14;
+ const score=mean.map((m,i)=>{const h=i%24;if(h<8||h>=17) return 0;const g=gust[i]/m;
+   let r=m<12?1:m<14?2:m<=24?(g<1.4?4:3):2; if(m>15&&m<20&&g<1.35)r=5;return r;});
+ ['Mon','Tue','Wed'].forEach((d,k)=>{const y=k*(rowH+6);
+   el(s,'text',{x:0,y:y+11,'font-size':11,fill:T2},d);
+   for(let h=6;h<22;h++){const i=k*24+h;const r=score[i];const cw=(W-40)/16;
+     el(s,'rect',{x:36+(h-6)*cw,y,width:cw-2,height:rowH,rx:3,fill:r?R[r-1]:'#24201B'});}
+ });
+})();
+
+/* ---------- compass ---------- */
+(()=>{const s=document.getElementById('compass');const c=65,r=52;
+ // shoreline orientation: beach faces S (sea to the south). Sectors relative to wind FROM-direction
+ const arc=(a0,a1,rr,col,op)=>{const p=(a)=>[c+rr*Math.sin(a*Math.PI/180),c-rr*Math.cos(a*Math.PI/180)];
+   const [x0,y0]=p(a0),[x1,y1]=p(a1);el(s,'path',{d:`M${c} ${c} L${x0} ${y0} A${rr} ${rr} 0 ${(a1-a0+360)%360>180?1:0} 1 ${x1} ${y1} Z`,fill:col,'fill-opacity':op});};
+ arc(250,110,r,'#F1EBE2',.04);  // offshore (from land, N side)
+ arc(110,250,r,C('--wind'),.10); // onshore/side (from sea)
+ el(s,'circle',{cx:c,cy:c,r,fill:'none',stroke:LINE});
+ for(let a=0;a<360;a+=30) {const q=a*Math.PI/180;el(s,'line',{x1:c+(r-4)*Math.sin(q),y1:c-(r-4)*Math.cos(q),x2:c+r*Math.sin(q),y2:c-r*Math.cos(q),stroke:T3});}
+ [['N',0],['E',90],['S',180],['W',270]].forEach(([t,a])=>{const q=a*Math.PI/180;el(s,'text',{x:c+(r-13)*Math.sin(q),y:c-(r-13)*Math.cos(q)+3.5,'font-size':9.5,fill:T3,'text-anchor':'middle'},t)});
+ // shoreline
+ el(s,'line',{x1:c-r-4,x2:c+r+4,y1:c+6,y2:c+6,stroke:'#D9B98A','stroke-width':1.2,'stroke-dasharray':'3 3','transform':`rotate(-12 ${c} ${c})`});
+ // wind arrow from SW (225) pointing toward NE
+ const g=el(s,'g',{transform:`rotate(${225+180} ${c} ${c})`});
+ el(g,'path',{d:`M${c} ${c+30} L${c} ${c-26} M${c-6} ${c-18} L${c} ${c-27} L${c+6} ${c-18}`,stroke:C('--wind'),'stroke-width':2.6,fill:'none','stroke-linecap':'round','stroke-linejoin':'round'});
+ el(s,'circle',{cx:c,cy:c,r:15,fill:'#1E1B17'});
+ el(s,'text',{x:c,y:c+5,'font-size':14,'font-weight':700,fill:'#F1EBE2','text-anchor':'middle'},'14');
+ el(s,'text',{x:c,y:c+r+9,'font-size':0,fill:T3,'text-anchor':'middle'},'');
+ el(s,'text',{x:6,y:126,'font-size':9,fill:T3},'live · side-shore');
+})();
+
+/* ---------- waves ---------- */
+(()=>{const s=document.getElementById('waves');const W=322,top=28,bot=150;
+ const n=24; // every 3 h for 3 days
+ const hs=[...Array(n)].map((_,i)=>0.35+0.75*Math.exp(-Math.pow((i-10.5)/4,2))+0.15*Math.sin(i/1.7));
+ const per=hs.map((h,i)=>Math.round(5+h*3.6+(i>8&&i<14?1:0)));
+ const wd=[...Array(n)].map((_,i)=>i%8<3?330:(i%8<6?150:200)); // from-direction
+ const bw=(W-30)/n, x=i=>4+i*bw, y=v=>bot-v/1.6*(bot-top);
+ [0.5,1,1.5].forEach(k=>{el(s,'line',{x1:0,x2:W-22,y1:y(k),y2:y(k),stroke:LINE,'stroke-width':.6});el(s,'text',{x:W,y:y(k)+3.5,'font-size':10,fill:T3,'text-anchor':'end'},k)});
+ el(s,'line',{x1:0,x2:W-22,y1:bot,y2:bot,stroke:LINE});
+ hs.forEach((h,i)=>{const best=i>=8&&i<=9;
+   el(s,'rect',{x:x(i)+1,y:y(h),width:bw-2,height:bot-y(h),rx:3,fill:C('--wave'),'fill-opacity':best?1:.55});
+   if(i%2===0) el(s,'text',{x:x(i)+bw/2,y:y(h)-5,'font-size':9.5,fill:best?'#F1EBE2':T2,'text-anchor':'middle','font-weight':best?700:400},per[i]+'s');
+   if(i%2===1){const g=el(s,'g',{transform:`translate(${x(i)} ${bot+16}) rotate(${wd[i]+180})`});
+     el(g,'path',{d:'M0 -5 L0 5 M-2.8 2 L0 5 L2.8 2',stroke:C('--wind'),'stroke-width':1.5,fill:'none','stroke-linecap':'round'});}
+ });
+ ['Mon','Tue','Wed'].forEach((d,k)=>{el(s,'text',{x:x(k*8+4),y:bot+40,'font-size':11,fill:T2,'text-anchor':'middle','font-weight':500},d);if(k)el(s,'line',{x1:x(k*8),x2:x(k*8),y1:top-10,y2:bot+28,stroke:LINE})});
+ el(s,'text',{x:0,y:12,'font-size':10,fill:T3},'m');
+ el(s,'text',{x:W-22,y:bot+20,'font-size':9.5,fill:T3,'text-anchor':'end'},'');
+})();
+
+/* ---------- map ---------- */
+(()=>{const s=document.getElementById('map');
+ el(s,'rect',{width:390,height:728,fill:'#13110E'});
+ // sea
+ el(s,'path',{d:'M390 120 C 350 190, 330 260, 300 330 C 270 400, 210 430, 160 470 C 120 500, 70 540, 40 600 C 25 640, 10 690, 0 728 L 390 728 Z',fill:'#182022'});
+ el(s,'path',{d:'M390 120 C 350 190, 330 260, 300 330 C 270 400, 210 430, 160 470 C 120 500, 70 540, 40 600 C 25 640, 10 690, 0 728',fill:'none',stroke:'#3A3A33','stroke-width':1.2});
+ // county borders
+ ['M0 260 C 80 250, 150 270, 210 240','M150 100 C 160 200, 190 300, 230 420','M0 420 C 60 410, 120 440, 170 470','M240 80 C 250 160, 280 220, 320 260'].forEach(d=>el(s,'path',{d,fill:'none',stroke:'#2A261F','stroke-width':1}));
+ // warning area (orange, coastal county) with texture + label
+ const defs=el(s,'defs');const p=el(defs,'pattern',{id:'wh',width:6,height:6,patternUnits:'userSpaceOnUse',patternTransform:'rotate(45)'});
+ el(p,'rect',{width:2,height:6,fill:C('--w-orange'),'fill-opacity':.45});
+ el(s,'path',{d:'M320 260 C 280 220, 250 160, 240 80 L 300 70 L 390 60 L 390 120 C 350 190, 335 230, 320 260 Z',fill:'url(#wh)',stroke:C('--w-orange'),'stroke-opacity':.7});
+ el(s,'rect',{x:262,y:104,width:96,height:22,rx:11,fill:'#1E1B17',stroke:C('--w-orange'),'stroke-opacity':.6});
+ el(s,'text',{x:310,y:119,'font-size':10.5,fill:'#F1EBE2','text-anchor':'middle'},'▲ Orange · sea');
+ // stations w/ wind arrows coloured by speed (sequential aqua ramp)
+ const st=[[110,170,8,250],[180,150,6,270],[70,330,11,240],[200,330,13,225],[250,300,16,220],[150,410,14,230],[95,470,18,225],[205,250,10,240],[300,200,12,200],[40,520,15,230],[130,250,7,260],[260,380,9,215]];
+ const WR=['#35584C','#3F7D68','#4FA184','#62C7A2','#B0EBD5']; const sc=k=>k<8?WR[0]:k<11?WR[1]:k<14?WR[2]:k<17?WR[3]:WR[4];
+ st.forEach(([x,y,k,d])=>{const g=el(s,'g',{transform:`translate(${x} ${y}) rotate(${d+180})`});
+   el(g,'path',{d:'M0 -11 L0 9 M-5 4 L0 10 L5 4',stroke:sc(k),'stroke-width':2.4,fill:'none','stroke-linecap':'round','stroke-linejoin':'round'});
+   el(s,'text',{x:x+(x===150?20:11),y:y+4,'font-size':10.5,fill:'#D9D1C5','font-weight':600},k);});
+ // selected station ring
+ el(s,'circle',{cx:150,cy:410,r:15,fill:'none',stroke:'#F1EBE2','stroke-width':1.2});
+ // lightning dots (fading by age)
+ [[60,120,1],[75,108,.85],[52,140,.7],[90,95,.55],[40,100,.4],[68,152,.3],[100,130,.25]].forEach(([x,y,o])=>{
+   el(s,'circle',{cx:x,cy:y,r:4.5,fill:C('--storm'),'fill-opacity':o,stroke:'#13110E','stroke-width':1.5});});
+ el(s,'text',{x:28,y:86,'font-size':10,fill:'#CDBDF5'},'⚡ 23 strikes');
+ // legend
+ const lg=el(s,'g',{transform:'translate(206 520)'});
+ el(lg,'rect',{x:-6,y:-14,width:168,height:40,rx:10,fill:'#1E1B17e6'});
+ el(lg,'text',{x:0,y:0,'font-size':9.5,fill:T3},'wind kn');
+ ['<8','8','11','14','17+'].forEach((t,i)=>{el(lg,'rect',{x:i*30,y:6,width:26,height:6,rx:2,fill:WR[i]});el(lg,'text',{x:i*30,y:22,'font-size':9,fill:T2},t)});
+ // labels
+ [['Barcelona',245,262],['Castelldefels',150,440],['Sitges',95,500],['Vic',140,72]].forEach(([t,x,y])=>el(s,'text',{x,y,'font-size':10,fill:'#7E7468','text-anchor':'middle'},t));
+})();
+(()=>{const s=document.getElementById('spark');const v=[8,9,9,10,11,11,12,13,12,13,14,14];const g=v.map(k=>k*1.4+1);
+ const x=i=>2+i*(330/11),y=k=>36-k/24*32;
+ el(s,'path',{d:g.map((k,i)=>(i?'L':'M')+x(i)+' '+y(k)).join(' ')+' '+v.slice().reverse().map((k,j)=>'L'+x(11-j)+' '+y(k)).join(' ')+'Z',fill:C('--wind'),'fill-opacity':.25});
+ el(s,'path',{d:v.map((k,i)=>(i?'L':'M')+x(i)+' '+y(k)).join(' '),stroke:C('--wind'),'stroke-width':2,fill:'none'});
+ el(s,'circle',{cx:x(11),cy:y(14),r:3.5,fill:C('--wind'),stroke:'#1E1B17','stroke-width':2});
+})();
+
+/* ---------- spots ---------- */
+(()=>{const spots=[
+ ['Castelldefels','Wing · flatwater',14,21,225,4,[0,1,3,4,4,3,0,0],'13–17 h'],
+ ['Ocata','Surf · beach',6,9,330,3,[3,3,2,1,1,1,0,0],'08–11 h'],
+ ['Sant Pol','Wing · waves',9,13,200,2,[0,1,1,2,2,2,1,0],'14–16 h'],
+ ['Collserola loop','Bike · 42 km',7,12,240,5,[5,5,5,5,5,4,4,4],'all day'],
+ ['Montseny · Turó de l\'Home','Hike · 1706 m',22,34,300,2,[3,3,2,1,1,0,0,0],'until 13 h'],
+];
+ document.getElementById('spots').innerHTML=spots.map(([n,t,k,g,d,r,strip,w])=>`
+ <div class="card" style="padding:13px 14px">
+  <div class="row"><div><div style="font-size:15px;font-weight:600">${n}</div><div class="faint" style="font-size:11.5px;margin-top:2px">${t}</div></div><div class="sp"></div>
+   <div style="text-align:right"><div style="font-size:17px;font-weight:600"><span style="color:${C('--wind')};display:inline-block;transform:rotate(${d+90}deg);font-size:14px">➜</span> ${k}<span class="faint" style="font-size:11px"> kn</span></div>
+   <div class="faint" style="font-size:11px">gusts ${g}</div></div></div>
+  <div class="row" style="margin-top:10px;gap:3px">${strip.map(s=>`<i style="flex:1;height:8px;border-radius:2px;background:${s?R[s-1]:'#2A261F'}"></i>`).join('')}
+   <span style="margin-left:10px;font-size:12px;font-weight:600;color:${r>=3?R[r-1]:T2}">${w}</span></div>
+ </div>`).join('')+`<div class="faint" style="font-size:10.5px;display:flex;justify-content:space-between;padding:0 4px"><span>08 h</span><span>bars = today's rating, 08–22 h</span><span>22 h</span></div>`;
+})();
+
+/* ---------- history: heatmap + months ---------- */
+(()=>{const s=document.getElementById('heat');const cw=12.4,ch=12.4;let seed=7;const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
+ ['M','','W','','F','','S'].forEach((d,i)=>el(s,'text',{x:0,y:i*(ch+2)+10,'font-size':9,fill:T3},d));
+ for(let w=0;w<26;w++)for(let d=0;d<7;d++){const season=0.5+0.5*Math.sin((w-2)/26*Math.PI*1.1);const v=rnd()*season*1.6;
+   const k=v<0.35?-1:Math.min(4,Math.floor((v-0.35)*4));
+   el(s,'rect',{x:14+w*cw,y:d*(ch+2),width:cw-2,height:ch,rx:2.5,fill:k<0?'#24201B':R[k]});}
+ ['May','Jun','Jul','Aug','Sep','Oct','Nov'].forEach((m,i)=>el(s,'text',{x:14+i*4.33*cw,y:112,'font-size':9.5,fill:T3},m));
+ const lg=el(s,'g',{transform:'translate(214 118)'});el(lg,'text',{x:0,y:8,'font-size':9,fill:T3},'0 h');
+ R.forEach((c,i)=>el(lg,'rect',{x:22+i*13,y:0,width:11,height:9,rx:2,fill:c}));el(lg,'text',{x:90,y:8,'font-size':9,fill:T3},'6+ h');
+})();
+(()=>{const s=document.getElementById('months');const v=[6.1,7.8,10.2,12.4,10.9,8.3,7.1,6.4,7.0,8.8,8.1,6.6];const W=350,bot=124,top=10;
+ const bw=W/12,y=k=>bot-k/14*(bot-top);
+ [5,10].forEach(k=>{el(s,'line',{x1:0,x2:W,y1:y(k),y2:y(k),stroke:LINE,'stroke-width':.6});el(s,'text',{x:W,y:y(k)-3,'font-size':9.5,fill:T3,'text-anchor':'end'},k)});
+ v.forEach((k,i)=>{const now=i===10;el(s,'rect',{x:i*bw+3,y:y(k),width:bw-6,height:bot-y(k),rx:3,fill:C('--wind'),'fill-opacity':i===3?1:.5});
+   el(s,'text',{x:i*bw+bw/2,y:bot+14,'font-size':9.5,fill:now?'#F1EBE2':T3,'text-anchor':'middle','font-weight':now?700:400},'JFMAMJJASOND'[i]);});
+ el(s,'text',{x:3*bw+bw/2,y:y(12.4)-5,'font-size':10,fill:'#F1EBE2','text-anchor':'middle','font-weight':600},'12.4');
+ el(s,'line',{x1:0,x2:W,y1:bot,y2:bot,stroke:LINE});
+})();
+</script>
+<script>
+/* Oratge mockups v2 — daily planners (one per sport).
+   Relies on globals from the main script: C, R, el, icon, dots, LINE, T2, T3. */
+
+const HOURS = [7,8,9,10,11,12,13,14,15,16,17,18,19,20];
+const W = 326, LAB = 54, CW = (W - LAB) / HOURS.length;
+const cx = i => LAB + i * CW + CW / 2;
+const TXT = '#F1EBE2';
+
+/* ---------- meteogram: one SVG, one row per variable, shared hour columns ---------- */
+function meteogram(host, rows, o = {}) {
+  const rise = o.sunrise ?? 7.6, set = o.sunset ?? 17.58;
+  const heights = rows.map(r => r.h);
+  const total = 18 + heights.reduce((a, b) => a + b, 0);
+  const s = el(host, 'svg', { width: W, height: total });
+  const hx = h => LAB + (h - HOURS[0]) * CW;
+  // night shading across all rows
+  el(s, 'rect', { x: LAB, y: 14, width: hx(rise) - LAB, height: total - 14, fill: '#1A1814' });
+  el(s, 'rect', { x: hx(set), y: 14, width: W - hx(set), height: total - 14, fill: '#1A1814' });
+  // hour axis
+  HOURS.forEach((h, i) => { if (h % 2 === 0) el(s, 'text', { x: cx(i), y: 10, 'font-size': 9.5, fill: T3, 'text-anchor': 'middle' }, String(h).padStart(2, '0')); });
+  if (o.best) el(s, 'rect', { x: hx(o.best[0]), y: 13, width: hx(o.best[1]) - hx(o.best[0]), height: total - 13, rx: 6, fill: 'none', stroke: TXT, 'stroke-opacity': .55, 'stroke-dasharray': '2 3' });
+  let y = 18;
+  rows.forEach((r, k) => {
+    if (k) el(s, 'line', { x1: 0, x2: W, y1: y, y2: y, stroke: LINE, 'stroke-width': .6 });
+    const ly = y + Math.min(r.h / 2 + 4, 15);
+    const t = el(s, 'text', { x: 0, y: ly, 'font-size': 10, fill: T2, 'font-weight': 500 }, r.label);
+    if (r.unit && r.h >= 32) el(s, 'text', { x: 0, y: ly + 11, 'font-size': 8.5, fill: T3 }, r.unit);
+    else if (r.unit) el(t, 'tspan', { 'font-size': 8.5, fill: T3, 'font-weight': 400, dx: 3 }, r.unit);
+    ROW[r.type](s, y, r);
+    y += r.h;
+  });
+  return s;
+}
+const ROW = {
+  icons(s, y, r) { r.v.forEach((k, i) => { if (i % 2 === 0 || r.all) { const g = el(s, 'g', { transform: `translate(${cx(i) - 9} ${y + 3}) scale(.75)` }); g.innerHTML = icon(k, 24).replace(/^<svg[^>]*>|<\/svg>$/g, ''); } }); },
+  rating(s, y, r) { r.v.forEach((v, i) => el(s, 'rect', { x: LAB + i * CW + 1, y: y + 4, width: CW - 2, height: r.h - 8, rx: 3, fill: v ? R[v - 1] : '#24201B' })); },
+  line(s, y, r) {
+    const pad = 10, top = y + pad, bot = y + r.h - 6, lo = r.min, hi = r.max;
+    const yy = v => bot - (v - lo) / (hi - lo) * (bot - top);
+    if (r.range) {
+      const id = 'h' + Math.random().toString(36).slice(2, 7);
+      const p = el(el(s, 'defs'), 'pattern', { id, width: 5, height: 5, patternUnits: 'userSpaceOnUse', patternTransform: 'rotate(45)' });
+      el(p, 'rect', { width: 2, height: 5, fill: '#3A342C' });
+      el(s, 'rect', { x: LAB, y: yy(Math.min(r.range[1], hi)), width: W - LAB, height: yy(r.range[0]) - yy(Math.min(r.range[1], hi)), fill: `url(#${id})` });
+      if (r.rangeLabel) el(s, 'text', { x: W - 2, y: yy(Math.min(r.range[1], hi)) - 3, 'font-size': 8.5, fill: T3, 'text-anchor': 'end' }, r.rangeLabel);
+    }
+    (r.grid || []).forEach(g => { el(s, 'line', { x1: LAB, x2: W, y1: yy(g), y2: yy(g), stroke: LINE, 'stroke-width': .5, 'stroke-dasharray': '1 3' }); });
+    const path = a => a.map((v, i) => (i ? 'L' : 'M') + cx(i) + ' ' + yy(v)).join(' ');
+    if (r.band) el(s, 'path', { d: path(r.band) + ' ' + r.v.slice().reverse().map((v, j) => 'L' + cx(r.v.length - 1 - j) + ' ' + yy(v)).join(' ') + 'Z', fill: r.color, 'fill-opacity': .25 });
+    (r.extra || []).forEach(e => el(s, 'path', { d: path(e.v), stroke: e.color, 'stroke-width': 1.6, fill: 'none', 'stroke-dasharray': e.dash || '', 'stroke-linejoin': 'round' }));
+    el(s, 'path', { d: path(r.v), stroke: r.color, 'stroke-width': 2, fill: 'none', 'stroke-linejoin': 'round', 'stroke-linecap': 'round' });
+    (r.labels || []).forEach(i => { el(s, 'circle', { cx: cx(i), cy: yy(r.v[i]), r: 3, fill: r.color, stroke: '#1E1B17', 'stroke-width': 1.5 });
+      el(s, 'text', { x: cx(i), y: yy(r.v[i]) - 6, 'font-size': 10, fill: TXT, 'text-anchor': 'middle', 'font-weight': 600 }, (r.fmt || (v => v))(r.v[i])); });
+    (r.notes || []).forEach(([i, t, dy]) => el(s, 'text', { x: cx(i), y: yy(r.v[i]) + (dy || 14), 'font-size': 9, fill: T2, 'text-anchor': 'middle' }, t));
+  },
+  bars(s, y, r) {
+    const top = y + (r.lab ? 13 : 5), bot = y + r.h - 4;
+    r.v.forEach((v, i) => { if (!v) return; const h = Math.max(2, v / r.max * (bot - top));
+      el(s, 'rect', { x: cx(i) - CW * .32, y: bot - h, width: CW * .64, height: h, rx: 2.5, fill: r.color, 'fill-opacity': r.op ? r.op(v, i) : 1 });
+      if (r.lab && (r.every ? i % r.every === 0 : true)) el(s, 'text', { x: cx(i), y: bot - h - 3, 'font-size': 8.5, fill: T2, 'text-anchor': 'middle' }, (r.fmt || (v => v))(v)); });
+  },
+  arrows(s, y, r) {
+    r.v.forEach((d, i) => { if (r.every && i % r.every) return; const g = el(s, 'g', { transform: `translate(${cx(i)} ${y + (r.tags ? 11 : r.h / 2)}) rotate(${d + 180})` });
+      el(g, 'path', { d: 'M0 -6 L0 6 M-3 2.5 L0 6 L3 2.5', stroke: r.color, 'stroke-width': 1.7, fill: 'none', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' });
+      if (r.tags) { const t = r.tags[i], col = { off: '#CF3A78', on: T2, side: TXT, 'side-on': TXT, cross: T2 }[t] || T3;
+        el(s, 'text', { x: cx(i), y: y + r.h - 4, 'font-size': 7.5, fill: col, 'text-anchor': 'middle', 'font-weight': t === 'off' ? 700 : 400 }, t === 'side-on' ? 'S-on' : t === 'side' ? 'side' : t); } });
+  },
+  nums(s, y, r) { r.v.forEach((v, i) => { if (r.every && i % r.every) return; el(s, 'text', { x: cx(i), y: y + r.h / 2 + 4, 'font-size': 10, fill: r.col ? r.col(v, i) : TXT, 'text-anchor': 'middle', 'font-weight': r.bold ? 600 : 400 }, (r.fmt || (v => v))(v)); }); },
+  cat(s, y, r) {
+    r.v.forEach((v, i) => { const c = r.map[v]; if (c) el(s, 'rect', { x: LAB + i * CW + 1, y: y + 5, width: CW - 2, height: r.h - 10, rx: 3, fill: c[0], 'fill-opacity': c[2] ?? 1 }); });
+    r.v.forEach((v, i) => { const c = r.map[v]; if (!c || !c[1] || (i && r.v[i - 1] === v)) return; let run = 1; while (r.v[i + run] === v) run++;
+      if (run >= 2) el(s, 'text', { x: LAB + i * CW + 4, y: y + r.h / 2 + 3.5, 'font-size': 8.5, fill: c[3] || '#15130F', 'font-weight': 600 }, c[1]); }); },
+};
+
+/* ---------- shared bits ---------- */
+const days = (sel, ratings) => `<div class="tabs">${['Mon 9', 'Tue 10', 'Wed 11', 'Thu 12', 'Fri 13', 'Sat 14', 'Sun 15', 'Mon 16'].map((d, i) =>
+  `<div class="tab ${i === sel ? 'on' : ''} ${i > 2 ? 'outlook' : ''}"><span>${d.split(' ')[0]}</span><b>${d.split(' ')[1]}</b><i style="background:${ratings[i] ? R[ratings[i] - 1] : '#2E2A24'}"></i></div>`).join('')}</div>
+  <div class="faint" style="font-size:10.5px;margin:6px 2px 0">Hour by hour for 3 days · days 4–8 are a daily outlook</div>`;
+const head = (sport, spot, back = 'Today') => `<div class="row muted" style="font-size:13px;gap:8px;margin-top:4px"><span style="font-size:18px">‹</span> ${back}</div>
+  <div class="row" style="margin-top:8px"><div><div style="font-size:24px;font-weight:600;letter-spacing:-.01em">${sport}</div><div class="muted" style="font-size:13px;margin-top:1px">${spot}</div></div><div class="sp"></div>
+  <span class="pill">Change spot</span></div>`;
+const verdict = (r, word, best, line, conf) => `<div class="card verdict"><div class="row"><span class="dots big-dots">${dots(r)}</span><span style="margin-left:10px;font-weight:600;color:${R[r - 1]}">${word}</span><div class="sp"></div><span class="pill">${conf}</span></div>
+  <div style="font-size:20px;font-weight:600;margin-top:10px;letter-spacing:-.01em">${best}</div><div class="muted" style="font-size:12.5px;margin-top:3px;line-height:1.45">${line}</div></div>`;
+const sec = t => `<div class="lbl" style="margin:18px 0 8px">${t}</div>`;
+const src = t => `<div class="src">Data: ${t}</div>`;
+const fact = (l, v, s, col) => `<div class="fact"><div class="lbl">${l}</div><div class="v" style="${col ? 'color:' + col : ''}">${v}</div>${s ? `<div class="s">${s}</div>` : ''}</div>`;
+const mgHost = id => `<div class="card mg" id="${id}"></div>`;
+const warnLine = (lvl, t, d) => `<div class="warn w-${lvl}"><svg width="16" height="16" viewBox="0 0 24 24" style="flex:none;margin-top:1px"><path d="M12 3l10 18H2z" fill="var(--w-${lvl})"/><path d="M12 10v5M12 17.5v.5" stroke="#15130F" stroke-width="2" stroke-linecap="round"/></svg><div><div class="t">${t}</div><div class="d">${d}</div></div></div>`;
+function small(id, w, h, fn) { const s = document.getElementById(id); s.setAttribute('width', w); s.setAttribute('height', h); fn(s); }
+
+/* =====================================================================
+   WING FOIL — Tue 10 Nov · Castelldefels (beach faces S)
+   ===================================================================== */
+document.getElementById('d-wing').innerHTML = head('Wing foil', 'Castelldefels · flatwater · beach faces S') + days(1, [3, 4, 2, 1, 1, 3, 4, 2]) +
+  verdict(4, 'Good', 'Best 13–17 h · peak 14–16 h', 'Side-on SW building to 16–19 kn, gusts ≤ 24. Chop rising to 0.8 m. Morning offshore NW, so stay ashore before 10 h.', 'High confidence') +
+  sec('Hour by hour') + mgHost('mg-wing') +
+  `<div class="legend" style="margin-top:8px"><span><i class="sw" style="background:var(--wind);height:3px"></i>mean wind</span><span><i class="sw" style="background:color-mix(in srgb,var(--wind) 30%,transparent)"></i>gusts</span><span><i class="sw" style="background:repeating-linear-gradient(45deg,#3A342C 0 2px,transparent 2px 5px)"></i>your range</span><span><i class="sw" style="background:#1A1814;border:1px solid #36312A"></i>dark</span></div>` +
+  sec('Gear for 75 kg') + `<div class="f2">${fact('Wing', '5 m → 4 m', '5 m 13–15 h · 4 m when gusts > 22')}${fact('Foil · board', '1100 cm² · 85 L', 'early-planing setup')}</div>` +
+  sec('Forecast vs station today') + `<div class="card"><svg id="wing-bias"></svg><div class="legend" style="margin-top:6px"><span><i class="sw" style="background:var(--wind);height:3px"></i>measured · XEMA 10 m</span><span><i class="sw" style="background:repeating-linear-gradient(90deg,#B0A596 0 3px,transparent 3px 6px);height:2px"></i>Meteocat forecast</span></div>
+    <div class="muted" style="font-size:12px;margin-top:8px;line-height:1.45">Running <b style="color:${TXT}">+2 kn above forecast</b> today. In SW over the last 30 days the forecast here averaged 1.8 kn low, so corrected values are shown above.</div></div>` +
+  sec('Pressure · next front') + `<div class="card"><svg id="wing-press"></svg><div class="muted" style="font-size:12px;margin-top:6px">Falling 4 hPa in 6 h. Front on Wed: NW gusts 30+ kn (offshore), so Wed is not rideable.</div></div>` +
+  sec('Water · light · safety') + `<div class="f4">${fact('Water', '18.6°', '3/2 suit')}${fact('Sunset', '17:35', 'last light 18:03')}${fact('Lightning', 'none', '50 km · 24 h')}${fact('UV max', '2', 'low')}</div>
+   <div class="card row" style="margin-top:10px;gap:10px;padding:12px 14px"><span style="color:var(--w-yellow)">▲</span><div style="font-size:12px" class="muted"><b style="color:${TXT}">Pre-warning Wed:</b> yellow wind warning likely for the Barcelona coast.</div></div>` +
+  src('beach forecast Castelldefels (hourly wind, waves, water), XEMA 30/31/50 + 34 (pressure), municipal hourly, UV, XDDE, warnings and pre-warnings, Open-Meteo gust forecast');
+
+meteogram(document.getElementById('mg-wing'), [
+  { type: 'icons', label: 'Sky', h: 26, v: ['partly', 'sun', 'sun', 'sun', 'sun', 'partly', 'partly', 'partly', 'partly', 'cloud', 'cloud', 'night', 'night', 'night'] },
+  { type: 'rating', label: 'Rating', h: 22, v: [0, 0, 0, 1, 2, 3, 4, 5, 5, 4, 2, 0, 0, 0] },
+  { type: 'line', label: 'Wind', unit: 'kn', h: 96, min: 0, max: 30, color: C('--wind'), range: [14, 24], rangeLabel: 'your range 14–24',
+    v: [6, 7, 8, 10, 12, 14, 16, 18, 19, 18, 16, 13, 10, 8], band: [9, 10, 11, 13, 16, 18, 21, 23, 24, 23, 21, 17, 14, 11], labels: [8], grid: [10, 20] },
+  { type: 'arrows', label: 'From', unit: 'vs shore', h: 32, color: C('--wind'), v: [320, 320, 300, 260, 240, 230, 225, 225, 220, 220, 225, 230, 240, 260],
+    tags: ['off', 'off', 'off', 'side', 'side', 'side-on', 'side-on', 'side-on', 'side-on', 'side-on', 'side-on', 'side-on', 'side', 'side'] },
+  { type: 'nums', label: 'Gust', unit: 'kn', h: 22, v: [9, 10, 11, 13, 16, 18, 21, 23, 24, 23, 21, 17, 14, 11], col: v => v > 22 ? C('--heat') : T2 },
+  { type: 'bars', label: 'Waves', unit: 'm', h: 38, max: 1.2, color: C('--wave'), lab: true, every: 2, fmt: v => v.toFixed(1), v: [.3, .3, .3, .4, .4, .5, .6, .7, .8, .8, .8, .7, .7, .6] },
+  { type: 'nums', label: 'Air', unit: '°C', h: 22, every: 1, v: [12, 13, 15, 17, 18, 19, 19, 19, 18, 17, 16, 15, 14, 14], fmt: v => v + '°', col: () => C('--heat') },
+  { type: 'bars', label: 'Rain', unit: '%', h: 30, max: 100, color: C('--rain'), lab: true, every: 2, fmt: v => v, v: [0, 0, 0, 0, 0, 5, 5, 10, 10, 20, 30, 40, 30, 20] },
+  { type: 'cat', label: 'Storm', h: 22, v: Array(14).fill('none'), map: { none: ['#24201B', 'no lightning risk all day', 1, T3] } },
+], { best: [13, 17] });
+
+small('wing-bias', 322, 96, s => { const f = [6, 7, 8, 10, 12, 14, 16, 18], m = [7, 9, 10, 12, 14, 16], x = i => 30 + i * 40, y = v => 84 - v / 22 * 74;
+  [0, 10, 20].forEach(g => { el(s, 'line', { x1: 24, x2: 322, y1: y(g), y2: y(g), stroke: LINE, 'stroke-width': .5 }); el(s, 'text', { x: 0, y: y(g) + 3, 'font-size': 9, fill: T3 }, g); });
+  el(s, 'path', { d: f.map((v, i) => (i ? 'L' : 'M') + x(i) + ' ' + y(v)).join(' '), stroke: T2, 'stroke-dasharray': '3 3', 'stroke-width': 1.6, fill: 'none' });
+  el(s, 'path', { d: m.map((v, i) => (i ? 'L' : 'M') + x(i) + ' ' + y(v)).join(' '), stroke: C('--wind'), 'stroke-width': 2, fill: 'none' });
+  el(s, 'circle', { cx: x(5), cy: y(16), r: 3.5, fill: C('--wind'), stroke: '#1E1B17', 'stroke-width': 1.5 });
+  el(s, 'text', { x: x(5), y: y(16) - 7, 'font-size': 10, fill: TXT, 'text-anchor': 'middle', 'font-weight': 600 }, 'now 16');
+  ['07', '09', '11', '13'].forEach((t, k) => el(s, 'text', { x: x(k * 2), y: 96, 'font-size': 9, fill: T3, 'text-anchor': 'middle' }, t)); });
+small('wing-press', 322, 70, s => { const v = [1018, 1018, 1017.5, 1017, 1016, 1015, 1014, 1013, 1012, 1011, 1010, 1009.5, 1009], x = i => 6 + i * 24, y = p => 58 - (p - 1008) / 11 * 50;
+  el(s, 'line', { x1: x(6), x2: x(6), y1: 4, y2: 62, stroke: LINE, 'stroke-dasharray': '2 2' }); el(s, 'text', { x: x(6) + 4, y: 12, 'font-size': 9, fill: T3 }, 'now');
+  el(s, 'path', { d: v.map((p, i) => (i ? 'L' : 'M') + x(i) + ' ' + y(p)).join(' '), stroke: T2, 'stroke-width': 2, fill: 'none' });
+  el(s, 'text', { x: x(0), y: y(1018) - 6, 'font-size': 10, fill: TXT }, '1018'); el(s, 'text', { x: x(12), y: y(1009) - 6, 'font-size': 10, fill: TXT, 'text-anchor': 'end' }, '1009 hPa');
+  el(s, 'text', { x: 0, y: 70, 'font-size': 9, fill: T3 }, '−12 h'); el(s, 'text', { x: 322, y: 70, 'font-size': 9, fill: T3, 'text-anchor': 'end' }, '+12 h'); });
+
+/* =====================================================================
+   SURF — Wed 11 Nov · Ocata (faces E–SE, exposure 40–180°)
+   ===================================================================== */
+document.getElementById('d-surf').innerHTML = head('Surf', 'Ocata · El Masnou · faces E–SE') + days(2, [1, 1, 3, 4, 3, 1, 1, 2]) +
+  verdict(3, 'Fair', 'Best 08–11 h · dawn patrol', 'E swell 1.1–1.2 m @ 9 s, direct hit. Light W offshore until 10 h, then the sea breeze turns onshore and it gets choppy after noon.', 'Medium confidence') +
+  warnLine('orange', 'Orange warning · Sea state', 'Maresme coast · Wed 12–20 h · waves up to 2.5 m offshore') +
+  sec('Hour by hour') + mgHost('mg-surf') +
+  sec('Swell window') + `<div class="row" style="gap:12px"><div class="card" style="padding:10px"><svg id="surf-win"></svg></div>
+    <div style="flex:1;display:flex;flex-direction:column;gap:8px">${fact('Swell', 'E 95°', 'inside window 40–180°')}${fact('Energy', 'building', '+0.4 m in 24 h')}</div></div>` +
+  sec('Buoy · last 24 h') + `<div class="card"><svg id="surf-buoy"></svg><div class="legend" style="margin-top:6px"><span><i class="sw" style="background:var(--wave)"></i>significant height</span><span>period labelled</span></div></div>` +
+  sec('Body') + `<div class="f4">${fact('Water', '19.2°', '3/2 full')}${fact('Air', '12→18°', 'cold dawn')}${fact('UV max', '2', 'low')}${fact('Sunrise', '07:37', 'first light 07:09')}</div>` +
+  src('beach forecast Ocata (hourly waves, direction, water temp), XEMA buoy 90–97, municipal hourly wind, warnings, Open-Meteo Marine (swell period forecast)');
+
+meteogram(document.getElementById('mg-surf'), [
+  { type: 'icons', label: 'Sky', h: 26, v: ['sun', 'sun', 'sun', 'sun', 'partly', 'partly', 'cloud', 'cloud', 'cloud', 'rain', 'rain', 'night', 'night', 'night'] },
+  { type: 'rating', label: 'Rating', h: 22, v: [2, 3, 4, 4, 3, 2, 2, 1, 1, 1, 1, 0, 0, 0] },
+  { type: 'bars', label: 'Waves', unit: 'm', h: 78, max: 1.5, color: C('--wave'), lab: true, every: 1, fmt: v => v.toFixed(1), v: [.9, 1, 1.1, 1.2, 1.2, 1.2, 1.1, 1.1, 1, 1, .9, .9, .8, .8], op: (v, i) => i >= 1 && i <= 3 ? 1 : .55 },
+  { type: 'nums', label: 'Period', unit: 's', h: 22, v: [8, 8, 9, 9, 9, 9, 9, 8, 8, 8, 8, 7, 7, 7], col: v => v >= 9 ? TXT : T2, bold: true },
+  { type: 'arrows', label: 'Swell', h: 24, color: C('--wave'), v: Array(14).fill(95), every: 2 },
+  { type: 'arrows', label: 'Wind', unit: 'vs beach', h: 32, color: C('--wind'), v: [300, 300, 290, 270, 200, 150, 120, 110, 100, 100, 90, 80, 60, 40],
+    tags: ['off', 'off', 'off', 'off', 'cross', 'on', 'on', 'on', 'on', 'on', 'on', 'on', 'on', 'on'] },
+  { type: 'nums', label: 'Wind', unit: 'kn', h: 22, v: [6, 6, 5, 4, 4, 6, 9, 11, 12, 12, 11, 9, 8, 7], col: v => v > 10 ? C('--heat') : T2 },
+  { type: 'nums', label: 'Air', unit: '°C', h: 22, v: [10, 11, 12, 14, 16, 17, 18, 18, 17, 16, 15, 14, 13, 13], fmt: v => v + '°', col: () => C('--heat') },
+  { type: 'bars', label: 'Rain', unit: '%', h: 30, max: 100, color: C('--rain'), lab: true, every: 2, v: [0, 0, 0, 0, 0, 10, 20, 30, 40, 60, 60, 40, 20, 10] },
+], { best: [8, 11], sunrise: 7.62 });
+
+small('surf-win', 140, 140, s => { const c = 70, r = 58, P = a => [c + r * Math.sin(a * Math.PI / 180), c - r * Math.cos(a * Math.PI / 180)];
+  const [x0, y0] = P(40), [x1, y1] = P(180); el(s, 'path', { d: `M${c} ${c} L${x0} ${y0} A${r} ${r} 0 0 1 ${x1} ${y1} Z`, fill: C('--wave'), 'fill-opacity': .14 });
+  el(s, 'circle', { cx: c, cy: c, r, fill: 'none', stroke: LINE });
+  [['N', 0], ['E', 90], ['S', 180], ['W', 270]].forEach(([t, a]) => { const [x, y] = [c + (r - 11) * Math.sin(a * Math.PI / 180), c - (r - 11) * Math.cos(a * Math.PI / 180)]; el(s, 'text', { x, y: y + 3.5, 'font-size': 9.5, fill: T3, 'text-anchor': 'middle' }, t); });
+  const g = el(s, 'g', { transform: `rotate(${95 - 90} ${c} ${c})` });
+  el(g, 'path', { d: `M${c + 50} ${c} L${c + 8} ${c} M${c + 16} ${c - 6} L${c + 7} ${c} L${c + 16} ${c + 6}`, stroke: C('--wave'), 'stroke-width': 2.6, fill: 'none', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' });
+  const [a1, b1] = P(20), [a2, b2] = P(200); el(s, 'line', { x1: a1, y1: b1, x2: a2, y2: b2, stroke: '#D9B98A', 'stroke-dasharray': '3 3' });
+  el(s, 'circle', { cx: c, cy: c, r: 3, fill: '#D9B98A' }); el(s, 'text', { x: 4, y: 138, 'font-size': 9, fill: T3 }, 'shaded = open to the sea'); });
+small('surf-buoy', 322, 100, s => { const v = [.5, .5, .55, .6, .6, .65, .7, .7, .75, .8, .8, .85, .9], p = [6, 6, 6, 7, 7, 7, 7, 8, 8, 8, 8, 9, 9], x = i => 8 + i * 25, y = h => 84 - h / 1.2 * 70;
+  v.forEach((h, i) => { el(s, 'rect', { x: x(i) - 8, y: y(h), width: 16, height: 84 - y(h), rx: 3, fill: C('--wave'), 'fill-opacity': i === 12 ? 1 : .55 }); if (i % 3 === 0 || i === 12) el(s, 'text', { x: x(i), y: y(h) - 4, 'font-size': 9, fill: i === 12 ? TXT : T2, 'text-anchor': 'middle' }, p[i] + 's'); });
+  el(s, 'line', { x1: 0, x2: 322, y1: 84, y2: 84, stroke: LINE }); el(s, 'text', { x: 0, y: 98, 'font-size': 9, fill: T3 }, '−24 h'); el(s, 'text', { x: 322, y: 98, 'font-size': 9, fill: T3, 'text-anchor': 'end' }, 'now 0.9 m'); });
+
+/* =====================================================================
+   BIKE — Mon 9 Nov · Collserola loop 42 km / 3 h
+   ===================================================================== */
+document.getElementById('d-bike').innerHTML = head('Bike', 'Collserola loop · 42 km · 780 m ↑') + days(0, [4, 3, 1, 3, 4, 5, 4, 3]) +
+  verdict(5, 'Epic', 'Leave 09:00 → back 12:00', 'Dry window before the 13 h showers. NW tailwind on the climb, roads dry from 09 h. Feels 11° at the start, 19° at the finish.', 'High confidence') +
+  `<div class="card row" style="margin-top:10px;gap:10px;padding:12px 14px"><div class="lbl" style="margin:0">Ride length</div><div class="sp"></div>${['1 h', '2 h', '3 h', '4 h', '5 h'].map(t => `<span class="chip ${t === '3 h' ? 'on' : ''}" style="padding:5px 10px">${t}</span>`).join('')}</div>` +
+  sec('Hour by hour') + mgHost('mg-bike') +
+  sec('Wind along the route · leaving 09:00') + `<div class="card"><svg id="bike-route"></svg><div class="legend" style="margin-top:6px"><span><i class="sw" style="background:var(--wind)"></i>tailwind</span><span><i class="sw" style="background:#7E7468"></i>crosswind</span><span><i class="sw" style="background:var(--heat)"></i>headwind</span></div></div>` +
+  sec('Surface') + `<div class="f2">${fact('Roads', 'dry from 09 h', '3.2 mm overnight · drying fast')}${fact('Gravel · trails', 'damp', '6 mm in 72 h · ET₀ 1.4 mm/day · soil 31 %')}</div>` +
+  sec('What to wear') + `<div class="card" style="font-size:13px;line-height:1.6"><b>Start 11° feels-like · 6 kn NW</b><br><span class="muted">Long-finger gloves and a gilet until 10 h; arm warmers you can pocket. Rain jacket stays home if you're back by 12:30.</span></div>` +
+  src('municipal hourly (temp, rain, wind, sky), XEMA 35/70/72 (rain observed, intensity), 11–13 (asphalt temp → ice), 62/63 (soil moisture), CMV 6006 (ET₀), UV forecast, warnings');
+
+meteogram(document.getElementById('mg-bike'), [
+  { type: 'icons', label: 'Sky', h: 26, v: ['partly', 'sun', 'sun', 'sun', 'partly', 'cloud', 'rain', 'rain', 'rain', 'cloud', 'partly', 'night', 'night', 'night'] },
+  { type: 'rating', label: 'Rating', h: 22, v: [1, 2, 4, 5, 5, 4, 2, 1, 1, 2, 2, 1, 0, 0] },
+  { type: 'line', label: 'Temp', unit: '°C', h: 80, min: 6, max: 22, color: C('--heat'), v: [9, 10, 12, 14, 16, 18, 19, 20, 20, 19, 17, 15, 14, 13], labels: [0, 7],
+    fmt: v => v + '°', extra: [{ v: [7, 8, 11, 13, 15, 17, 18, 19, 19, 18, 16, 14, 12, 11], color: C('--heat'), dash: '2 3' }], notes: [[3, 'feels (dashed)', 22]], grid: [10, 15, 20] },
+  { type: 'bars', label: 'Rain', unit: 'mm', h: 40, max: 3, color: C('--rain'), lab: true, fmt: v => v.toFixed(1), v: [0, 0, 0, 0, 0, 0, .4, 2.1, 1.6, .3, 0, 0, 0, 0] },
+  { type: 'nums', label: 'Chance', unit: '%', h: 22, v: [0, 0, 0, 0, 0, 10, 30, 60, 60, 40, 20, 10, 0, 0], col: v => v >= 30 ? C('--rain') : T3 },
+  { type: 'cat', label: 'Roads', h: 22, v: ['wet', 'damp', 'dry', 'dry', 'dry', 'dry', 'damp', 'wet', 'wet', 'wet', 'damp', 'damp', 'dry', 'dry'],
+    map: { wet: [C('--rain'), 'wet', .9], damp: [C('--rain'), 'damp', .45], dry: ['#2A261F', '', 1] } },
+  { type: 'arrows', label: 'Wind', h: 24, color: C('--wind'), v: [330, 330, 320, 300, 250, 230, 225, 225, 230, 240, 260, 300, 320, 330] },
+  { type: 'nums', label: 'Speed', unit: 'kn', h: 22, v: [5, 5, 6, 7, 8, 10, 12, 14, 13, 11, 9, 7, 6, 5], col: v => v > 12 ? C('--heat') : T2 },
+  { type: 'bars', label: 'UV', h: 30, max: 6, color: C('--sun'), lab: true, v: [0, 0, 1, 2, 3, 3, 3, 2, 1, 1, 0, 0, 0, 0] },
+], { best: [9, 12] });
+
+small('bike-route', 322, 150, s => { // loop polyline with segment colours by headwind/tailwind at NW 300°
+  const pts = [[40, 120], [70, 95], [95, 70], [130, 45], [175, 30], [220, 28], [262, 42], [285, 70], [280, 102], [250, 122], [205, 132], [150, 135], [100, 132], [60, 128], [40, 120]];
+  const wind = 300; // from
+  for (let i = 0; i < pts.length - 1; i++) { const [a, b] = [pts[i], pts[i + 1]]; const bearing = (Math.atan2(b[0] - a[0], a[1] - b[1]) * 180 / Math.PI + 360) % 360;
+    const rel = Math.cos((bearing - (wind + 180)) * Math.PI / 180); const col = rel > .35 ? C('--wind') : rel < -.35 ? C('--heat') : '#7E7468';
+    el(s, 'line', { x1: a[0], y1: a[1], x2: b[0], y2: b[1], stroke: col, 'stroke-width': 5, 'stroke-linecap': 'round' }); }
+  el(s, 'circle', { cx: 40, cy: 120, r: 5, fill: TXT }); el(s, 'text', { x: 50, y: 142, 'font-size': 9.5, fill: T2 }, 'start · Sarrià');
+  el(s, 'text', { x: 175, y: 20, 'font-size': 9.5, fill: T2 }, 'Tibidabo 512 m');
+  const g = el(s, 'g', { transform: `translate(300 22) rotate(${wind + 180})` }); el(g, 'path', { d: 'M0 -9 L0 9 M-4 4 L0 9 L4 4', stroke: C('--wind'), 'stroke-width': 2, fill: 'none', 'stroke-linecap': 'round' });
+  el(s, 'text', { x: 300, y: 46, 'font-size': 9, fill: T2, 'text-anchor': 'middle' }, 'NW 7 kn');
+  el(s, 'text', { x: 0, y: 12, 'font-size': 11, fill: TXT, 'font-weight': 600 }, '58 % tailwind on the climb'); });
+
+/* =====================================================================
+   RUN — Tue 10 Nov · Barcelona · 1 h
+   ===================================================================== */
+document.getElementById('d-run').innerHTML = head('Run', 'Barcelona · Diagonal Mar · 10 km') + days(1, [3, 4, 2, 3, 4, 5, 4, 3]) +
+  verdict(4, 'Good', 'Best 08:00–09:00 · or after 18 h', 'Feels 11–13° with low UV and dry streets in the morning. Midday reaches 21° feels-like in full sun with UV 3, and humidity climbs again after dark.', 'High confidence') +
+  `<div class="card row" style="margin-top:10px;gap:10px;padding:12px 14px"><div class="lbl" style="margin:0">Run length</div><div class="sp"></div>${['30 min', '1 h', '1.5 h', '2 h+'].map(t => `<span class="chip ${t === '1 h' ? 'on' : ''}" style="padding:5px 10px">${t}</span>`).join('')}</div>` +
+  sec('Hour by hour') + mgHost('mg-run') +
+  sec('Sun or shade') + `<div class="f2">${fact('In full sun', '+3 °C', '480 W/m² at 12 h')}${fact('Shade route', 'Parc del Fòrum', 'suggested 11–15 h')}</div>` +
+  sec('Body') + `<div class="f4">${fact('Wear', 'Long sleeve', 'shorts')}${fact('Drink', '0.4 L', 'low sweat')}${fact('Heat stress', 'low', 'all day')}${fact('Air', 'AQI 32', 'good · optional')}</div>` +
+  src('municipal hourly (temp, feels, RH, rain, wind), UV forecast, XEMA 32/33 (now), 36 (irradiance), 39 (UV measured), warnings; air quality optional via Open-Meteo');
+
+meteogram(document.getElementById('mg-run'), [
+  { type: 'icons', label: 'Sky', h: 26, v: ['partly', 'sun', 'sun', 'sun', 'sun', 'sun', 'partly', 'partly', 'partly', 'cloud', 'cloud', 'night', 'night', 'night'] },
+  { type: 'rating', label: 'Rating', h: 22, v: [3, 5, 5, 4, 3, 2, 2, 2, 2, 3, 3, 4, 4, 3] },
+  { type: 'line', label: 'Feels', unit: '°C', h: 84, min: 6, max: 24, color: C('--heat'), range: [6, 16], rangeLabel: 'comfort 6–16°',
+    v: [10, 11, 13, 15, 17, 19, 20, 21, 21, 20, 18, 16, 15, 14], labels: [1, 7], fmt: v => v + '°', grid: [10, 20] },
+  { type: 'nums', label: 'Humid.', unit: '%', h: 22, v: [88, 85, 78, 70, 62, 55, 52, 50, 52, 58, 65, 72, 78, 82], col: v => v > 80 ? C('--rain') : T2 },
+  { type: 'bars', label: 'UV', h: 34, max: 6, color: C('--sun'), lab: true, v: [0, 0, 1, 2, 3, 3, 3, 2, 1, 1, 0, 0, 0, 0] },
+  { type: 'bars', label: 'Sun', unit: 'W/m²', h: 34, max: 600, color: C('--sun'), op: () => .45, v: [0, 40, 180, 320, 430, 480, 470, 400, 280, 140, 30, 0, 0, 0] },
+  { type: 'bars', label: 'Rain', unit: '%', h: 28, max: 100, color: C('--rain'), lab: true, every: 2, v: [0, 0, 0, 0, 0, 0, 5, 5, 10, 10, 10, 5, 0, 0] },
+  { type: 'nums', label: 'Wind', unit: 'kn', h: 22, v: [4, 5, 6, 7, 9, 11, 12, 13, 12, 10, 8, 6, 5, 4], col: () => T2 },
+], { best: [8, 9] });
+
+/* =====================================================================
+   HIKE — Sat 14 Nov · Pedraforca 2506 m from Refugi Lluís Estasen 1640 m
+   ===================================================================== */
+document.getElementById('d-hike').innerHTML = head('Hike', 'Pedraforca 2506 m · from refugi 1640 m') + days(2, [2, 2, 3, 3, 3, 3, 4, 2]) +
+  verdict(3, 'Fair', 'Start 07:30 · turn back by 12:00', 'Clear, cold morning, -1° and NW 22 kn on the summit. Cumulus builds from 12 h, with a 45 % storm risk at 14 h. Be down at the refugi before 14 h.', 'Medium confidence') +
+  sec('Plan') + `<div class="card"><svg id="hike-plan"></svg></div>` +
+  sec('Summit hour by hour') + mgHost('mg-hike') +
+  sec('Temperature by altitude · 11 h') + `<div class="card"><svg id="hike-alt"></svg></div>` +
+  sec('Snow · lightning · ground') + `<div class="f2"><div class="card" style="padding:12px"><div class="lbl">Snow depth · Cadí station 2140 m</div><svg id="hike-snow"></svg></div>
+    <div class="card" style="padding:12px"><div class="lbl">Lightning · Berguedà · 5 days</div><svg id="hike-light"></svg></div></div>
+   <div class="f2" style="margin-top:10px">${fact('North faces', 'icy', 'snow level 2300 m · −1° summit')}${fact('Daylight', '07:58–17:24', '9 h 26 min')}</div>` +
+  src('Pyrenees summit forecast (pics/el-pedraforca), refugi forecast, Pyrenees area forecast, XEMA 38 (snow), 32 (mountain stations), XDDE county report + live strikes, warnings; freezing level via Open-Meteo');
+
+meteogram(document.getElementById('mg-hike'), [
+  { type: 'icons', label: 'Sky', h: 26, v: ['sun', 'sun', 'sun', 'sun', 'partly', 'cloud', 'storm', 'storm', 'storm', 'rain', 'cloud', 'night', 'night', 'night'] },
+  { type: 'rating', label: 'Rating', h: 22, v: [2, 4, 5, 5, 4, 3, 1, 1, 1, 1, 1, 0, 0, 0] },
+  { type: 'bars', label: 'Storm', unit: '%', h: 40, max: 70, color: C('--storm'), lab: true, every: 1, v: [0, 0, 0, 0, 5, 10, 25, 45, 60, 55, 40, 20, 10, 0] },
+  { type: 'line', label: 'Wind', unit: 'kn', h: 70, min: 0, max: 45, color: C('--wind'), v: [22, 24, 22, 18, 15, 14, 16, 20, 25, 28, 30, 30, 28, 26],
+    band: [31, 34, 31, 25, 21, 20, 22, 28, 35, 39, 42, 42, 39, 36], labels: [1, 10], grid: [20, 40] },
+  { type: 'nums', label: 'Temp', unit: '°C', h: 22, v: [-2, -1, 0, 2, 3, 4, 4, 3, 2, 1, 0, -1, -2, -2], fmt: v => v + '°', col: v => v <= 0 ? C('--snow') : C('--heat') },
+  { type: 'bars', label: 'Precip', unit: 'mm', h: 32, max: 3, color: C('--rain'), lab: true, fmt: v => v.toFixed(1), v: [0, 0, 0, 0, 0, 0, .5, 1.8, 2.4, 1.2, .3, 0, 0, 0] },
+  { type: 'nums', label: 'Snow lvl', unit: 'm', h: 32, every: 2, v: [2300, 2300, 2350, 2400, 2400, 2400, 2350, 2300, 2200, 2100, 2000, 1900, 1900, 1900], col: () => C('--snow') },
+], { best: [7.5, 12], sunrise: 7.97, sunset: 17.4 });
+
+small('hike-plan', 322, 66, s => { const x = h => 10 + (h - 7) * 28.5; // 7..18
+  el(s, 'rect', { x: x(7), y: 22, width: x(18) - x(7), height: 10, rx: 5, fill: '#24201B' });
+  el(s, 'rect', { x: x(7.97), y: 22, width: x(17.4) - x(7.97), height: 10, rx: 5, fill: '#2E2A24' });
+  [[7.5, 10.75, R[4], 'up'], [10.75, 11.25, R[3], ''], [11.25, 13.75, R[3], 'down']].forEach(([a, b, c, t]) => { el(s, 'rect', { x: x(a), y: 22, width: x(b) - x(a), height: 10, rx: 5, fill: c }); if (t) el(s, 'text', { x: (x(a) + x(b)) / 2, y: 30, 'font-size': 8, fill: '#15130F', 'text-anchor': 'middle', 'font-weight': 700 }, t); });
+  el(s, 'rect', { x: x(13), y: 20, width: x(17) - x(13), height: 14, rx: 4, fill: C('--storm'), 'fill-opacity': .25 });
+  [[7.5, 'start 07:30'], [10.75, 'summit 10:45'], [12, 'turn-back limit 12:00'], [13.75, 'refugi 13:45']].forEach(([h, t], k) => { el(s, 'line', { x1: x(h), x2: x(h), y1: k % 2 ? 34 : 16, y2: k % 2 ? 44 : 22, stroke: h === 12 ? C('--w-orange') : T2 });
+    el(s, 'text', { x: x(h), y: k % 2 ? 55 : 11, 'font-size': 9.5, fill: h === 12 ? C('--w-orange') : TXT, 'text-anchor': 'middle', 'font-weight': h === 12 ? 600 : 400 }, t); });
+  el(s, 'text', { x: x(17), y: 64, 'font-size': 9, fill: C('--storm'), 'text-anchor': 'end' }, 'storm risk 13–17 h'); });
+small('hike-alt', 322, 150, s => { s.style.overflow = 'visible'; const pts = [[1215, 7, 'Saldes'], [1640, 5, 'Refugi'], [2100, 2, ''], [2506, -1, 'Summit']], x = t => 40 + (t + 4) / 16 * 270, y = a => 136 - (a - 1000) / 1700 * 124;
+  [1500, 2000, 2500].forEach(a => { el(s, 'line', { x1: 34, x2: 322, y1: y(a), y2: y(a), stroke: LINE, 'stroke-width': .5 }); el(s, 'text', { x: 0, y: y(a) + 3, 'font-size': 9, fill: T3 }, a + ' m'); });
+  el(s, 'line', { x1: x(0), x2: x(0), y1: 6, y2: 140, stroke: C('--snow'), 'stroke-dasharray': '2 3' }); el(s, 'text', { x: x(0) + 4, y: 140, 'font-size': 9, fill: C('--snow') }, '0 °C');
+  el(s, 'line', { x1: 34, x2: 322, y1: y(2300), y2: y(2300), stroke: C('--snow'), 'stroke-opacity': .6 }); el(s, 'text', { x: 322, y: y(2300) - 4, 'font-size': 9, fill: C('--snow'), 'text-anchor': 'end' }, 'snow level 2300 m');
+  el(s, 'path', { d: pts.map((p, i) => (i ? 'L' : 'M') + x(p[1]) + ' ' + y(p[0])).join(' '), stroke: C('--heat'), 'stroke-width': 2, fill: 'none' });
+  pts.forEach(([a, t, n]) => { el(s, 'circle', { cx: x(t), cy: y(a), r: 3.5, fill: C('--heat'), stroke: '#1E1B17', 'stroke-width': 1.5 }); if (n) el(s, 'text', { x: x(t) + 8, y: y(a) + (a > 2400 ? -7 : 4), 'font-size': 10, fill: TXT }, `${n} ${t}°`); }); });
+small('hike-snow', 140, 64, s => { const v = [0, 0, 0, 2, 4, 4, 4, 3, 3, 6, 10, 12, 12, 12], x = i => 4 + i * 10, y = c => 50 - c / 14 * 40;
+  el(s, 'path', { d: v.map((c, i) => (i ? 'L' : 'M') + x(i) + ' ' + y(c)).join(' ') + ` L${x(13)} 50 L${x(0)} 50 Z`, fill: C('--snow'), 'fill-opacity': .2 });
+  el(s, 'path', { d: v.map((c, i) => (i ? 'L' : 'M') + x(i) + ' ' + y(c)).join(' '), stroke: C('--snow'), 'stroke-width': 2, fill: 'none' });
+  el(s, 'text', { x: 136, y: y(12) - 5, 'font-size': 11, fill: TXT, 'text-anchor': 'end', 'font-weight': 600 }, '12 cm'); el(s, 'text', { x: 0, y: 62, 'font-size': 8.5, fill: T3 }, '14 days'); });
+small('hike-light', 140, 64, s => { const v = [0, 0, 14, 37, 3], n = ['Thu', 'Fri', 'Sat', 'Sun', 'Mon'];
+  v.forEach((k, i) => { const h = k / 40 * 36; if (k) el(s, 'rect', { x: 6 + i * 27, y: 46 - h, width: 18, height: h, rx: 3, fill: C('--storm') }); el(s, 'text', { x: 15 + i * 27, y: 58, 'font-size': 8.5, fill: T3, 'text-anchor': 'middle' }, n[i]); if (k) el(s, 'text', { x: 15 + i * 27, y: 42 - h, 'font-size': 9, fill: T2, 'text-anchor': 'middle' }, k); });
+  el(s, 'line', { x1: 0, x2: 140, y1: 46, y2: 46, stroke: LINE }); });
+
+</script>
+<script>["d-wing","d-surf","d-bike","d-run","d-hike"].forEach(id=>{document.getElementById("nav-"+id).innerHTML=document.getElementById("nav2").innerHTML;});</script>
+</body>
+</html>
