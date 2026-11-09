@@ -1,0 +1,77 @@
+{
+  "pkg": "@oratge/ui",
+  "globalName": "OratgeUI",
+  "shape": "package",
+  "buildCmd": "npm run build",
+  "cssEntry": "dist/styles.css",
+  "extraFonts": [
+    "node_modules/@fontsource/dm-sans/300.css",
+    "node_modules/@fontsource/dm-sans/400.css",
+    "node_modules/@fontsource/dm-sans/500.css",
+    "node_modules/@fontsource/dm-sans/600.css",
+    "node_modules/@fontsource/dm-sans/700.css"
+  ],
+  "provider": {
+    "component": "OratgeRoot",
+    "props": {
+      "padded": true
+    }
+  },
+  "overrides": {
+    "HourChart": {
+      "cardMode": "column"
+    },
+    "MonthBars": {
+      "cardMode": "column"
+    },
+    "TrendLine": {
+      "cardMode": "column"
+    },
+    "WaveBars": {
+      "cardMode": "column"
+    },
+    "WindBand": {
+      "cardMode": "column"
+    },
+    "ActivityRow": {
+      "cardMode": "column"
+    },
+    "BottomNav": {
+      "cardMode": "column"
+    },
+    "Card": {
+      "cardMode": "column"
+    },
+    "ChipGroup": {
+      "cardMode": "column"
+    },
+    "CurrentConditions": {
+      "cardMode": "column"
+    },
+    "DayTabs": {
+      "cardMode": "column"
+    },
+    "FactTile": {
+      "cardMode": "column"
+    },
+    "RatingStrip": {
+      "cardMode": "column"
+    },
+    "SectionLabel": {
+      "cardMode": "column"
+    },
+    "SpotCard": {
+      "cardMode": "column"
+    },
+    "VerdictCard": {
+      "cardMode": "column"
+    },
+    "WarningBanner": {
+      "cardMode": "column"
+    },
+    "WeatherIcon": {
+      "cardMode": "column"
+    }
+  },
+  "readmeHeader": ".design-sync/conventions.md"
+}
