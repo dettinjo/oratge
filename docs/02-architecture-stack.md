@@ -11,12 +11,12 @@
    evaluated on a schedule, not when the app happens to be open.
 
 ```
- ┌───────────── homelab (Coolify) ─────────────┐        ┌──── Android ────┐
- │  oratge-api (FastAPI)                        │ HTTPS  │ Compose UI      │
- │   ├─ scheduler + budget governor ──► Meteocat│◄──────►│ Room cache      │
- │   ├─ gap filler ──────────────────► Open-Meteo        │ WorkManager     │
- │   ├─ scoring engine (activities)             │        │ Glance widgets  │
- │   ├─ alert evaluator ─► push (ntfy / FCM)    │        └─────────────────┘
+ ┌───────────── homelab (Coolify) ─────────────┐        ┌─ Flutter (Android/iOS) ─┐
+ │  oratge-api (FastAPI)                        │ HTTPS  │ Riverpod + widgets      │
+ │   ├─ scheduler + budget governor ──► Meteocat│◄──────►│ drift (SQLite) cache    │
+ │   ├─ gap filler ──────────────────► Open-Meteo        │ workmanager / BG fetch  │
+ │   ├─ scoring engine (activities)             │        │ home_widget (native)    │
+ │   ├─ alert evaluator ─► push (FCM → APNs)    │        └─────────────────────────┘
  │   └─ Postgres (+ TimescaleDB optional)       │
  │  key from Infisical: METEOCAT_API_KEY        │
  └──────────────────────────────────────────────┘
@@ -63,7 +63,7 @@ the paid professional plan, or more Open-Meteo for anything not official.
 | Storage | **Postgres** (Coolify-managed); readings table partitioned by month | time-series queries for history and analysis |
 | HTTP | httpx + tenacity retries | |
 | Analysis | numpy / pandas for stats, percentiles, climatology | |
-| Push | **ntfy** (self-hostable, no Google dependency) — FCM later if needed | |
+| Push | **Firebase Cloud Messaging** (one API for Android and iOS; iOS requires APNs anyway). ntfy as an Android-only fallback for personal use | iOS background fetch is unreliable, so alerts must be server-pushed |
 | Deploy | Docker → Coolify, secrets from Infisical, public HTTPS via Coolify proxy, app token auth | same pattern as other homelab apps |
 | Tests | pytest + recorded Meteocat JSON fixtures (VCR) | quota-free testing |
 
@@ -71,21 +71,31 @@ The backend exposes **its own small, app-shaped API**, not a Meteocat mirror:
 `GET /v1/home`, `/v1/spots/{id}`, `/v1/activities/{type}?spot=`, `/v1/map/now`,
 `/v1/history/{station}`, `/v1/warnings`, `/v1/lightning?since=`.
 
-## 4. Android stack
+## 4. App stack — Flutter (Android first, iOS ready)
 | Concern | Choice |
 |---|---|
-| Language / UI | **Kotlin + Jetpack Compose + Material 3** (dynamic colour off, own palette) |
-| Architecture | single-activity, MVVM + unidirectional state; modules `:core`, `:data`, `:feature-*` |
-| DI | Hilt |
-| Network | Retrofit + kotlinx.serialization (or Ktor client) |
-| Offline | Room: last payload per screen, shown instantly, then refreshed |
-| Background | WorkManager (refresh widget data, every 30–60 min) |
-| Charts | custom Compose `Canvas` for the signature visuals (wind band, wave bars, go-window); **Vico** for plain line and bar history charts |
-| Map | **MapLibre** + a minimal vector style (OSM / OpenFreeMap tiles), no Google Maps key |
-| Widgets | Glance (Compose for widgets) |
-| Location | fused location (coarse) → nearest municipality / representative station |
-| Min SDK | 26; target latest |
-| CI | GitHub Actions: lint, unit tests, debug APK artefact |
+| Framework | **Flutter (stable) + Dart 3**, one codebase for Android and iOS (web/desktop possible later) |
+| UI | Custom design system on top of Material 3 widgets (own theme, own typography); platform-adaptive details only where expected (back gestures, pickers, haptics) |
+| State / DI | **Riverpod** (with code generation); feature-first folders `lib/features/{today,activities,map,spots,history}` + `lib/core` |
+| Navigation | go_router (deep links from notifications: `oratge://spot/castelldefels`) |
+| Models / JSON | freezed + json_serializable; API client generated from the backend's OpenAPI schema (openapi-generator `dart-dio`) so the two never drift apart |
+| Network | dio (retry, ETag / If-None-Match → cheap refreshes) |
+| Offline | **drift** (SQLite): last payload per screen, shown instantly, then refreshed |
+| Background | `workmanager` plugin (Android periodic work; iOS BGAppRefresh, best-effort) |
+| Charts | **CustomPainter** for the signature visuals (wind band, wave bars, go-window, compass); **fl_chart** for plain history line and bar charts |
+| Map | **flutter_map** + `vector_map_tiles` with a minimal OpenFreeMap / Protomaps style. Pure Dart, no API key, easy custom markers (wind arrows, lightning dots) |
+| Widgets | `home_widget`: data is written from Dart, but the widget layout is native (Android: Glance/XML, iOS: WidgetKit/SwiftUI). This is the one place native code is unavoidable |
+| Location | geolocator (coarse) → nearest municipality / representative station |
+| i18n | flutter gen-l10n (ARB files): ca / es / en |
+| Push | firebase_messaging + flutter_local_notifications |
+| Quality | flutter_lints/very_good_analysis, unit + widget tests, golden tests for the chart painters |
+| CI | GitHub Actions: analyze, test, build Android APK/AAB; iOS build on a macOS runner once needed (an iOS release needs an Apple developer account, $99/yr) |
+| Min versions | Android 7 (API 24+), iOS 15+ |
 
-Rejected: Flutter / React Native (the brief is Android-only, so native gives the best
-Material 3, widget and performance story); calling Meteocat from the phone (quota, key).
+Why Flutter fits this app: the design is fully custom (not stock Material/Cupertino), and
+the core visuals are hand-drawn charts. Flutter's own rendering makes them pixel-identical
+on both platforms with one CustomPainter each, and it holds 60/120 fps easily.
+
+Trade-offs to accept: home-screen widgets and some background behaviour stay
+platform-specific; app size is ~8–10 MB larger than native; iOS background refresh is not
+guaranteed (hence server push).

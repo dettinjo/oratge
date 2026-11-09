@@ -82,7 +82,7 @@ live wind/waves and today's best window.
 Calendar heat-map (e.g. windy days per month), records, monthly climatology vs this
 year, "best wing months at this spot" computed from our archive + XEMA statistics.
 
-### Widgets (Glance)
+### Home-screen widgets (home_widget: native layouts fed from Flutter)
 - Small: live wind at the main spot (number + arrow + gust).
 - Medium: today's scores for 3 chosen activities.
 
