@@ -15,3 +15,6 @@
 - `.ds-sync` pins playwright 1.61.0 to the local Chromium cache. A different machine needs the matching version (see base skill §4.1).
 - Colours exist in three places: `src/tokens.ts`, `src/styles.css`, and the conventions header. Change them together.
 - First sync was graded by Claude only. The user's review of `.review.html` and of the Claude Design project still counts as the final check.
+
+## Sync history
+- 2026-11-09: first sync to Claude Design project "Oratge" (4b2b9c74-d63a-4763-ab3f-7bda08b12813): 28 components, 169 files. Authorization only worked in a fresh session after `/design-login`; the old session kept failing.
