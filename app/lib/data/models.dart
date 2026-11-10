@@ -207,10 +207,13 @@ class MapPin {
         x = (j['x'] as num).toDouble(),
         y = (j['y'] as num).toDouble(),
         wind = j['wind'] as num,
-        windFrom = j['windFrom'] as num;
+        windFrom = j['windFrom'] as num,
+        lat = (j['lat'] as num?)?.toDouble(),
+        lon = (j['lon'] as num?)?.toDouble();
   final String name;
   final int rating;
   final double x, y;
+  final double? lat, lon;
   final num wind, windFrom;
 }
 

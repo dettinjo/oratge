@@ -8,6 +8,7 @@ import '../../theme/oratge_tokens.dart';
 import '../charts/chart_utils.dart';
 import '../components/basics.dart';
 import '../components/blocks.dart';
+import '../components/og_map.dart';
 import '../components/rows_cards.dart';
 import 'common.dart';
 
@@ -100,7 +101,7 @@ class _MapScreenState extends State<MapScreen> {
                 aspectRatio: 1,
                 child: Semantics(
                   label: 'Map of Catalonia with ${d.pins.length} spots; pins show today’s rating',
-                  child: LayoutBuilder(builder: (context, box) {
+                  child: OgSpotMap(pins: d.pins, layer: layer, fallback: LayoutBuilder(builder: (context, box) {
                     final s = box.biggest;
                     return Stack(children: [
                       Positioned.fill(child: CustomPaint(painter: _CataloniaPainter(c, layer, d.warnings))),
@@ -130,7 +131,7 @@ class _MapScreenState extends State<MapScreen> {
                           ]),
                         ),
                     ]);
-                  }),
+                  })),
                 ),
               ),
             ),
@@ -143,6 +144,8 @@ class _MapScreenState extends State<MapScreen> {
             ]),
           ], right: [
             const OgSectionLabel('Official warnings'),
+            if (d.warnings.isEmpty)
+              Text('No active Meteocat warnings for your spots.', style: OgText.day.copyWith(color: c.text2)),
             for (final w in d.warnings) ...[
               OgWarningBanner(level: w.level, title: w.title, detail: w.detail, pre: w.pre),
               const SizedBox(height: 10),

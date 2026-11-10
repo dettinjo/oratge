@@ -719,6 +719,7 @@ class Builder:
         return {'title': 'Map', 'date': date_line(),
                 'layers': {'options': ['Wind', 'Rating', 'Warnings'], 'selected': 'Wind'},
                 'pins': [{'name': x['name'], 'rating': x['rating'], 'x': pins[x['id']][0], 'y': pins[x['id']][1],
+                          'lat': SPOTS[x['id']]['lat'], 'lon': SPOTS[x['id']]['lon'],
                           'wind': x['wind'], 'windFrom': x['windFrom']} for x in sp],
                 'warnings': self.warnings(),
                 'sources': ('Meteocat warnings; ' if self.src.meteocat_available() else 'Warnings need the Meteocat key; ')

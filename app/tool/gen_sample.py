@@ -226,10 +226,14 @@ def map_screen():
     # Pin positions on a schematic Catalonia map (0–1 coordinates), placeholder until a real base map.
     pins = {'Castelldefels': (0.56, 0.74), 'Ocata': (0.70, 0.62), 'Collserola loop': (0.62, 0.66),
             "Montseny · Turó de l'Home": (0.68, 0.48), 'Pedraforca': (0.48, 0.24)}
+    coords = {'Castelldefels': (41.265, 1.975), 'Ocata': (41.477, 2.338), 'Collserola loop': (41.418, 2.118),
+              "Montseny · Turó de l'Home": (41.778, 2.436), 'Pedraforca': (42.239, 1.703)}
     pin_list = [{'name': s['props']['name'], 'rating': s['props']['rating'], 'x': pins[s['props']['name']][0],
-                 'y': pins[s['props']['name']][1], 'wind': s['props']['wind'], 'windFrom': s['props']['windFrom']}
+                 'y': pins[s['props']['name']][1], 'wind': s['props']['wind'], 'windFrom': s['props']['windFrom'],
+                 'lat': coords[s['props']['name']][0], 'lon': coords[s['props']['name']][1]}
                 for s in spots]
-    pin_list.append({'name': 'Pedraforca', 'rating': 2, 'x': 0.48, 'y': 0.24, 'wind': 22, 'windFrom': 310})
+    pin_list.append({'name': 'Pedraforca', 'rating': 2, 'x': 0.48, 'y': 0.24, 'wind': 22, 'windFrom': 310,
+                     'lat': 42.239, 'lon': 1.703})
     return {'title': title, 'date': date, 'layers': comps(root, 'ChipGroup')[0]['props'],
             'pins': pin_list,
             'warnings': [w['props'] for w in comps(root, 'WarningBanner')],

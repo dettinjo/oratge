@@ -18,7 +18,9 @@
    "x": 0.56,
    "y": 0.74,
    "wind": 14,
-   "windFrom": 225
+   "windFrom": 225,
+   "lat": 41.265,
+   "lon": 1.975
   },
   {
    "name": "Ocata",
@@ -26,7 +28,9 @@
    "x": 0.7,
    "y": 0.62,
    "wind": 6,
-   "windFrom": 330
+   "windFrom": 330,
+   "lat": 41.477,
+   "lon": 2.338
   },
   {
    "name": "Collserola loop",
@@ -34,7 +38,9 @@
    "x": 0.62,
    "y": 0.66,
    "wind": 7,
-   "windFrom": 240
+   "windFrom": 240,
+   "lat": 41.418,
+   "lon": 2.118
   },
   {
    "name": "Montseny · Turó de l'Home",
@@ -42,7 +48,9 @@
    "x": 0.68,
    "y": 0.48,
    "wind": 22,
-   "windFrom": 300
+   "windFrom": 300,
+   "lat": 41.778,
+   "lon": 2.436
   },
   {
    "name": "Pedraforca",
@@ -50,7 +58,9 @@
    "x": 0.48,
    "y": 0.24,
    "wind": 22,
-   "windFrom": 310
+   "windFrom": 310,
+   "lat": 42.239,
+   "lon": 1.703
   }
  ],
  "warnings": [
