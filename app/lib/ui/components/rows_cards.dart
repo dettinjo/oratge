@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../theme/og_helpers.dart';
 import '../../theme/oratge_tokens.dart';
+import '../motion.dart';
 import 'basics.dart';
 import 'weather_icon.dart';
 
@@ -140,8 +141,9 @@ class OgVerdictCard extends StatelessWidget {
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [
           OgRatingDots(value: rating, large: true, showWord: true),
+          const SizedBox(width: 8),
           const Spacer(),
-          if (confidence != null) OgPill(confidence!),
+          if (confidence != null) Flexible(child: OgPill(confidence!)),
         ]),
         const SizedBox(height: 10),
         Text(best, style: OgText.verdictBest.copyWith(color: c.text)),
@@ -320,7 +322,7 @@ class OgCurrentConditions extends StatelessWidget {
       Row(children: [
         OgWeatherIcon(sky, size: 62),
         const SizedBox(width: 14),
-        Text('${temp.round()}°', style: OgText.heroTemp.copyWith(color: c.text)),
+        CountUp(value: temp.round(), suffix: '°', style: OgText.heroTemp.copyWith(color: c.text)),
         const SizedBox(width: 14),
         Expanded(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [

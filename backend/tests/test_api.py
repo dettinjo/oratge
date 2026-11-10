@@ -41,6 +41,22 @@ class FakeSources(Sources):
             d['hourly'] = {('time' if k == 'time' else k.replace('wind_speed_10m', variable)): v for k, v in d['hourly'].items()}
         return d
 
+    def places(self, q):
+        return {'results': [{'name': 'Sitges', 'admin1': 'Catalonia', 'admin2': 'Barcelona', 'latitude': 41.235, 'longitude': 1.812},
+                            {'name': 'Sitges', 'admin1': 'Andalusia', 'latitude': 37.0, 'longitude': -4.0}]}
+
+    def reverse(self, lat, lon):
+        if lat < 41.23:  # offshore: Nominatim only knows the country
+            return {'name': 'España', 'addresstype': 'country', 'address': {'country': 'España'}}
+        return {'name': 'Sitges', 'address': {'town': 'Sitges'}}
+
+    def reverse_nearest(self, lat, lon):
+        return {'features': [{'properties': {'name': 'JetCenter', 'city': 'Sitges'}}]}
+
+    def grid(self, lats, lons):
+        return [{'latitude': a, 'longitude': b, 'current': {'time': '2026-11-10T09:00', 'wind_speed_10m': 10, 'wind_direction_10m': 220,
+                 'wind_gusts_10m': 15, 'temperature_2m': 17, 'precipitation': 0}} for a, b in zip(lats, lons)]
+
     def _get(self, key, url, params, max_age, headers=None):
         # Archive requests: synthesise from the forecast's hourly wind.
         h = fx('fc.json')['hourly']
@@ -106,3 +122,21 @@ def test_token(monkeypatch):
 def test_health_reports_quota():
     h = client.get('/health').json()
     assert h['ok'] and h['quota']['prediccio']['limit'] == 100
+
+
+def test_today_for_a_place():
+    d = client.get('/v1/today?lat=41.235&lon=1.812&place=Sitges').json()
+    assert d['current']['place'] == 'Sitges' and d['place']['lat'] == 41.235
+    assert {'wind', 'gust', 'uv'} <= set(d['next24'])
+    assert client.get('/v1/today?lat=48.8&lon=2.3').status_code == 400  # Paris is outside Catalonia
+
+
+def test_places_only_catalonia():
+    assert client.get('/v1/places?q=Sitges').json()['places'] == [{'name': 'Sitges', 'region': 'Barcelona', 'lat': 41.235, 'lon': 1.812}]
+
+
+def test_reverse_and_grid():
+    assert client.get('/v1/reverse?lat=41.24&lon=1.81').json()['name'] == 'Sitges'
+    assert client.get('/v1/reverse?lat=41.225&lon=1.821').json()['name'] == 'Sitges'  # offshore → nearest town
+    g = client.get('/v1/map/grid').json()
+    assert len(g['points']) > 50 and g['time'] == '09:00'

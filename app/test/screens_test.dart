@@ -1,15 +1,15 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:oratge/data/profile.dart';
 import 'package:oratge/theme/oratge_tokens.dart';
 import 'package:oratge/ui/screens/browse_screens.dart';
+import 'package:oratge/ui/screens/map_full.dart';
 import 'package:oratge/ui/screens/planner_screen.dart';
 import 'package:oratge/ui/screens/profile_screens.dart';
 import 'package:oratge/ui/screens/today_screen.dart';
+
+import 'helpers.dart';
 
 /// Renders one screen inside the app theme + state, with a router so links resolve.
 Future<void> pumpScreen(WidgetTester tester, Widget screen, {Brightness brightness = Brightness.dark, Size size = const Size(390, 844)}) async {
@@ -30,22 +30,8 @@ Future<void> pumpScreen(WidgetTester tester, Widget screen, {Brightness brightne
   await tester.pumpAndSettle();
 }
 
-Future<void> _loadFonts() async {
-  final dm = FontLoader('DMSans');
-  for (final w in [300, 400, 500, 600, 700]) {
-    dm.addFont(rootBundle.load('assets/fonts/DMSans-$w.ttf'));
-  }
-  await dm.load();
-  // Material icons ship with the Flutter SDK.
-  final flutterRoot = Platform.environment['FLUTTER_ROOT'] ?? '${Platform.environment['HOME']}/development/flutter';
-  final icons = File('$flutterRoot/bin/cache/artifacts/material_fonts/MaterialIcons-Regular.otf');
-  if (icons.existsSync()) {
-    await (FontLoader('MaterialIcons')..addFont(Future.value(ByteData.sublistView(icons.readAsBytesSync())))).load();
-  }
-}
-
 void main() {
-  setUpAll(_loadFonts);
+  setUpAll(loadFonts);
   final screens = <String, Widget Function()>{
     'today': () => const TodayScreen(),
     'activities': () => const ActivitiesScreen(),
@@ -53,6 +39,7 @@ void main() {
     'spots': () => const SpotsScreen(),
     'spot': () => const SpotScreen(id: 'castelldefels'),
     'profile': () => const ProfileScreen(),
+    'map-full': () => const MapFullScreen(),
     for (final s in ['wing', 'surf', 'bike', 'run', 'hike']) 'planner-$s': () => PlannerScreen(sport: s),
     for (var i = 1; i <= 10; i++) 'setup-$i': () => SetupScreen(step: i),
   };
@@ -86,3 +73,4 @@ void main() {
     expect(state.themeMode, ThemeMode.light);
   });
 }
+

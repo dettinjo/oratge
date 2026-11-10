@@ -11,6 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import os
 
 from .archive import start_scheduler
+from . import build as build_mod
 from .build import Builder
 from .config import settings
 from .sources import Sources
@@ -64,8 +65,27 @@ def health():
 
 
 @app.get('/v1/today', dependencies=[Depends(auth)])
-def today(b: Builder = Depends(builder)):
+def today(lat: float | None = None, lon: float | None = None, place: str | None = None, b: Builder = Depends(builder)):
+    if lat is not None and lon is not None:
+        if not (40.0 <= lat <= 43.5 and -0.5 <= lon <= 3.6):
+            raise HTTPException(400, 'Oratge covers Catalonia')
+        return b.today({'name': place or f'{lat:.2f}, {lon:.2f}', 'lat': lat, 'lon': lon})
     return b.today()
+
+
+@app.get('/v1/places', dependencies=[Depends(auth)])
+def places(q: str = ''):
+    return {'places': build_mod.places(_sources, q.strip())}
+
+
+@app.get('/v1/reverse', dependencies=[Depends(auth)])
+def reverse(lat: float, lon: float):
+    return build_mod.reverse(_sources, lat, lon)
+
+
+@app.get('/v1/map/grid', dependencies=[Depends(auth)])
+def map_grid():
+    return build_mod.grid(_sources)
 
 
 @app.get('/v1/activities', dependencies=[Depends(auth)])

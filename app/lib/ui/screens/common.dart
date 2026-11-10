@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../data/profile.dart';
 import '../../data/repository.dart';
 import '../../theme/oratge_tokens.dart';
+import '../motion.dart';
 
 /// Breakpoints from the handoff: < 600 phone, 600–1023 tablet, ≥ 1024 desktop.
 enum FormFactor { phone, tablet, desktop }
@@ -20,7 +21,9 @@ class OgPage extends StatelessWidget {
     this.back,
     required this.children,
     this.showProfile = true,
+    this.headerExtra,
   });
+  final Widget? headerExtra;
   final String title;
   final String? subtitle;
   final ({String label, String route})? back;
@@ -60,13 +63,14 @@ class OgPage extends StatelessWidget {
                         padding: const EdgeInsets.only(top: 2),
                         child: Text(subtitle!, style: OgText.day.copyWith(color: c.text2)),
                       ),
+                    ?headerExtra,
                     const _DataBanner(),
                   ]),
                 ),
                 if (showProfile && ff == FormFactor.phone) const _ProfileButton(),
               ]),
               const SizedBox(height: 12),
-              ...children,
+              for (final (i, child) in children.indexed) FadeSlideIn(index: i + 1, child: child),
             ],
           ),
         ),

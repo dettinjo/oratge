@@ -64,3 +64,8 @@ void windArrow(Canvas canvas, Offset at, double from, Color col, {double len = 6
 
 /// Band between an upper series and a lower series.
 Path bandPath(List<Offset> upper, List<Offset> lower) => Path()..addPolygon([...upper, ...lower.reversed], true);
+
+const _compass = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+
+/// Eight-point compass name for a direction in degrees.
+String compassName(double deg) => _compass[(((deg % 360) + 22.5) ~/ 45) % 8];

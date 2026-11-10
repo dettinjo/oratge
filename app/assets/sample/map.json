@@ -13,6 +13,10 @@
  },
  "pins": [
   {
+   "id": "castelldefels",
+   "sport": "wing",
+   "window": "13–17 h",
+   "gust": 21,
    "name": "Castelldefels",
    "rating": 4,
    "x": 0.56,
@@ -23,6 +27,10 @@
    "lon": 1.975
   },
   {
+   "id": "ocata",
+   "sport": "surf",
+   "window": "08–11 h",
+   "gust": 9,
    "name": "Ocata",
    "rating": 3,
    "x": 0.7,
@@ -33,6 +41,10 @@
    "lon": 2.338
   },
   {
+   "id": "collserola",
+   "sport": "bike",
+   "window": "all day",
+   "gust": 12,
    "name": "Collserola loop",
    "rating": 5,
    "x": 0.62,
@@ -43,6 +55,10 @@
    "lon": 2.118
   },
   {
+   "id": "montseny",
+   "sport": "hike",
+   "window": "until 13 h",
+   "gust": 34,
    "name": "Montseny · Turó de l'Home",
    "rating": 2,
    "x": 0.68,
@@ -53,6 +69,10 @@
    "lon": 2.436
   },
   {
+   "id": "pedraforca",
+   "sport": "hike",
+   "window": "07–12 h",
+   "gust": 34,
    "name": "Pedraforca",
    "rating": 2,
    "x": 0.48,

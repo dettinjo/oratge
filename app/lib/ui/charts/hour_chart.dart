@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../theme/og_helpers.dart';
 import '../../theme/oratge_tokens.dart';
 import '../components/weather_icon.dart';
+import '../motion.dart';
 
 /// One row of the planner meteogram (HourChart.d.ts `HourRow`).
 class HourRow {
@@ -125,7 +126,9 @@ class OgHourChart extends StatelessWidget {
     this.sunrise = 7.6,
     this.sunset = 17.6,
     this.semanticLabel,
+    this.selected,
   });
+  final int? selected;
   final List<int> hours;
   final List<HourRow> rows;
   final List<num>? best;
@@ -150,9 +153,8 @@ class OgHourChart extends StatelessWidget {
       label: semanticLabel ?? 'Hour by hour chart',
       excludeSemantics: true,
       child: LayoutBuilder(
-        builder: (context, box) => CustomPaint(
-          size: Size(box.maxWidth, total),
-          painter: _HourChartPainter(this, context.og),
+        builder: (context, box) => Reveal(
+          child: CustomPaint(size: Size(box.maxWidth, total), painter: _HourChartPainter(this, context.og)),
         ),
       ),
     );
@@ -179,6 +181,13 @@ class _HourChartPainter extends CustomPainter {
     final night = Paint()..color = c.night;
     canvas.drawRect(Rect.fromLTRB(lab, 16, math.max(lab, hx(w.sunrise)), total), night);
     canvas.drawRect(Rect.fromLTRB(math.min(width, hx(w.sunset)), 16, width, total), night);
+
+    // Selected hour: a soft column behind every row.
+    if (w.selected != null && w.selected! < hours.length) {
+      canvas.drawRRect(
+          RRect.fromRectAndRadius(Rect.fromLTWH(lab + w.selected! * cw, 14, cw, total - 14), const Radius.circular(6)),
+          Paint()..color = c.text.withValues(alpha: 0.10));
+    }
 
     // Hour axis (every 2 h).
     for (var i = 0; i < hours.length; i++) {
@@ -386,4 +395,12 @@ class _HourChartPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_HourChartPainter old) => old.w != w || old.c != c;
+}
+
+
+/// Column index under a horizontal position (mirrors the painter; used by Scrub).
+int? hourChartIndex(double dx, double width, int n) {
+  const lab = OgHourChart.labW;
+  if (dx < lab) return null;
+  return ((dx - lab) / ((width - lab) / n)).floor().clamp(0, n - 1);
 }

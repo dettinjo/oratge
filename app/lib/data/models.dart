@@ -84,8 +84,10 @@ class TodayData {
         scale = nums(j['scale']),
         confidence = j['confidence'] as Json?,
         daylight = _list(j['daylight'], Fact.fromJson),
-        sources = j['sources'] as String;
+        sources = j['sources'] as String,
+        place = j['place'] == null ? null : Place.fromJson(j['place'] as Json);
   final String title, date, sources;
+  final Place? place;
   final Json best, current, next24;
   final Json? confidence;
   final List<Warning> warnings;
@@ -209,7 +211,13 @@ class MapPin {
         wind = j['wind'] as num,
         windFrom = j['windFrom'] as num,
         lat = (j['lat'] as num?)?.toDouble(),
-        lon = (j['lon'] as num?)?.toDouble();
+        lon = (j['lon'] as num?)?.toDouble(),
+        id = j['id'] as String?,
+        sport = j['sport'] as String?,
+        window = j['window'] as String?,
+        gust = j['gust'] as num?;
+  final String? id, sport, window;
+  final num? gust;
   final String name;
   final int rating;
   final double x, y;
@@ -260,4 +268,43 @@ class SpotDetail {
   final String id, title, date, sources;
   final List<Fact> live;
   final List<LabeledBlocks> sections;
+}
+
+class Place {
+  const Place({required this.name, required this.lat, required this.lon, this.region = '', this.current = false});
+  final String name, region;
+  final double lat, lon;
+
+  /// Picked from the device's location.
+  final bool current;
+
+  factory Place.fromJson(Json j) => Place(
+      name: j['name'] as String,
+      region: j['region'] as String? ?? '',
+      lat: (j['lat'] as num).toDouble(),
+      lon: (j['lon'] as num).toDouble(),
+      current: j['current'] == true);
+  Json toJson() => {'name': name, 'region': region, 'lat': lat, 'lon': lon, 'current': current};
+}
+
+class GridPoint {
+  GridPoint.fromJson(Json j)
+      : lat = (j['lat'] as num).toDouble(),
+        lon = (j['lon'] as num).toDouble(),
+        wind = (j['wind'] as num).toDouble(),
+        gust = (j['gust'] as num?)?.toDouble(),
+        wdir = (j['wdir'] as num).toDouble(),
+        temp = (j['temp'] as num).toDouble(),
+        precip = (j['precip'] as num?)?.toDouble() ?? 0;
+  final double lat, lon, wind, wdir, temp, precip;
+  final double? gust;
+}
+
+class GridData {
+  GridData.fromJson(Json j)
+      : time = j['time'] as String? ?? '',
+        source = j['source'] as String? ?? '',
+        points = _list(j['points'], GridPoint.fromJson);
+  final String time, source;
+  final List<GridPoint> points;
 }

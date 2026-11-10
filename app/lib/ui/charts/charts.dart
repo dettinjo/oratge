@@ -5,29 +5,42 @@ import 'package:flutter/material.dart';
 import '../../theme/og_helpers.dart';
 import '../../theme/oratge_tokens.dart';
 import '../components/weather_icon.dart';
+import '../motion.dart';
 import 'chart_utils.dart';
 
 export 'hour_chart.dart';
 
 /// Wraps a painter with full-width layout and an accessibility label.
 class _Chart extends StatelessWidget {
-  const _Chart({required this.height, required this.label, required this.builder, this.width});
+  const _Chart({required this.height, required this.label, required this.builder, this.width, this.radial = false});
   final double height;
   final double? width;
   final String label;
   final CustomPainter Function(OratgeColors c) builder;
+  final bool radial;
 
   @override
   Widget build(BuildContext context) => Semantics(
         label: label,
         excludeSemantics: true,
         child: LayoutBuilder(
-          builder: (context, box) => CustomPaint(
-            size: Size(width ?? box.maxWidth, height),
-            painter: builder(context.og),
+          builder: (context, box) => Reveal(
+            radial: radial,
+            child: CustomPaint(size: Size(width ?? box.maxWidth, height), painter: builder(context.og)),
           ),
         ),
       );
+}
+
+void _cursor(Canvas canvas, double x, double top, double bottom, OratgeColors c) {
+  canvas.drawLine(Offset(x, top), Offset(x, bottom), Paint()
+    ..color = c.text.withValues(alpha: 0.6)
+    ..strokeWidth = 1.2);
+}
+
+void _dot(Canvas canvas, Offset p, Color col, OratgeColors c) {
+  canvas.drawCircle(p, 5.5, Paint()..color = c.surface);
+  canvas.drawCircle(p, 4, Paint()..color = col);
 }
 
 String _hh(int h) => '${(h % 24).toString().padLeft(2, '0')} h';
@@ -35,7 +48,7 @@ String _hh(int h) => '${(h % 24).toString().padLeft(2, '0')} h';
 // ───────────────────────────── WindBand ─────────────────────────────
 class OgWindBand extends StatelessWidget {
   const OgWindBand(
-      {super.key,
+      {super.key, this.selected,
       required this.mean,
       required this.gust,
       this.directions,
@@ -45,6 +58,7 @@ class OgWindBand extends StatelessWidget {
       this.best,
       this.max = 35,
       this.semanticLabel});
+  final int? selected;
   final List<num> mean, gust;
   final List<num>? directions;
   final List<num>? range;
@@ -97,6 +111,12 @@ class _WindBandPainter extends CustomPainter {
       ogText(canvas, w.days[k], x(math.min(k * 24 + 12, n - 1)), bot + 17, color: c.text2, weight: FontWeight.w500, align: 0.5);
       if (k > 0) canvas.drawLine(Offset(x(k * 24), top), Offset(x(k * 24), bot + 6), strokePaint(c.line, 1));
     }
+    final sel = w.selected;
+    if (sel != null && sel < n) {
+      _cursor(canvas, x(sel), top - 4, bot, c);
+      _dot(canvas, gp[sel], c.wind.withValues(alpha: 0.6), c);
+      _dot(canvas, mp[sel], c.wind, c);
+    }
   }
 
   @override
@@ -106,7 +126,7 @@ class _WindBandPainter extends CustomPainter {
 // ───────────────────────────── WaveBars ─────────────────────────────
 class OgWaveBars extends StatelessWidget {
   const OgWaveBars(
-      {super.key,
+      {super.key, this.selected,
       required this.heights,
       required this.periods,
       this.windFrom,
@@ -114,6 +134,7 @@ class OgWaveBars extends StatelessWidget {
       this.best = const [],
       this.max = 1.6,
       this.semanticLabel});
+  final int? selected;
   final List<num> heights, periods;
   final List<num>? windFrom;
   final List<String> days;
@@ -145,7 +166,7 @@ class _WaveBarsPainter extends CustomPainter {
     }
     canvas.drawLine(Offset(0, bot), Offset(s.width - 24, bot), strokePaint(c.line, 1));
     for (var i = 0; i < n; i++) {
-      final hi = w.best.contains(i) || w.best.isEmpty;
+      final hi = w.selected == null ? (w.best.contains(i) || w.best.isEmpty) : i == w.selected;
       canvas.drawRRect(
           RRect.fromRectAndRadius(Rect.fromLTRB(x(i) + 1, y(w.heights[i]), x(i) + bw - 1, bot), const Radius.circular(3)),
           fillPaint(c.water.withValues(alpha: hi ? 1 : 0.55)));
@@ -175,6 +196,7 @@ class OgWindCompass extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => _Chart(
+      radial: true,
       width: size,
       height: size + (caption != null ? 18 : 0),
       label: 'Wind from ${from.round()} degrees, ${speed.round()} knots${caption != null ? ', $caption' : ''}',
@@ -234,6 +256,7 @@ class OgSwellWindow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => _Chart(
+      radial: true,
       width: size,
       height: size,
       label: 'Swell from ${swellFrom.round()} degrees; beach open from ${exposure[0]} to ${exposure[1]} degrees',
@@ -276,7 +299,7 @@ class _SwellPainter extends CustomPainter {
 // ───────────────────────────── TrendLine ─────────────────────────────
 class OgTrendLine extends StatelessWidget {
   const OgTrendLine(
-      {super.key,
+      {super.key, this.selected,
       required this.values,
       required this.accent,
       this.band,
@@ -289,6 +312,7 @@ class OgTrendLine extends StatelessWidget {
       this.max,
       this.height = 70,
       this.semanticLabel});
+  final int? selected;
   final List<num> values;
   final OgAccent accent;
   final List<num>? band, compare;
@@ -344,6 +368,12 @@ class _TrendPainter extends CustomPainter {
       ogText(canvas, w.caption![0], 0, s.height - 2, color: c.text2);
       ogText(canvas, w.caption![1], s.width, s.height - 2, color: c.text2, align: 1);
     }
+    final sel = w.selected;
+    if (sel != null && sel < pts.length) {
+      _cursor(canvas, pts[sel].dx, top - 2, bot, c);
+      if (w.compare != null && sel < w.compare!.length) _dot(canvas, Offset(x(sel), y(w.compare![sel])), c.text2, c);
+      _dot(canvas, pts[sel], col, c);
+    }
   }
 
   @override
@@ -353,7 +383,8 @@ class _TrendPainter extends CustomPainter {
 // ───────────────────────────── NextHours ─────────────────────────────
 class OgNextHours extends StatelessWidget {
   const OgNextHours(
-      {super.key, required this.temps, required this.rain, required this.sky, required this.startHour, this.semanticLabel});
+      {super.key, this.selected, required this.temps, required this.rain, required this.sky, required this.startHour, this.semanticLabel});
+  final int? selected;
   final List<num> temps, rain;
   final List<WeatherKind> sky;
   final int startHour;
@@ -405,6 +436,11 @@ class _NextHoursPainter extends CustomPainter {
     }
     for (final i in [0, 6, 12, 18]) {
       if (i < n) ogText(canvas, _hh(w.startHour + i), x(i), 126, color: c.text2, align: i == 0 ? 0 : 0.5);
+    }
+    final sel = w.selected;
+    if (sel != null && sel < n) {
+      _cursor(canvas, x(sel), 20, base, c);
+      _dot(canvas, pts[sel], c.heat, c);
     }
   }
 
@@ -469,7 +505,8 @@ class _HeatmapPainter extends CustomPainter {
 // ───────────────────────────── MonthBars ─────────────────────────────
 class OgMonthBars extends StatelessWidget {
   const OgMonthBars(
-      {super.key, required this.values, this.accent = OgAccent.wind, this.highlight, this.current, this.semanticLabel});
+      {super.key, this.selected, required this.values, this.accent = OgAccent.wind, this.highlight, this.current, this.semanticLabel});
+  final int? selected;
   final List<num> values;
   final OgAccent accent;
   final int? highlight, current;
@@ -499,7 +536,7 @@ class _MonthBarsPainter extends CustomPainter {
     for (var i = 0; i < 12; i++) {
       canvas.drawRRect(
           RRect.fromRectAndRadius(Rect.fromLTRB(i * bw + 3, y(w.values[i]), i * bw + bw - 3, bot), const Radius.circular(3)),
-          fillPaint(col.withValues(alpha: i == w.highlight ? 1 : 0.5)));
+          fillPaint(col.withValues(alpha: i == (w.selected ?? w.highlight) ? 1 : 0.5)));
       ogText(canvas, letters[i], i * bw + bw / 2, bot + 16,
           color: i == w.current ? c.text : c.text2, weight: i == w.current ? FontWeight.w700 : FontWeight.w400, align: 0.5);
     }
@@ -619,3 +656,11 @@ class _RouteWindPainter extends CustomPainter {
   @override
   bool shouldRepaint(_RouteWindPainter o) => o.w != w || o.c != c;
 }
+
+
+/// Index under a horizontal position, mirroring each painter's x-scale (used by Scrub).
+int? indexWindBand(double dx, double w, int n) => ((dx - 4) * (n - 1) / (w - 30)).round().clamp(0, n - 1);
+int? indexWaveBars(double dx, double w, int n) => ((dx - 4) / ((w - 30) / n)).floor().clamp(0, n - 1);
+int? indexTrend(double dx, double w, int n) => ((dx - 4) * (n - 1) / (w - 8)).round().clamp(0, n - 1);
+int? indexNextHours(double dx, double w, int n) => ((dx - 10) * (n - 1) / (w - 20)).round().clamp(0, n - 1);
+int? indexMonths(double dx, double w) => (dx / ((w - 24) / 12)).floor().clamp(0, 11);

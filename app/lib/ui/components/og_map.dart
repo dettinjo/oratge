@@ -10,12 +10,28 @@ import '../../theme/og_helpers.dart';
 import '../../theme/oratge_tokens.dart';
 import '../charts/chart_utils.dart';
 
+/// OSM tiles toned to the theme (desaturated; inverted and warmed in dark).
+Widget oratgeTiles(BuildContext context) {
+  final dark = Theme.of(context).brightness == Brightness.dark;
+  return ColorFiltered(
+    colorFilter: ColorFilter.matrix(dark ? _darkMatrix : _lightMatrix),
+    child: TileLayer(
+      urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+      userAgentPackageName: 'cat.oratge.oratge',
+      maxNativeZoom: 16,
+    ),
+  );
+}
+
 /// True under `flutter test` (no network tiles there).
 bool get _inTest => !kIsWeb && Platform.environment.containsKey('FLUTTER_TEST');
 
 /// Real map of Catalonia (CARTO basemap, theme-matched) with spot pins: wind arrows or rating dots.
 class OgSpotMap extends StatelessWidget {
-  const OgSpotMap({super.key, required this.pins, required this.layer, this.fallback});
+  const OgSpotMap({super.key, required this.pins, required this.layer, this.fallback, this.onTap});
+
+  /// Preview mode: no gestures, a tap opens the full map.
+  final VoidCallback? onTap;
   final List<MapPin> pins;
   final String layer;
 
@@ -26,10 +42,6 @@ class OgSpotMap extends StatelessWidget {
   Widget build(BuildContext context) {
     if (_inTest || pins.any((p) => p.lat == null)) return fallback ?? const SizedBox.shrink();
     final c = context.og;
-    final dark = Theme.of(context).brightness == Brightness.dark;
-    // OSM's standard tiles are colourful; desaturate them (and invert for dark) so the warm
-    // monochrome UI and the coloured pins stay readable.
-    final filter = ColorFilter.matrix(dark ? _darkMatrix : _lightMatrix);
     return ClipRRect(
       borderRadius: BorderRadius.circular(14),
       child: FlutterMap(
@@ -39,17 +51,12 @@ class OgSpotMap extends StatelessWidget {
           minZoom: 6,
           maxZoom: 13,
           backgroundColor: c.bg,
-          interactionOptions: const InteractionOptions(flags: InteractiveFlag.all & ~InteractiveFlag.rotate),
+          interactionOptions: InteractionOptions(
+              flags: onTap != null ? InteractiveFlag.none : InteractiveFlag.all & ~InteractiveFlag.rotate),
+          onTap: onTap == null ? null : (_, _) => onTap!(),
         ),
         children: [
-          ColorFiltered(
-            colorFilter: filter,
-            child: TileLayer(
-              urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-              userAgentPackageName: 'cat.oratge.oratge',
-              maxNativeZoom: 13,
-            ),
-          ),
+          oratgeTiles(context),
           MarkerLayer(markers: [
             for (final p in pins)
               Marker(

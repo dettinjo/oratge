@@ -23,9 +23,9 @@ def today_local() -> date:
     return datetime.now(TZ).date()
 
 
-def date_line(d: date | None = None) -> str:
+def date_line(d: date | None = None, place: str | None = None) -> str:
     d = d or today_local()
-    return f'{WD[d.weekday()]} {d.day} {MONTHS[d.month - 1]} · {HOME["name"]}'
+    return f'{WD[d.weekday()]} {d.day} {MONTHS[d.month - 1]} · {place or HOME["name"]}'
 
 
 def n(x) -> str:
@@ -125,8 +125,9 @@ class Builder:
         return f'{storms[0].storm:.0f} % storm risk from {hh(storms[0].t.hour)}' if storms else f'summit {mid.temp:.0f}°, {mid.wind:.0f} kn'
 
     # ── Today ──
-    def today(self) -> dict:
-        fc = self.src.forecast(HOME['lat'], HOME['lon'])
+    def today(self, place: dict | None = None) -> dict:
+        place = place or HOME
+        fc = self.src.forecast(place['lat'], place['lon'])
         hours = E.parse_hours(fc)
         now = datetime.now(TZ).replace(tzinfo=None, minute=0, second=0, microsecond=0)
         cur = next((h for h in hours if h.t == now), hours[len(hours) // 2])
@@ -136,7 +137,7 @@ class Builder:
         best = max(sports, key=lambda s: (s['rating'], s['window'] != '—'))
         nxt = hours[idx:idx + 24]
         dry = all(h.precip < 0.1 for h in hours[idx:idx + 2])
-        live = self.live(HOME)
+        live = self.live(place) if place is HOME else None
         src_line = (f'Meteocat · {HOME["station_name"]} station · {live["age"]}' if live
                     else 'Open-Meteo model · this hour (no Meteocat key yet)')
         temp = live['temp'] if live and live.get('temp') is not None else cur.temp
@@ -159,12 +160,13 @@ class Builder:
         uv_max_i = max(range(len(nxt)), key=lambda i: nxt[i].uv) if nxt else 0
         rain_next = next((h for h in nxt if h.pprob >= 30), None)
         return {
-            'title': 'Today', 'date': date_line(),
+            'title': 'Today', 'date': date_line(place=place['name']),
+            'place': {'name': place['name'], 'lat': place['lat'], 'lon': place['lon']},
             'best': {'sport': best['sport'], 'window': best['window'], 'rating': best['rating'],
                      'reason': best['reason'][:1].upper() + best['reason'][1:] + '.',
                      'note': 'Dry for the next 2 hours (forecast)' if dry else 'Rain likely within 2 hours (forecast)'},
             'warnings': self.warnings(),
-            'current': {'place': HOME['name'], 'source': src_line, 'sky': cur.sky, 'temp': round(temp),
+            'current': {'place': place['name'], 'source': src_line, 'sky': cur.sky, 'temp': round(temp),
                         'summary': SUMMARY.get(cur.sky, 'Variable'), 'feels': round(cur.feels),
                         'min': round(d0['temperature_2m_min'][1]), 'max': round(d0['temperature_2m_max'][1]),
                         'wind': f'{E.compass(wdir)} {wind:.0f} kn · gusts {gust:.0f}'},
@@ -175,7 +177,11 @@ class Builder:
                 {'label': 'Water', 'value': f'{sst:.1f}°' if sst is not None else '—', 'sub': wetsuit(sst) if sst else 'no data', 'accent': 'water', 'size': 'lg'},
             ],
             'next24': {'startHour': nxt[0].t.hour if nxt else 0, 'temps': [round(h.temp, 1) for h in nxt],
-                       'rain': [round(h.pprob) for h in nxt], 'sky': [h.sky for h in nxt]},
+                       'rain': [round(h.pprob) for h in nxt], 'sky': [h.sky for h in nxt],
+                       'wind': [round(h.wind, 1) for h in nxt], 'gust': [round(h.gust, 1) for h in nxt],
+                       'wdir': [round(h.wdir) for h in nxt], 'uv': [round(h.uv, 1) for h in nxt],
+                       'feels': [round(h.feels, 1) for h in nxt], 'humidity': [round(h.rh) for h in nxt],
+                       'precip': [round(h.precip, 1) for h in nxt]},
             'sports': sports, 'days': days, 'scale': [lo, hi],
             'confidence': self.confidence(),
             'daylight': [{'label': 'Sunrise', 'value': d0['sunrise'][1][11:16]},
@@ -738,12 +744,69 @@ class Builder:
         sp = self.spots()['spots']
         return {'title': 'Map', 'date': date_line(),
                 'layers': {'options': ['Wind', 'Rating', 'Warnings'], 'selected': 'Wind'},
-                'pins': [{'name': x['name'], 'rating': x['rating'], 'x': pins[x['id']][0], 'y': pins[x['id']][1],
+                'pins': [{'id': x['id'], 'sport': x['sport'], 'window': x['window'], 'gust': x['gust'],
+                          'name': x['name'], 'rating': x['rating'], 'x': pins[x['id']][0], 'y': pins[x['id']][1],
                           'lat': SPOTS[x['id']]['lat'], 'lon': SPOTS[x['id']]['lon'],
                           'wind': x['wind'], 'windFrom': x['windFrom']} for x in sp],
                 'warnings': self.warnings(),
                 'sources': ('Meteocat warnings; ' if self.src.meteocat_available() else 'Warnings need the Meteocat key; ')
                            + 'ratings from your spots (Open-Meteo)'}
+
+
+def places(src, q: str) -> list[dict]:
+    data = src.places(q) if len(q) >= 2 else {}
+    out = []
+    for r in data.get('results', []) or []:
+        if r.get('admin1') not in ('Catalonia', 'Catalunya', 'Cataluña'):
+            continue
+        out.append({'name': r['name'], 'region': r.get('admin2') or r.get('admin3') or '',
+                    'lat': round(r['latitude'], 4), 'lon': round(r['longitude'], 4)})
+    return out[:10]
+
+
+def reverse(src, lat: float, lon: float) -> dict:
+    try:
+        d = src.reverse(lat, lon)
+        a = d.get('address', {})
+        # Prefer the settlement; fall back to the feature name only when it isn't just the country.
+        name = (a.get('town') or a.get('city') or a.get('village') or a.get('municipality') or a.get('suburb')
+                or (d.get('name') if d.get('addresstype') not in ('country', 'state') else None))
+    except Exception:
+        name = None
+    if not name:  # e.g. a blurred "approximate" location that lands in the sea: use the nearest town
+        try:
+            for f in src.reverse_nearest(lat, lon).get('features', []):
+                pr = f.get('properties', {})
+                name = pr.get('city') or pr.get('town') or pr.get('village') or pr.get('county')
+                if name:
+                    break
+        except Exception:
+            name = None
+    return {'name': name or f'{lat:.2f}, {lon:.2f}', 'lat': lat, 'lon': lon}
+
+
+def grid(src) -> dict:
+    """Current wind/temperature/rain on a 0.3° grid over Catalonia (one Open-Meteo call, cached 30 min)."""
+    lats, lons = [], []
+    la = 40.55
+    while la <= 42.85:
+        lo = 0.2
+        while lo <= 3.35:
+            lats.append(round(la, 2))
+            lons.append(round(lo, 2))
+            lo += 0.3
+        la += 0.3
+    data = src.grid(lats, lons)
+    pts = []
+    for d in data if isinstance(data, list) else [data]:
+        c = d.get('current', {})
+        if c.get('wind_speed_10m') is None:
+            continue
+        pts.append({'lat': d['latitude'], 'lon': d['longitude'], 'wind': c['wind_speed_10m'],
+                    'gust': c.get('wind_gusts_10m'), 'wdir': c['wind_direction_10m'], 'temp': c['temperature_2m'],
+                    'precip': c.get('precipitation', 0)})
+    t = (data[0] if isinstance(data, list) and data else {}).get('current', {}).get('time', '')
+    return {'time': t[11:16], 'points': pts, 'source': 'Open-Meteo current conditions (model)'}
 
 
 SUMMARY = {'sun': 'Sunny', 'partly': 'Partly cloudy', 'cloud': 'Cloudy', 'rain': 'Rain', 'storm': 'Thunderstorms',

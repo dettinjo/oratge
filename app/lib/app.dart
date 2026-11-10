@@ -7,6 +7,8 @@ import 'ui/screens/browse_screens.dart';
 import 'ui/screens/common.dart';
 import 'ui/screens/planner_screen.dart';
 import 'ui/screens/profile_screens.dart';
+import 'ui/motion.dart';
+import 'ui/screens/map_full.dart';
 import 'ui/screens/today_screen.dart';
 
 const _tabs = [
@@ -16,29 +18,43 @@ const _tabs = [
   (route: '/spots', label: 'Spots', icon: Icons.place_outlined),
 ];
 
+Page<void> _tab(GoRouterState s, Widget child) => CustomTransitionPage(
+    key: s.pageKey,
+    child: child,
+    transitionDuration: const Duration(milliseconds: 220),
+    transitionsBuilder: (context, a, _, child) => fadeThrough(a, child));
+
+Page<void> _detail(GoRouterState s, Widget child) => CustomTransitionPage(
+    key: s.pageKey,
+    child: child,
+    transitionDuration: const Duration(milliseconds: 300),
+    reverseTransitionDuration: const Duration(milliseconds: 220),
+    transitionsBuilder: (context, a, _, child) => slideUpFade(a, child));
+
 GoRouter buildRouter() => GoRouter(
       initialLocation: '/today',
       routes: [
         ShellRoute(
           builder: (context, state, child) => AppShell(location: state.uri.path, child: child),
           routes: [
-            GoRoute(path: '/today', pageBuilder: (c, s) => const NoTransitionPage(child: TodayScreen())),
+            GoRoute(path: '/today', pageBuilder: (c, s) => _tab(s, const TodayScreen())),
             GoRoute(
               path: '/activities',
-              pageBuilder: (c, s) => const NoTransitionPage(child: ActivitiesScreen()),
+              pageBuilder: (c, s) => _tab(s, const ActivitiesScreen()),
               routes: [
-                GoRoute(path: ':sport', builder: (c, s) => PlannerScreen(sport: s.pathParameters['sport']!)),
+                GoRoute(path: ':sport', pageBuilder: (c, s) => _detail(s, PlannerScreen(sport: s.pathParameters['sport']!))),
               ],
             ),
-            GoRoute(path: '/map', pageBuilder: (c, s) => const NoTransitionPage(child: MapScreen())),
+            GoRoute(path: '/map', pageBuilder: (c, s) => _tab(s, const MapScreen())),
             GoRoute(
               path: '/spots',
-              pageBuilder: (c, s) => const NoTransitionPage(child: SpotsScreen()),
-              routes: [GoRoute(path: ':id', builder: (c, s) => SpotScreen(id: s.pathParameters['id']!))],
+              pageBuilder: (c, s) => _tab(s, const SpotsScreen()),
+              routes: [GoRoute(path: ':id', pageBuilder: (c, s) => _detail(s, SpotScreen(id: s.pathParameters['id']!)))],
             ),
-            GoRoute(path: '/profile', pageBuilder: (c, s) => const NoTransitionPage(child: ProfileScreen())),
+            GoRoute(path: '/profile', pageBuilder: (c, s) => _tab(s, const ProfileScreen())),
           ],
         ),
+        GoRoute(path: '/map/full', pageBuilder: (c, s) => _detail(s, const MapFullScreen())),
         GoRoute(
           path: '/setup/:step',
           builder: (c, s) => SetupScreen(step: int.tryParse(s.pathParameters['step'] ?? '1')?.clamp(1, 10) ?? 1),

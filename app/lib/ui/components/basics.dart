@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../theme/og_helpers.dart';
 import '../../theme/oratge_tokens.dart';
+import '../motion.dart';
 
 /// Rounded surface (20 px radius, no shadow).
 class OgCard extends StatelessWidget {
@@ -115,11 +116,17 @@ class OgRatingDots extends StatelessWidget {
       excludeSemantics: true,
       child: Row(mainAxisSize: MainAxisSize.min, children: [
         for (var i = 0; i < 5; i++)
-          Container(
-            width: d,
-            height: d,
-            margin: const EdgeInsets.only(right: 4),
-            decoration: BoxDecoration(shape: BoxShape.circle, color: i < v ? c.ratingColor(v) : c.r0),
+          TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0.4, end: 1),
+            duration: motion(context, 300 + 70 * i),
+            curve: Curves.easeOutBack,
+            builder: (context, k, child) => Transform.scale(scale: k, child: child),
+            child: Container(
+              width: d,
+              height: d,
+              margin: const EdgeInsets.only(right: 4),
+              decoration: BoxDecoration(shape: BoxShape.circle, color: i < v ? c.ratingColor(v) : c.r0),
+            ),
           ),
         if (showWord)
           Padding(
@@ -246,7 +253,7 @@ class OgPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
       decoration: BoxDecoration(border: Border.all(color: c.line), borderRadius: BorderRadius.circular(999)),
-      child: Text(text, style: OgText.chip.copyWith(color: c.text2)),
+      child: Text(text, style: OgText.chip.copyWith(color: c.text2), maxLines: 1, overflow: TextOverflow.ellipsis),
     );
   }
 }

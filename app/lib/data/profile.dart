@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'models.dart';
 import 'repository.dart';
 
 /// Field kinds used by the setup flow.
@@ -156,6 +157,8 @@ class AppState extends ChangeNotifier {
     final raw = _prefs?.getString('profile');
     profile = {...defaultProfile, if (raw != null) ...(jsonDecode(raw) as Map<String, dynamic>)};
     themeMode = ThemeMode.values.firstWhere((m) => m.name == _prefs?.getString('themeMode'), orElse: () => ThemeMode.dark);
+    final rawPlace = _prefs?.getString('place');
+    place = rawPlace == null ? null : Place.fromJson(jsonDecode(rawPlace) as Map<String, dynamic>);
     doneSteps = {...(_prefs?.getStringList('doneSteps') ?? ['you', 'body', 'sports', 'wing', 'surf', 'bike', 'hike', 'alerts'])};
   }
 
@@ -168,6 +171,19 @@ class AppState extends ChangeNotifier {
   late Map<String, dynamic> profile;
   late ThemeMode themeMode;
   late Set<String> doneSteps;
+
+  /// Place shown on Today (null = home from the profile).
+  Place? place;
+
+  void setPlace(Place? p) {
+    place = p;
+    if (p == null) {
+      _prefs?.remove('place');
+    } else {
+      _prefs?.setString('place', jsonEncode(p.toJson()));
+    }
+    notifyListeners();
+  }
 
   static Future<AppState> load() async => AppState(await SharedPreferences.getInstance());
 

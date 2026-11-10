@@ -8,6 +8,7 @@ import '../../theme/oratge_tokens.dart';
 import '../components/basics.dart';
 import '../components/blocks.dart';
 import '../components/rows_cards.dart';
+import '../components/sheets.dart';
 import 'common.dart';
 
 /// Daily planner for one sport: answer → key numbers → hour chart → advice → method (collapsed).
@@ -44,14 +45,22 @@ class _PlannerScreenState extends State<PlannerScreen> {
             ),
             const SizedBox(height: 14),
             Columns(left: [
-              OgVerdictCard(
-                rating: (v['rating'] as num).toInt(),
-                best: '${v['best']}',
-                summary: '${v['summary']}',
-                confidence: v['confidence'] as String?,
+              Semantics(
+                button: true,
+                label: 'Verdict: ${v['best']}. Show how the rating is made',
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(OgRadius.card),
+                  onTap: () => showVerdictSheet(context, v, d.analysis),
+                  child: OgVerdictCard(
+                    rating: (v['rating'] as num).toInt(),
+                    best: '${v['best']}',
+                    summary: '${v['summary']}',
+                    confidence: v['confidence'] as String?,
+                  ),
+                ),
               ),
               OgSectionLabel(d.keyLabel),
-              factsGrid(d.keyFacts),
+              factsGrid(d.keyFacts, onTap: (f) => showFactSheet(context, f, series: seriesFromHourChart(d.hourChart, f), source: d.sources)),
               if (d.chip != null) ...[
                 const SizedBox(height: 12),
                 OgChipGroup(
@@ -64,7 +73,7 @@ class _PlannerScreenState extends State<PlannerScreen> {
               const OgSectionLabel('Hour by hour'),
               Text(d.takeaway, style: OgText.verdictSummary.copyWith(color: c.text)),
               const SizedBox(height: 8),
-              OgCard(padding: const EdgeInsets.fromLTRB(12, 12, 10, 10), child: hourChartFromJson(d.hourChart, semanticLabel: d.takeaway)),
+              OgCard(padding: const EdgeInsets.fromLTRB(12, 12, 10, 10), child: interactiveHourChart(d.hourChart, semanticLabel: d.takeaway)),
             ], right: [
               if (d.tuned.isNotEmpty) ...[
                 const OgSectionLabel('Tuned to you'),
@@ -76,7 +85,7 @@ class _PlannerScreenState extends State<PlannerScreen> {
               ],
               if (d.planFacts.isNotEmpty) ...[
                 OgSectionLabel(d.planLabel ?? 'Plan'),
-                factsGrid(d.planFacts),
+                factsGrid(d.planFacts, onTap: (f) => showFactSheet(context, f, series: seriesFromHourChart(d.hourChart, f), source: d.sources)),
               ],
               if (d.outlook != null) ...[
                 OgSectionLabel(d.outlookLabel ?? 'Next 3 days'),
@@ -162,7 +171,7 @@ class _AnalysisSection extends StatelessWidget {
                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                     Text(a.ensembleIntro ?? '', style: OgText.src.copyWith(color: c.text2)),
                     const SizedBox(height: 10),
-                    hourChartFromJson(a.ensembleChart!, semanticLabel: a.ensembleLabel),
+                    interactiveHourChart(a.ensembleChart!, semanticLabel: a.ensembleLabel),
                   ]),
                 ),
               ],
@@ -171,13 +180,13 @@ class _AnalysisSection extends StatelessWidget {
                 OgCard(
                   raised: true,
                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    trendFromJson(a.stationTrend!, semanticLabel: a.stationNote),
+                    interactiveTrend(a.stationTrend!, semanticLabel: a.stationNote),
                     const SizedBox(height: 6),
                     Text(a.stationLegend ?? '', style: OgText.src.copyWith(color: c.text2)),
                     const SizedBox(height: 6),
                     Text(a.stationNote ?? '', style: OgText.chip.copyWith(color: c.text, fontSize: 13)),
                     const SizedBox(height: 10),
-                    factsGrid(a.stationTiles, columns: 3),
+                    factsGrid(a.stationTiles, columns: 3, onTap: (f) => showFactSheet(context, f)),
                   ]),
                 ),
               ] else ...[

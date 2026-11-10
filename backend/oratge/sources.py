@@ -84,6 +84,27 @@ class Sources:
                  timezone=settings.tz, models='ecmwf_ifs025')
         return self._get(f'om:ens:{lat:.3f},{lon:.3f}:{variable}', OM_ENSEMBLE, p, 6 * 3600)
 
+    def places(self, q: str):
+        p = dict(name=q, count=20, language='en', countryCode='ES')
+        return self._get(f'om:geo:{q.lower()}', 'https://geocoding-api.open-meteo.com/v1/search', p, 30 * 86400)
+
+    def reverse(self, lat: float, lon: float):
+        # Nominatim: 1 req/s policy; results are cached for 30 days at ~1 km resolution.
+        # ~100 m resolution: coarser rounding can land a coastal point in the sea (→ only a country name).
+        p = dict(lat=f'{lat:.3f}', lon=f'{lon:.3f}', format='jsonv2', zoom=12)
+        return self._get(f'osm:rev:{lat:.3f},{lon:.3f}', 'https://nominatim.openstreetmap.org/reverse', p, 30 * 86400)
+
+    def reverse_nearest(self, lat: float, lon: float):
+        """Photon (OSM data): nearest named features, works for points just offshore."""
+        p = dict(lat=f'{lat:.3f}', lon=f'{lon:.3f}', limit=5)
+        return self._get(f'photon:rev:{lat:.3f},{lon:.3f}', 'https://photon.komoot.io/reverse', p, 30 * 86400)
+
+    def grid(self, lats: list[float], lons: list[float]):
+        p = dict(latitude=','.join(f'{x:.2f}' for x in lats), longitude=','.join(f'{x:.2f}' for x in lons),
+                 current='wind_speed_10m,wind_direction_10m,wind_gusts_10m,temperature_2m,precipitation',
+                 wind_speed_unit='kn', timezone=settings.tz)
+        return self._get(f'om:grid:{len(lats)}', OM_FORECAST, p, 1800)
+
     # ── Meteocat (only with a key; every call is budgeted) ──
     def meteocat_available(self) -> bool:
         return bool(settings.meteocat_key)

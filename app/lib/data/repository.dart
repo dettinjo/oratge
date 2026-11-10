@@ -11,7 +11,11 @@ const sports = ['wing', 'surf', 'bike', 'run', 'hike'];
 
 /// Everything the UI needs. Implementations: sample data (bundled) and the Oratge backend.
 abstract class ForecastRepository {
-  Future<TodayData> today();
+  /// Today for [place] (null = home).
+  Future<TodayData> today([Place? place]);
+  Future<List<Place>> places(String query);
+  Future<Place> reverse(double lat, double lon);
+  Future<GridData> grid();
   Future<ActivitiesData> activities();
   Future<PlannerData> planner(String sport, {int day = 0});
   Future<MapData> map();
@@ -27,8 +31,35 @@ class SampleRepository implements ForecastRepository {
   Future<Json> _load(String name) async =>
       jsonDecode(await _bundle.loadString('assets/sample/$name.json', cache: false)) as Json;
 
+  /// A few Catalan places so search works offline too.
+  static const _towns = [
+    Place(name: 'Barcelona', region: 'Barcelona', lat: 41.389, lon: 2.159),
+    Place(name: 'Castelldefels', region: 'Barcelona', lat: 41.281, lon: 1.977),
+    Place(name: 'El Masnou', region: 'Barcelona', lat: 41.48, lon: 2.319),
+    Place(name: 'Sitges', region: 'Barcelona', lat: 41.235, lon: 1.812),
+    Place(name: 'Girona', region: 'Girona', lat: 41.979, lon: 2.821),
+    Place(name: 'Tarragona', region: 'Tarragona', lat: 41.119, lon: 1.245),
+    Place(name: 'Lleida', region: 'Lleida', lat: 41.617, lon: 0.62),
+    Place(name: 'Berga', region: 'Barcelona', lat: 42.104, lon: 1.846),
+    Place(name: 'Roses', region: 'Girona', lat: 42.262, lon: 3.176),
+    Place(name: 'Puigcerdà', region: 'Girona', lat: 42.432, lon: 1.928),
+  ];
+
   @override
-  Future<TodayData> today() async => TodayData.fromJson(await _load('today'));
+  Future<TodayData> today([Place? place]) async => TodayData.fromJson(await _load('today'));
+  @override
+  Future<List<Place>> places(String query) async =>
+      _towns.where((t) => t.name.toLowerCase().contains(query.toLowerCase())).toList();
+  @override
+  Future<Place> reverse(double lat, double lon) async {
+    final near = [..._towns]..sort((a, b) =>
+        ((a.lat - lat) * (a.lat - lat) + (a.lon - lon) * (a.lon - lon))
+            .compareTo((b.lat - lat) * (b.lat - lat) + (b.lon - lon) * (b.lon - lon)));
+    return Place(name: near.first.name, region: near.first.region, lat: lat, lon: lon, current: true);
+  }
+
+  @override
+  Future<GridData> grid() async => GridData.fromJson({'time': '', 'points': [], 'source': 'offline'});
   @override
   Future<ActivitiesData> activities() async => ActivitiesData.fromJson(await _load('activities'));
   @override
@@ -189,7 +220,36 @@ class ApiRepository implements ForecastRepository {
   }
 
   @override
-  Future<TodayData> today() => _load('today', TodayData.fromJson, (f) => f.today());
+  Future<TodayData> today([Place? place]) => _load(
+      place == null
+          ? 'today'
+          : 'today?lat=${place.lat.toStringAsFixed(3)}&lon=${place.lon.toStringAsFixed(3)}&place=${Uri.encodeQueryComponent(place.name)}',
+      TodayData.fromJson,
+      (f) => f.today(place));
+
+  /// Live search (not cached on disk): falls back to the offline town list.
+  @override
+  Future<List<Place>> places(String query) async {
+    try {
+      final j = await _fetch('places?q=${Uri.encodeQueryComponent(query)}');
+      return [for (final p in j['places'] as List) Place.fromJson(p as Json)];
+    } catch (_) {
+      return fallback?.places(query) ?? const [];
+    }
+  }
+
+  @override
+  Future<Place> reverse(double lat, double lon) async {
+    try {
+      final p = Place.fromJson(await _fetch('reverse?lat=${lat.toStringAsFixed(3)}&lon=${lon.toStringAsFixed(3)}'));
+      return Place(name: p.name, lat: lat, lon: lon, current: true);
+    } catch (_) {
+      return fallback?.reverse(lat, lon) ?? Place(name: 'Current location', lat: lat, lon: lon, current: true);
+    }
+  }
+
+  @override
+  Future<GridData> grid() => _load('map/grid', GridData.fromJson, (f) => f.grid());
   @override
   Future<ActivitiesData> activities() => _load('activities', ActivitiesData.fromJson, (f) => f.activities());
   @override

@@ -127,3 +127,12 @@ class WeatherIconPainter extends CustomPainter {
   @override
   bool shouldRepaint(WeatherIconPainter old) => old.kind != kind || old.c != c;
 }
+
+/// Weather glyph from its name in the data contract ("partly", "rain", …).
+class OgWeatherIconFromName extends StatelessWidget {
+  const OgWeatherIconFromName(this.name, {super.key, this.size = 24});
+  final String name;
+  final double size;
+  @override
+  Widget build(BuildContext context) => OgWeatherIcon(weatherKindFrom(name), size: size);
+}

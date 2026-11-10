@@ -9,6 +9,7 @@ import '../charts/chart_utils.dart';
 import '../components/basics.dart';
 import '../components/blocks.dart';
 import '../components/og_map.dart';
+import '../components/sheets.dart';
 import '../components/rows_cards.dart';
 import 'common.dart';
 
@@ -101,7 +102,7 @@ class _MapScreenState extends State<MapScreen> {
                 aspectRatio: 1,
                 child: Semantics(
                   label: 'Map of Catalonia with ${d.pins.length} spots; pins show today’s rating',
-                  child: OgSpotMap(pins: d.pins, layer: layer, fallback: LayoutBuilder(builder: (context, box) {
+                  child: OgSpotMap(pins: d.pins, layer: layer, onTap: () => context.push('/map/full'), fallback: LayoutBuilder(builder: (context, box) {
                     final s = box.biggest;
                     return Stack(children: [
                       Positioned.fill(child: CustomPaint(painter: _CataloniaPainter(c, layer, d.warnings))),
@@ -135,6 +136,17 @@ class _MapScreenState extends State<MapScreen> {
                 ),
               ),
             ),
+            const SizedBox(height: 10),
+            OutlinedButton.icon(
+              style: OutlinedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(48),
+                  side: BorderSide(color: c.line),
+                  foregroundColor: c.text,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999))),
+              onPressed: () => context.push('/map/full'),
+              icon: const Icon(Icons.open_in_full, size: 18),
+              label: const Text('Open detailed map'),
+            ),
             const SizedBox(height: 8),
             Row(children: [
               Text(layer == 'Wind' ? 'Arrows show live wind, coloured by speed' : 'Pins show today’s rating',
@@ -147,7 +159,11 @@ class _MapScreenState extends State<MapScreen> {
             if (d.warnings.isEmpty)
               Text('No active Meteocat warnings for your spots.', style: OgText.day.copyWith(color: c.text2)),
             for (final w in d.warnings) ...[
-              OgWarningBanner(level: w.level, title: w.title, detail: w.detail, pre: w.pre),
+              InkWell(
+                borderRadius: BorderRadius.circular(16),
+                onTap: () => showWarningSheet(context, w),
+                child: OgWarningBanner(level: w.level, title: w.title, detail: w.detail, pre: w.pre),
+              ),
               const SizedBox(height: 10),
             ],
             OgDataSources(d.sources),
@@ -266,7 +282,7 @@ class SpotScreen extends StatelessWidget {
         return OgPage(title: d.title, subtitle: d.date, back: (label: 'Back to Spots', route: '/spots'), children: [
           Columns(left: [
             const OgSectionLabel('Live', top: 4),
-            factsGrid(d.live),
+            factsGrid(d.live, onTap: (f) => showFactSheet(context, f, source: d.sources)),
             if (d.sections.isNotEmpty) ...[
               OgSectionLabel(d.sections.first.label ?? ''),
               OgCard(child: blockGroup(d.sections.first.blocks, label: d.sections.first.label)),
