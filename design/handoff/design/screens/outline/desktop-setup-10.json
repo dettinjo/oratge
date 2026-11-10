@@ -1,0 +1,291 @@
+{
+ "title": "Desktop · Setup 10 · Done",
+ "outline": [
+  {
+   "component": "OratgeRoot",
+   "props": {
+    "width": "100%"
+   },
+   "children": [
+    {
+     "el": "nav",
+     "label": "Main",
+     "children": [
+      "Oratge",
+      {
+       "link": "desktop-today.dc.html",
+       "label": null,
+       "children": [
+        "Today"
+       ]
+      },
+      {
+       "link": "desktop-activities.dc.html",
+       "label": null,
+       "children": [
+        "Activities"
+       ]
+      },
+      {
+       "link": "desktop-map.dc.html",
+       "label": null,
+       "children": [
+        "Map"
+       ]
+      },
+      {
+       "link": "desktop-spots.dc.html",
+       "label": null,
+       "children": [
+        "Spots"
+       ]
+      },
+      {
+       "link": "desktop-profile.dc.html",
+       "label": null,
+       "children": [
+        "Profile"
+       ]
+      },
+      "Appearance",
+      {
+       "el": "group",
+       "label": "Appearance",
+       "children": [
+        {
+         "link": "desktop-setup-10-light.dc.html",
+         "label": null,
+         "children": [
+          "Light"
+         ]
+        },
+        {
+         "link": "desktop-setup-10.dc.html",
+         "label": null,
+         "children": [
+          "Dark"
+         ]
+        },
+        {
+         "link": "desktop-setup-10.dc.html",
+         "label": null,
+         "children": [
+          "System"
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "el": "main",
+     "children": [
+      {
+       "el": "nav",
+       "label": "Setup steps",
+       "children": [
+        {
+         "link": "desktop-setup-1.dc.html",
+         "label": null,
+         "children": [
+          "✓",
+          "You"
+         ]
+        },
+        {
+         "link": "desktop-setup-2.dc.html",
+         "label": null,
+         "children": [
+          "✓",
+          "Body and pace"
+         ]
+        },
+        {
+         "link": "desktop-setup-3.dc.html",
+         "label": null,
+         "children": [
+          "✓",
+          "Sports"
+         ]
+        },
+        {
+         "link": "desktop-setup-4.dc.html",
+         "label": null,
+         "children": [
+          "✓",
+          "Wing foil"
+         ]
+        },
+        {
+         "link": "desktop-setup-5.dc.html",
+         "label": null,
+         "children": [
+          "✓",
+          "Surf"
+         ]
+        },
+        {
+         "link": "desktop-setup-6.dc.html",
+         "label": null,
+         "children": [
+          "✓",
+          "Bike"
+         ]
+        },
+        {
+         "link": "desktop-setup-7.dc.html",
+         "label": null,
+         "children": [
+          "✓",
+          "Run"
+         ]
+        },
+        {
+         "link": "desktop-setup-8.dc.html",
+         "label": null,
+         "children": [
+          "✓",
+          "Hike"
+         ]
+        },
+        {
+         "link": "desktop-setup-9.dc.html",
+         "label": null,
+         "children": [
+          "✓",
+          "Alerts"
+         ]
+        },
+        {
+         "link": "desktop-setup-10.dc.html",
+         "label": null,
+         "children": [
+          "10",
+          "Done"
+         ]
+        }
+       ]
+      },
+      {
+       "link": "desktop-setup-9.dc.html",
+       "label": null,
+       "children": [
+        "‹ Back"
+       ]
+      },
+      "Step 10 of 10",
+      {
+       "link": "desktop-profile.dc.html",
+       "label": "Close setup",
+       "children": [
+        "✕"
+       ]
+      },
+      {
+       "el": "progressbar",
+       "label": "Setup progress",
+       "children": []
+      },
+      "Done",
+      {
+       "el": "h1",
+       "text": "You’re all set",
+       "children": null
+      },
+      {
+       "el": "p",
+       "text": "Change anything later in Profile.",
+       "children": null
+      },
+      "✓ Ratings, ranges and advice now use your setup.",
+      {
+       "el": "section",
+       "children": [
+        "Your setup",
+        "You Alex · Barcelona · kn, °C",
+        {
+         "link": "desktop-setup-1.dc.html",
+         "label": null,
+         "children": [
+          "Edit"
+         ]
+        },
+        "Body and pace 78 kg · 180 cm · runs 5:15/km",
+        {
+         "link": "desktop-setup-2.dc.html",
+         "label": null,
+         "children": [
+          "Edit"
+         ]
+        },
+        "Sports Wing foil, surf, bike, run, hike",
+        {
+         "link": "desktop-setup-3.dc.html",
+         "label": null,
+         "children": [
+          "Edit"
+         ]
+        },
+        "Wing foil 4 + 5 m · 95 l · 14–24 kn",
+        {
+         "link": "desktop-setup-4.dc.html",
+         "label": null,
+         "children": [
+          "Edit"
+         ]
+        },
+        "Surf 7'2\" 48 l · 0.6–1.8 m · ≥ 8 s",
+        {
+         "link": "desktop-setup-5.dc.html",
+         "label": null,
+         "children": [
+          "Edit"
+         ]
+        },
+        "Bike Gravel · 40 mm · max 20 kn",
+        {
+         "link": "desktop-setup-6.dc.html",
+         "label": null,
+         "children": [
+          "Edit"
+         ]
+        },
+        "Run Road · 10 km · 5–22°",
+        {
+         "link": "desktop-setup-7.dc.html",
+         "label": null,
+         "children": [
+          "Edit"
+         ]
+        },
+        "Hike 8 kg · storms ≤ 20 % · wind ≤ 30 kn",
+        {
+         "link": "desktop-setup-8.dc.html",
+         "label": null,
+         "children": [
+          "Edit"
+         ]
+        },
+        "Alerts 3 of 4 on",
+        {
+         "link": "desktop-setup-9.dc.html",
+         "label": null,
+         "children": [
+          "Edit"
+         ]
+        }
+       ]
+      },
+      {
+       "link": "desktop-today.dc.html",
+       "label": null,
+       "children": [
+        "Start using Oratge"
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

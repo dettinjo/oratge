@@ -1,0 +1,154 @@
+{
+ "title": "Phone · Setup 2 · Body and pace",
+ "outline": [
+  {
+   "component": "OratgeRoot",
+   "props": {
+    "width": 390
+   },
+   "children": [
+    {
+     "link": "phone-setup-1.dc.html",
+     "label": null,
+     "children": [
+      "‹ Back"
+     ]
+    },
+    "Step 2 of 10",
+    {
+     "link": "phone-profile.dc.html",
+     "label": "Close setup",
+     "children": [
+      "✕"
+     ]
+    },
+    {
+     "el": "progressbar",
+     "label": "Setup progress",
+     "children": []
+    },
+    "Body and pace",
+    {
+     "el": "h1",
+     "text": "Tell us about you",
+     "children": null
+    },
+    {
+     "el": "p",
+     "text": "Used for gear size, turn-back times and what to wear.",
+     "children": null
+    },
+    {
+     "el": "section",
+     "children": [
+      "Body",
+      "Weight",
+      {
+       "input": "text",
+       "value": "78",
+       "label": "Weight"
+      },
+      "kg Height",
+      {
+       "input": "text",
+       "value": "180",
+       "label": "Height"
+      },
+      "cm Age",
+      {
+       "input": "text",
+       "value": "31",
+       "label": "Age"
+      },
+      "yrs Max heart rate Optional",
+      {
+       "input": "text",
+       "value": "188",
+       "label": "Max heart rate"
+      },
+      "bpm"
+     ]
+    },
+    {
+     "el": "section",
+     "children": [
+      "How you handle the weather",
+      "Fitness",
+      {
+       "input": "radio"
+      },
+      "Easy-going",
+      {
+       "input": "radio",
+       "checked": true
+      },
+      "Regular",
+      {
+       "input": "radio"
+      },
+      "Athletic You feel the cold",
+      {
+       "input": "radio"
+      },
+      "Less",
+      {
+       "input": "radio"
+      },
+      "Average",
+      {
+       "input": "radio",
+       "checked": true
+      },
+      "More"
+     ]
+    },
+    {
+     "el": "section",
+     "children": [
+      "Pace",
+      "Running pace",
+      {
+       "input": "text",
+       "value": "5:15",
+       "label": "Running pace"
+      },
+      "/km Climbing pace Hiking ascent",
+      {
+       "input": "text",
+       "value": "400",
+       "label": "Climbing pace"
+      },
+      "m/h Riding speed Flat, average",
+      {
+       "input": "text",
+       "value": "24",
+       "label": "Riding speed"
+      },
+      "km/h"
+     ]
+    },
+    {
+     "el": "section",
+     "children": [
+      "What this changes",
+      "Wing and board advice uses your weight. Hike turn-back times use your climbing pace. Layer and wetsuit advice use how you feel the cold."
+     ]
+    },
+    {
+     "link": "phone-setup-3.dc.html",
+     "label": null,
+     "children": [
+      "Continue"
+     ]
+    },
+    {
+     "link": "phone-setup-3.dc.html",
+     "label": null,
+     "children": [
+      "Skip this step"
+     ]
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,332 @@
+{
+ "title": "Desktop · Setup 4 · Wing foil",
+ "outline": [
+  {
+   "component": "OratgeRoot",
+   "props": {
+    "width": "100%"
+   },
+   "children": [
+    {
+     "el": "nav",
+     "label": "Main",
+     "children": [
+      "Oratge",
+      {
+       "link": "desktop-today.dc.html",
+       "label": null,
+       "children": [
+        "Today"
+       ]
+      },
+      {
+       "link": "desktop-activities.dc.html",
+       "label": null,
+       "children": [
+        "Activities"
+       ]
+      },
+      {
+       "link": "desktop-map.dc.html",
+       "label": null,
+       "children": [
+        "Map"
+       ]
+      },
+      {
+       "link": "desktop-spots.dc.html",
+       "label": null,
+       "children": [
+        "Spots"
+       ]
+      },
+      {
+       "link": "desktop-profile.dc.html",
+       "label": null,
+       "children": [
+        "Profile"
+       ]
+      },
+      "Appearance",
+      {
+       "el": "group",
+       "label": "Appearance",
+       "children": [
+        {
+         "link": "desktop-setup-4-light.dc.html",
+         "label": null,
+         "children": [
+          "Light"
+         ]
+        },
+        {
+         "link": "desktop-setup-4.dc.html",
+         "label": null,
+         "children": [
+          "Dark"
+         ]
+        },
+        {
+         "link": "desktop-setup-4.dc.html",
+         "label": null,
+         "children": [
+          "System"
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "el": "main",
+     "children": [
+      {
+       "el": "nav",
+       "label": "Setup steps",
+       "children": [
+        {
+         "link": "desktop-setup-1.dc.html",
+         "label": null,
+         "children": [
+          "✓",
+          "You"
+         ]
+        },
+        {
+         "link": "desktop-setup-2.dc.html",
+         "label": null,
+         "children": [
+          "✓",
+          "Body and pace"
+         ]
+        },
+        {
+         "link": "desktop-setup-3.dc.html",
+         "label": null,
+         "children": [
+          "✓",
+          "Sports"
+         ]
+        },
+        {
+         "link": "desktop-setup-4.dc.html",
+         "label": null,
+         "children": [
+          "4",
+          "Wing foil"
+         ]
+        },
+        {
+         "link": "desktop-setup-5.dc.html",
+         "label": null,
+         "children": [
+          "5",
+          "Surf"
+         ]
+        },
+        {
+         "link": "desktop-setup-6.dc.html",
+         "label": null,
+         "children": [
+          "6",
+          "Bike"
+         ]
+        },
+        {
+         "link": "desktop-setup-7.dc.html",
+         "label": null,
+         "children": [
+          "7",
+          "Run"
+         ]
+        },
+        {
+         "link": "desktop-setup-8.dc.html",
+         "label": null,
+         "children": [
+          "8",
+          "Hike"
+         ]
+        },
+        {
+         "link": "desktop-setup-9.dc.html",
+         "label": null,
+         "children": [
+          "9",
+          "Alerts"
+         ]
+        },
+        {
+         "link": "desktop-setup-10.dc.html",
+         "label": null,
+         "children": [
+          "10",
+          "Done"
+         ]
+        }
+       ]
+      },
+      {
+       "link": "desktop-setup-3.dc.html",
+       "label": null,
+       "children": [
+        "‹ Back"
+       ]
+      },
+      "Step 4 of 10",
+      {
+       "link": "desktop-profile.dc.html",
+       "label": "Close setup",
+       "children": [
+        "✕"
+       ]
+      },
+      {
+       "el": "progressbar",
+       "label": "Setup progress",
+       "children": []
+      },
+      "Wing foil",
+      {
+       "el": "h1",
+       "text": "Your wing foil setup",
+       "children": null
+      },
+      {
+       "el": "p",
+       "text": "Gear and the conditions you enjoy.",
+       "children": null
+      },
+      {
+       "el": "section",
+       "children": [
+        "Your gear",
+        "Wings you own",
+        {
+         "input": "checkbox"
+        },
+        "3 m",
+        {
+         "input": "checkbox",
+         "checked": true
+        },
+        "✓ 4 m",
+        {
+         "input": "checkbox",
+         "checked": true
+        },
+        "✓ 5 m",
+        {
+         "input": "checkbox"
+        },
+        "6 m Board volume",
+        {
+         "input": "text",
+         "value": "95",
+         "label": "Board volume"
+        },
+        "l Front wing",
+        {
+         "input": "text",
+         "value": "1100",
+         "label": "Front wing"
+        },
+        "cm²"
+       ]
+      },
+      {
+       "el": "section",
+       "children": [
+        "Your conditions",
+        "Wind range Where you ride comfortably",
+        {
+         "input": "text",
+         "value": "14",
+         "label": "Wind range from"
+        },
+        "–",
+        {
+         "input": "text",
+         "value": "24",
+         "label": "Wind range to"
+        },
+        "kn Gust limit",
+        {
+         "input": "text",
+         "value": "26",
+         "label": "Gust limit"
+        },
+        "kn Allowed directions",
+        {
+         "input": "checkbox",
+         "checked": true
+        },
+        "✓ Onshore",
+        {
+         "input": "checkbox",
+         "checked": true
+        },
+        "✓ Side-on",
+        {
+         "input": "checkbox",
+         "checked": true
+        },
+        "✓ Side",
+        {
+         "input": "checkbox"
+        },
+        "Offshore Offshore never rates above 1"
+       ]
+      },
+      {
+       "el": "section",
+       "children": [
+        "Level and wetsuit",
+        "Level",
+        {
+         "input": "radio"
+        },
+        "Learning",
+        {
+         "input": "radio",
+         "checked": true
+        },
+        "Riding upwind",
+        {
+         "input": "radio"
+        },
+        "Jumping Wetsuits",
+        {
+         "input": "text",
+         "value": "3/2, 4/3 + booties",
+         "label": "Wetsuits"
+        }
+       ]
+      },
+      {
+       "el": "section",
+       "children": [
+        "What this changes",
+        "Rideable from 14 kn instead of the default 12. 5 m wing until gusts pass 22 kn, then 4 m. Offshore hours drop to a 1 rating."
+       ]
+      },
+      {
+       "link": "desktop-setup-5.dc.html",
+       "label": null,
+       "children": [
+        "Continue"
+       ]
+      },
+      {
+       "link": "desktop-setup-5.dc.html",
+       "label": null,
+       "children": [
+        "Skip this step"
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,999 @@
+{
+ "title": "Desktop · Bike · Collserola loop",
+ "outline": [
+  {
+   "component": "OratgeRoot",
+   "props": {
+    "width": "100%"
+   },
+   "children": [
+    {
+     "el": "nav",
+     "label": "Main",
+     "children": [
+      "Oratge",
+      {
+       "link": "desktop-today.dc.html",
+       "label": null,
+       "children": [
+        "Today"
+       ]
+      },
+      {
+       "link": "desktop-activities.dc.html",
+       "label": null,
+       "children": [
+        "Activities"
+       ]
+      },
+      {
+       "link": "desktop-map.dc.html",
+       "label": null,
+       "children": [
+        "Map"
+       ]
+      },
+      {
+       "link": "desktop-spots.dc.html",
+       "label": null,
+       "children": [
+        "Spots"
+       ]
+      },
+      {
+       "link": "desktop-profile.dc.html",
+       "label": null,
+       "children": [
+        "Profile"
+       ]
+      },
+      "Appearance",
+      {
+       "el": "group",
+       "label": "Appearance",
+       "children": [
+        {
+         "link": "desktop-bike-light.dc.html",
+         "label": null,
+         "children": [
+          "Light"
+         ]
+        },
+        {
+         "link": "desktop-bike.dc.html",
+         "label": null,
+         "children": [
+          "Dark"
+         ]
+        },
+        {
+         "link": "desktop-bike.dc.html",
+         "label": null,
+         "children": [
+          "System"
+         ]
+        }
+       ]
+      },
+      "Data: Meteocat"
+     ]
+    },
+    {
+     "el": "main",
+     "children": [
+      {
+       "el": "header",
+       "children": [
+        {
+         "link": "desktop-activities.dc.html",
+         "label": null,
+         "children": [
+          "‹ Back to Activities"
+         ]
+        },
+        {
+         "el": "h1",
+         "text": "Bike · Collserola loop",
+         "children": null
+        },
+        {
+         "el": "p",
+         "text": "Mon 9 Nov · Barcelona",
+         "children": null
+        }
+       ]
+      },
+      {
+       "el": "section",
+       "children": [
+        {
+         "component": "DayTabs",
+         "props": {
+          "days": [
+           {
+            "weekday": "Mon",
+            "date": 9,
+            "rating": 5,
+            "outlook": false
+           },
+           {
+            "weekday": "Tue",
+            "date": 10,
+            "rating": 3,
+            "outlook": false
+           },
+           {
+            "weekday": "Wed",
+            "date": 11,
+            "rating": 1,
+            "outlook": false
+           },
+           {
+            "weekday": "Thu",
+            "date": 12,
+            "rating": 2,
+            "outlook": true
+           },
+           {
+            "weekday": "Fri",
+            "date": 13,
+            "rating": 4,
+            "outlook": true
+           },
+           {
+            "weekday": "Sat",
+            "date": 14,
+            "rating": 5,
+            "outlook": true
+           },
+           {
+            "weekday": "Sun",
+            "date": 15,
+            "rating": 5,
+            "outlook": true
+           },
+           {
+            "weekday": "Mon",
+            "date": 16,
+            "rating": 3,
+            "outlook": true
+           }
+          ],
+          "selected": 0
+         }
+        }
+       ]
+      },
+      {
+       "el": "section",
+       "children": [
+        {
+         "component": "VerdictCard",
+         "props": {
+          "rating": 5,
+          "best": "Leave 09:00 → back 12:00",
+          "confidence": "High confidence",
+          "summary": "Dry window before the 13 h showers. NW tailwind on the climb, roads dry from 09 h."
+         }
+        }
+       ]
+      },
+      {
+       "el": "section",
+       "children": [
+        {
+         "component": "ChipGroup",
+         "props": {
+          "label": "Ride length",
+          "options": [
+           "1 h",
+           "2 h",
+           "3 h",
+           "4 h",
+           "5 h"
+          ],
+          "selected": "3 h"
+         }
+        }
+       ]
+      },
+      {
+       "el": "section",
+       "children": [
+        {
+         "component": "SectionLabel",
+         "children": [
+          "On the ride"
+         ]
+        },
+        {
+         "component": "FactTile",
+         "props": {
+          "size": "lg",
+          "label": "Showers",
+          "value": "13 h",
+          "sub": "up to 2.1 mm",
+          "accent": "water"
+         }
+        },
+        {
+         "component": "FactTile",
+         "props": {
+          "size": "lg",
+          "label": "Tailwind",
+          "value": "58 %",
+          "sub": "NW 7 kn on the climb",
+          "accent": "wind"
+         }
+        },
+        {
+         "component": "FactTile",
+         "props": {
+          "size": "lg",
+          "label": "Temp",
+          "value": "12–18°",
+          "sub": "feels 11–17°",
+          "accent": "heat"
+         }
+        },
+        {
+         "component": "FactTile",
+         "props": {
+          "size": "lg",
+          "label": "UV",
+          "value": "3",
+          "sub": "moderate",
+          "accent": "sun"
+         }
+        }
+       ]
+      },
+      {
+       "el": "section",
+       "children": [
+        {
+         "component": "SectionLabel",
+         "children": [
+          "Tuned to you"
+         ]
+        },
+        {
+         "component": "Card",
+         "children": [
+          "Gravel · 40 mm, no mudguards damp roads before 09 h lower the rating",
+          "FTP 240 W · 11.5 kg Tibidabo climb in about 34 min",
+          "Max wind 20 kn gusts stay at 14 kn",
+          "Lights fitted an evening window after 17 h would count",
+          {
+           "link": "desktop-setup-6.dc.html",
+           "label": null,
+           "children": [
+            "Edit your setup ›"
+           ]
+          }
+         ]
+        }
+       ]
+      },
+      {
+       "el": "section",
+       "children": [
+        {
+         "component": "SectionLabel",
+         "children": [
+          "Plan"
+         ]
+        },
+        {
+         "component": "FactTile",
+         "props": {
+          "label": "Roads",
+          "value": "dry from 09 h",
+          "sub": "3.2 mm overnight"
+         }
+        },
+        {
+         "component": "FactTile",
+         "props": {
+          "label": "Climb",
+          "value": "512 m",
+          "sub": "Tibidabo"
+         }
+        },
+        {
+         "component": "FactTile",
+         "props": {
+          "label": "Sunset",
+          "value": "17:35",
+          "accent": "sun"
+         }
+        },
+        {
+         "component": "FactTile",
+         "props": {
+          "label": "Gusts",
+          "value": "12 kn",
+          "sub": "max on the ride",
+          "accent": "wind"
+         }
+        }
+       ]
+      },
+      {
+       "el": "section",
+       "children": [
+        {
+         "component": "SectionLabel",
+         "children": [
+          "Hour by hour"
+         ]
+        },
+        {
+         "el": "p",
+         "text": "Dry until 13 h, then showers of up to 2.1 mm; roads dry from 09 h.",
+         "children": null
+        },
+        {
+         "el": "group",
+         "label": "Dry until 13 h, then showers of up to 2.1 mm; roads dry from 09 h.",
+         "children": [
+          {
+           "component": "Card",
+           "children": [
+            {
+             "component": "HourChart",
+             "props": {
+              "hours": [
+               7,
+               8,
+               9,
+               10,
+               11,
+               12,
+               13,
+               14,
+               15,
+               16,
+               17,
+               18,
+               19,
+               20
+              ],
+              "rows": [
+               {
+                "type": "icons",
+                "label": "Sky",
+                "values": [
+                 "partly",
+                 "sun",
+                 "sun",
+                 "sun",
+                 "partly",
+                 "cloud",
+                 "rain",
+                 "rain",
+                 "rain",
+                 "cloud",
+                 "partly",
+                 "night",
+                 "night",
+                 "night"
+                ]
+               },
+               {
+                "type": "rating",
+                "label": "Rating",
+                "values": [
+                 1,
+                 2,
+                 4,
+                 5,
+                 5,
+                 4,
+                 2,
+                 1,
+                 1,
+                 2,
+                 2,
+                 1,
+                 0,
+                 0
+                ]
+               },
+               {
+                "type": "line",
+                "label": "Temp",
+                "unit": "°C",
+                "accent": "heat",
+                "min": 6,
+                "max": 22,
+                "values": [
+                 9,
+                 10,
+                 12,
+                 14,
+                 16,
+                 18,
+                 19,
+                 20,
+                 20,
+                 19,
+                 17,
+                 15,
+                 14,
+                 13
+                ],
+                "companion": [
+                 7,
+                 8,
+                 11,
+                 13,
+                 15,
+                 17,
+                 18,
+                 19,
+                 19,
+                 18,
+                 16,
+                 14,
+                 12,
+                 11
+                ],
+                "labelAt": [
+                 0,
+                 7
+                ],
+                "height": 80
+               },
+               {
+                "type": "bars",
+                "label": "Rain",
+                "unit": "mm",
+                "accent": "water",
+                "max": 3,
+                "labelEvery": 1,
+                "decimals": 1,
+                "values": [
+                 0,
+                 0,
+                 0,
+                 0,
+                 0,
+                 0,
+                 0.4,
+                 2.1,
+                 1.6,
+                 0.3,
+                 0,
+                 0,
+                 0,
+                 0
+                ],
+                "height": 40
+               },
+               {
+                "type": "category",
+                "label": "Roads",
+                "values": [
+                 "wet",
+                 "damp",
+                 "dry",
+                 "dry",
+                 "dry",
+                 "dry",
+                 "damp",
+                 "wet",
+                 "wet",
+                 "wet",
+                 "damp",
+                 "damp",
+                 "dry",
+                 "dry"
+                ],
+                "styles": {
+                 "wet": {
+                  "color": "var(--og-water)",
+                  "opacity": 0.9,
+                  "text": "wet"
+                 },
+                 "damp": {
+                  "color": "var(--og-water)",
+                  "opacity": 0.45,
+                  "text": "damp"
+                 },
+                 "dry": {
+                  "color": "var(--og-r0)"
+                 }
+                }
+               },
+               {
+                "type": "arrows",
+                "label": "Wind",
+                "accent": "wind",
+                "directions": [
+                 330,
+                 330,
+                 320,
+                 300,
+                 250,
+                 230,
+                 225,
+                 225,
+                 230,
+                 240,
+                 260,
+                 300,
+                 320,
+                 330
+                ]
+               },
+               {
+                "type": "numbers",
+                "label": "Speed",
+                "unit": "kn",
+                "values": [
+                 5,
+                 5,
+                 6,
+                 7,
+                 8,
+                 10,
+                 12,
+                 14,
+                 13,
+                 11,
+                 9,
+                 7,
+                 6,
+                 5
+                ],
+                "emphasizeAbove": 12
+               },
+               {
+                "type": "bars",
+                "label": "UV",
+                "accent": "sun",
+                "max": 6,
+                "labelEvery": 1,
+                "values": [
+                 0,
+                 0,
+                 1,
+                 2,
+                 3,
+                 3,
+                 3,
+                 2,
+                 1,
+                 1,
+                 0,
+                 0,
+                 0,
+                 0
+                ],
+                "height": 30
+               }
+              ],
+              "best": [
+               9,
+               12
+              ],
+              "width": 645
+             }
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      },
+      {
+       "el": "section",
+       "children": [
+        {
+         "el": "details",
+         "collapsedByDefault": false,
+         "children": [
+          {
+           "el": "summary",
+           "text": "How this forecast was made Hide details › Shower timing ±1 h Score 4.7 / 5 88 % hit rate",
+           "children": null
+          },
+          {
+           "component": "SectionLabel",
+           "children": [
+            "Model agreement · rain by 14 h"
+           ]
+          },
+          {
+           "component": "Card",
+           "children": [
+            "model blend scale 0–4 mm",
+            "Meteocat WRF 3 km · 4×/day · weight 30 % 1.8",
+            "AROME 1.3 km · Météo-France · weight 25 % 2.4",
+            "HARMONIE-AROME 2.5 km · AEMET · weight 20 % 2.1",
+            "ICON-EU 7 km · DWD · weight 10 % 1.2",
+            "ECMWF IFS 9 km · weight 10 % 1.5",
+            "GFS 13 km · NOAA · weight 5 % 0.6",
+            "Oratge blend 1.9 mm Model spread 1.8 mm All models put the first showers at 13 h ± 1 h; amounts differ."
+           ]
+          },
+          {
+           "component": "SectionLabel",
+           "children": [
+            "Why 5 of 5"
+           ]
+          },
+          {
+           "component": "Card",
+           "children": [
+            "Dry window 3 h before 13 h · weight 35 % 1.0",
+            "Wind NW 7 kn, 58 % tail · weight 20 % 0.9",
+            "Temperature 12–18° · weight 20 % 0.9",
+            "Roads dry from 09 h · weight 15 % 0.9",
+            "UV 3 · weight 10 % 0.9",
+            "4.7 / 5",
+            {
+             "component": "RatingDots",
+             "props": {
+              "value": 5,
+              "size": "lg",
+              "showWord": true
+             }
+            }
+           ]
+          },
+          {
+           "component": "SectionLabel",
+           "children": [
+            "Ensemble · rain and temperature"
+           ]
+          },
+          {
+           "component": "Card",
+           "children": [
+            "Solid line: ensemble median. Shading up to the 90th percentile, dashed line at the 10th, from 67 members (ECMWF ENS 51 + AROME-EPS 16). Bars: chance the condition holds.",
+            {
+             "component": "HourChart",
+             "props": {
+              "hours": [
+               7,
+               8,
+               9,
+               10,
+               11,
+               12,
+               13,
+               14,
+               15,
+               16,
+               17,
+               18,
+               19,
+               20
+              ],
+              "rows": [
+               {
+                "type": "bars",
+                "label": "Rain chance",
+                "unit": "%",
+                "accent": "water",
+                "max": 100,
+                "labelEvery": 2,
+                "values": [
+                 0,
+                 0,
+                 0,
+                 2,
+                 5,
+                 15,
+                 55,
+                 80,
+                 75,
+                 45,
+                 20,
+                 10,
+                 5,
+                 0
+                ],
+                "height": 40
+               },
+               {
+                "type": "bars",
+                "label": "Rain P90",
+                "unit": "mm",
+                "accent": "water",
+                "max": 4,
+                "labelEvery": 1,
+                "decimals": 1,
+                "values": [
+                 0,
+                 0,
+                 0,
+                 0,
+                 0,
+                 0.2,
+                 1.2,
+                 3.4,
+                 2.8,
+                 0.9,
+                 0.2,
+                 0,
+                 0,
+                 0
+                ],
+                "height": 40
+               },
+               {
+                "type": "line",
+                "label": "Temp P50",
+                "unit": "°C",
+                "accent": "heat",
+                "min": 6,
+                "max": 22,
+                "values": [
+                 9,
+                 10,
+                 12,
+                 14,
+                 16,
+                 18,
+                 19,
+                 20,
+                 20,
+                 19,
+                 17,
+                 15,
+                 14,
+                 13
+                ],
+                "band": [
+                 10,
+                 11,
+                 13,
+                 15,
+                 17,
+                 19,
+                 20,
+                 21,
+                 21,
+                 20,
+                 18,
+                 16,
+                 15,
+                 14
+                ],
+                "labelAt": [
+                 0,
+                 7
+                ],
+                "height": 70,
+                "companion": [
+                 8,
+                 9,
+                 11,
+                 13,
+                 15,
+                 16,
+                 17,
+                 18,
+                 18,
+                 17,
+                 15,
+                 14,
+                 13,
+                 12
+                ]
+               }
+              ],
+              "best": [
+               9,
+               12
+              ],
+              "width": 536
+             }
+            }
+           ]
+          },
+          {
+           "component": "SectionLabel",
+           "children": [
+            "Station check · Sant Cugat"
+           ]
+          },
+          {
+           "component": "Card",
+           "children": [
+            {
+             "component": "TrendLine",
+             "props": {
+              "accent": "heat",
+              "values": [
+               9,
+               10,
+               11,
+               13,
+               15,
+               17,
+               18,
+               19,
+               18,
+               16,
+               14,
+               12
+              ],
+              "compare": [
+               9,
+               10,
+               12,
+               14,
+               16,
+               17,
+               18,
+               18,
+               17,
+               15,
+               13,
+               12
+              ],
+              "nowIndex": 11,
+              "nowLabel": "now 12",
+              "caption": [
+               "−24 h",
+               "now"
+              ],
+              "min": 0,
+              "max": 22,
+              "height": 90,
+              "width": 536
+             }
+            },
+            "solid: measured at the station dashed: yesterday’s forecast",
+            "Yesterday’s blend against the XEMA station in Sant Cugat. Rain timing hit within 1 h on 9 of the last 10 shower days.",
+            {
+             "component": "FactTile",
+             "props": {
+              "label": "Bias",
+              "value": "−0.6°",
+              "sub": "models slightly warm",
+              "accent": "heat"
+             }
+            },
+            {
+             "component": "FactTile",
+             "props": {
+              "label": "Error",
+              "value": "1.1°",
+              "sub": "mean, 30 days"
+             }
+            },
+            {
+             "component": "FactTile",
+             "props": {
+              "label": "Hit rate",
+              "value": "88 %",
+              "sub": "rating ±1, 30 days"
+             }
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      },
+      {
+       "el": "section",
+       "children": [
+        {
+         "component": "SectionLabel",
+         "children": [
+          "Route wind · 09:00 start"
+         ]
+        },
+        {
+         "component": "Card",
+         "children": [
+          {
+           "component": "RouteWind",
+           "props": {
+            "windFrom": 300,
+            "windLabel": "NW 7 kn",
+            "title": "58 % tailwind on the climb",
+            "labels": [
+             [
+              50,
+              142,
+              "start · Sarrià"
+             ],
+             [
+              175,
+              20,
+              "Tibidabo 512 m"
+             ]
+            ],
+            "points": [
+             [
+              40,
+              120
+             ],
+             [
+              70,
+              95
+             ],
+             [
+              95,
+              70
+             ],
+             [
+              130,
+              45
+             ],
+             [
+              175,
+              30
+             ],
+             [
+              220,
+              28
+             ],
+             [
+              262,
+              42
+             ],
+             [
+              285,
+              70
+             ],
+             [
+              280,
+              102
+             ],
+             [
+              250,
+              122
+             ],
+             [
+              205,
+              132
+             ],
+             [
+              150,
+              135
+             ],
+             [
+              100,
+              132
+             ],
+             [
+              60,
+              128
+             ],
+             [
+              40,
+              120
+             ]
+            ],
+            "width": 391
+           }
+          }
+         ]
+        }
+       ]
+      },
+      {
+       "el": "section",
+       "children": [
+        {
+         "component": "DataSources",
+         "children": [
+          "municipal hourly forecast Barcelona and Sant Cugat, XEMA wind and rain, radar, UV, warnings"
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,557 @@
+{
+ "wing": {
+  "modelAgreement": {
+   "title": "Model agreement · wind at 15 h",
+   "unit": "kn",
+   "vals": [
+    17,
+    19,
+    18,
+    16,
+    15,
+    13
+   ],
+   "weights": [
+    30,
+    25,
+    20,
+    10,
+    10,
+    5
+   ],
+   "blend": 17.2,
+   "spread": "6 kn",
+   "verdict": "High agreement. Station correction +1.8 kn → 19 kn in the plan."
+  },
+  "ratingFactors": [
+   {
+    "factor": "Wind in range",
+    "observed": "17–19 kn vs your 14–24",
+    "weightPct": 35,
+    "score": 0.95,
+    "accent": "wind"
+   },
+   {
+    "factor": "Gust factor",
+    "observed": "gusts × 1.26",
+    "weightPct": 15,
+    "score": 0.7,
+    "accent": "wind"
+   },
+   {
+    "factor": "Direction",
+    "observed": "side-on SW",
+    "weightPct": 20,
+    "score": 1.0,
+    "accent": "wind"
+   },
+   {
+    "factor": "Chop",
+    "observed": "0.8 m",
+    "weightPct": 10,
+    "score": 0.7,
+    "accent": "water"
+   },
+   {
+    "factor": "Rain",
+    "observed": "≤ 10 %",
+    "weightPct": 10,
+    "score": 0.9,
+    "accent": "water"
+   },
+   {
+    "factor": "Daylight",
+    "observed": "sunset 17:35",
+    "weightPct": 10,
+    "score": 0.8,
+    "accent": "sun"
+   }
+  ],
+  "ratingTotal": "4.4",
+  "rating": 4,
+  "stationCheck": {
+   "title": "Station check · Castelldefels",
+   "note": "Yesterday’s blend against the XEMA station. The SW sea breeze runs 1.8 kn stronger than modelled here, so today’s blend is corrected by that amount.",
+   "tiles": [
+    {
+     "label": "Bias",
+     "value": "+1.8 kn",
+     "sub": "models too low",
+     "accent": "wind"
+    },
+    {
+     "label": "Error",
+     "value": "2.4 kn",
+     "sub": "mean, 30 days"
+    },
+    {
+     "label": "Hit rate",
+     "value": "82 %",
+     "sub": "rating ±1, 30 days"
+    }
+   ]
+  },
+  "tunedToYou": [
+   {
+    "fromProfile": "78 kg · 95 l board · upwind level",
+    "effect": "rideable from 14 kn, not 12"
+   },
+   {
+    "fromProfile": "Wings 4 m and 5 m",
+    "effect": "5 m until gusts pass 22 kn, then 4 m"
+   },
+   {
+    "fromProfile": "Gust limit 26 kn",
+    "effect": "peak 24 kn at 15 h stays inside"
+   },
+   {
+    "fromProfile": "Feels the cold · water 18.6°",
+    "effect": "3/2 is enough, bring a hood after 17 h"
+   }
+  ],
+  "takeaway": "Inside your range from 13 to 17 h, peaking at 19 kn around 15 h.",
+  "analysisSummary": [
+   "Models agree · spread 6 kn",
+   "Score 4.4 / 5",
+   "Station-corrected +1.8 kn"
+  ]
+ },
+ "surf": {
+  "modelAgreement": {
+   "title": "Model agreement · waves at 09 h",
+   "unit": "m",
+   "vals": [
+    1.1,
+    1.2,
+    1.0,
+    0.9,
+    0.8
+   ],
+   "weights": [
+    35,
+    25,
+    20,
+    15,
+    5
+   ],
+   "blend": 1.1,
+   "spread": "0.4 m",
+   "verdict": "Coastal models agree; global models miss the short-fetch E swell."
+  },
+  "ratingFactors": [
+   {
+    "factor": "Swell height",
+    "observed": "1.1 m",
+    "weightPct": 30,
+    "score": 0.5,
+    "accent": "water"
+   },
+   {
+    "factor": "Period",
+    "observed": "9 s",
+    "weightPct": 25,
+    "score": 0.5,
+    "accent": "water"
+   },
+   {
+    "factor": "Wind vs shore",
+    "observed": "offshore NW",
+    "weightPct": 25,
+    "score": 0.9,
+    "accent": "wind"
+   },
+   {
+    "factor": "Swell direction",
+    "observed": "E, inside 40–180°",
+    "weightPct": 10,
+    "score": 0.9,
+    "accent": "water"
+   },
+   {
+    "factor": "Daylight",
+    "observed": "sunrise 07:47",
+    "weightPct": 10,
+    "score": 0.8,
+    "accent": "sun"
+   }
+  ],
+  "ratingTotal": "3.3",
+  "rating": 3,
+  "stationCheck": {
+   "title": "Buoy check · Barcelona coast",
+   "note": "Yesterday’s blend against the Barcelona coastal buoy. Small negative bias, no correction applied.",
+   "tiles": [
+    {
+     "label": "Bias",
+     "value": "−0.1 m",
+     "sub": "models slightly high",
+     "accent": "water"
+    },
+    {
+     "label": "Error",
+     "value": "0.15 m",
+     "sub": "mean, 30 days"
+    },
+    {
+     "label": "Hit rate",
+     "value": "78 %",
+     "sub": "rating ±1, 30 days"
+    }
+   ]
+  },
+  "tunedToYou": [
+   {
+    "fromProfile": "48 l mid-length",
+    "effect": "1.1 m at 9 s is in your sweet spot"
+   },
+   {
+    "fromProfile": "Minimum period 8 s",
+    "effect": "window ends when it drops below 8 s at 16 h"
+   },
+   {
+    "fromProfile": "Avoid crowds",
+    "effect": "weekday morning: quieter than Sat"
+   },
+   {
+    "fromProfile": "Feels the cold",
+    "effect": "3/2 fine; 4/3 if you stay past 11 h"
+   }
+  ],
+  "takeaway": "Best before 11 h: 1.1 m at 9 s with offshore wind, then the sea breeze turns it messy.",
+  "analysisSummary": [
+   "Coastal models agree · spread 0.4 m",
+   "Score 3.3 / 5",
+   "Buoy check: no correction"
+  ]
+ },
+ "bike": {
+  "modelAgreement": {
+   "title": "Model agreement · rain by 14 h",
+   "unit": "mm",
+   "vals": [
+    1.8,
+    2.4,
+    2.1,
+    1.2,
+    1.5,
+    0.6
+   ],
+   "weights": [
+    30,
+    25,
+    20,
+    10,
+    10,
+    5
+   ],
+   "blend": 1.9,
+   "spread": "1.8 mm",
+   "verdict": "All models put the first showers at 13 h ± 1 h; amounts differ."
+  },
+  "ratingFactors": [
+   {
+    "factor": "Dry window",
+    "observed": "3 h before 13 h",
+    "weightPct": 35,
+    "score": 1.0,
+    "accent": "water"
+   },
+   {
+    "factor": "Wind",
+    "observed": "NW 7 kn, 58 % tail",
+    "weightPct": 20,
+    "score": 0.9,
+    "accent": "wind"
+   },
+   {
+    "factor": "Temperature",
+    "observed": "12–18°",
+    "weightPct": 20,
+    "score": 0.9,
+    "accent": "heat"
+   },
+   {
+    "factor": "Roads",
+    "observed": "dry from 09 h",
+    "weightPct": 15,
+    "score": 0.9,
+    "accent": "water"
+   },
+   {
+    "factor": "UV",
+    "observed": "3",
+    "weightPct": 10,
+    "score": 0.9,
+    "accent": "sun"
+   }
+  ],
+  "ratingTotal": "4.7",
+  "rating": 5,
+  "stationCheck": {
+   "title": "Station check · Sant Cugat",
+   "note": "Yesterday’s blend against the XEMA station in Sant Cugat. Rain timing hit within 1 h on 9 of the last 10 shower days.",
+   "tiles": [
+    {
+     "label": "Bias",
+     "value": "−0.6°",
+     "sub": "models slightly warm",
+     "accent": "heat"
+    },
+    {
+     "label": "Error",
+     "value": "1.1°",
+     "sub": "mean, 30 days"
+    },
+    {
+     "label": "Hit rate",
+     "value": "88 %",
+     "sub": "rating ±1, 30 days"
+    }
+   ]
+  },
+  "tunedToYou": [
+   {
+    "fromProfile": "Gravel · 40 mm, no mudguards",
+    "effect": "damp roads before 09 h lower the rating"
+   },
+   {
+    "fromProfile": "FTP 240 W · 11.5 kg",
+    "effect": "Tibidabo climb in about 34 min"
+   },
+   {
+    "fromProfile": "Max wind 20 kn",
+    "effect": "gusts stay at 14 kn"
+   },
+   {
+    "fromProfile": "Lights fitted",
+    "effect": "an evening window after 17 h would count"
+   }
+  ],
+  "takeaway": "Dry until 13 h, then showers of up to 2.1 mm; roads dry from 09 h.",
+  "analysisSummary": [
+   "Shower timing ±1 h",
+   "Score 4.7 / 5",
+   "88 % hit rate"
+  ]
+ },
+ "run": {
+  "modelAgreement": {
+   "title": "Model agreement · temperature at 08 h",
+   "unit": "°",
+   "vals": [
+    12,
+    11,
+    12,
+    13,
+    12,
+    13
+   ],
+   "weights": [
+    30,
+    25,
+    20,
+    10,
+    10,
+    5
+   ],
+   "blend": 12,
+   "spread": "2°",
+   "verdict": "Very high agreement on a calm, clear morning."
+  },
+  "ratingFactors": [
+   {
+    "factor": "Temperature",
+    "observed": "12° at go time",
+    "weightPct": 35,
+    "score": 1.0,
+    "accent": "heat"
+   },
+   {
+    "factor": "Feels like",
+    "observed": "11°",
+    "weightPct": 15,
+    "score": 0.9,
+    "accent": "heat"
+   },
+   {
+    "factor": "Wind",
+    "observed": "4 kn",
+    "weightPct": 20,
+    "score": 1.0,
+    "accent": "wind"
+   },
+   {
+    "factor": "Rain",
+    "observed": "0 %",
+    "weightPct": 20,
+    "score": 1.0,
+    "accent": "water"
+   },
+   {
+    "factor": "UV",
+    "observed": "1",
+    "weightPct": 10,
+    "score": 1.0,
+    "accent": "sun"
+   }
+  ],
+  "ratingTotal": "4.9",
+  "rating": 5,
+  "stationCheck": {
+   "title": "Station check · Zoo",
+   "note": "Yesterday’s blend against the XEMA Zoo station on the seafront.",
+   "tiles": [
+    {
+     "label": "Bias",
+     "value": "+0.4°",
+     "sub": "models slightly cool",
+     "accent": "heat"
+    },
+    {
+     "label": "Error",
+     "value": "0.8°",
+     "sub": "mean, 30 days"
+    },
+    {
+     "label": "Hit rate",
+     "value": "91 %",
+     "sub": "rating ±1, 30 days"
+    }
+   ]
+  },
+  "tunedToYou": [
+   {
+    "fromProfile": "Comfortable 5–22°",
+    "effect": "07:30–09:30 sits at 12–14°"
+   },
+   {
+    "fromProfile": "5:15 /km · 10 km",
+    "effect": "53 min, back by 08:25"
+   },
+   {
+    "fromProfile": "Feels the cold",
+    "effect": "long sleeve until 09 h"
+   },
+   {
+    "fromProfile": "Light rain is fine",
+    "effect": "no rain this morning anyway"
+   }
+  ],
+  "takeaway": "Coolest and calmest before 09:30; warmest at 14–15 h with UV 3.",
+  "analysisSummary": [
+   "Models agree · spread 2°",
+   "Score 4.9 / 5",
+   "91 % hit rate"
+  ]
+ },
+ "hike": {
+  "modelAgreement": {
+   "title": "Model agreement · summit wind at 10 h",
+   "unit": "kn",
+   "vals": [
+    22,
+    26,
+    24,
+    19,
+    21,
+    18
+   ],
+   "weights": [
+    30,
+    25,
+    20,
+    10,
+    10,
+    5
+   ],
+   "blend": 22.6,
+   "spread": "8 kn",
+   "verdict": "Medium agreement: the high-resolution models channel more wind over the ridge."
+  },
+  "ratingFactors": [
+   {
+    "factor": "Storm risk",
+    "observed": "45 % at 14 h",
+    "weightPct": 35,
+    "score": 0.3,
+    "accent": "storm"
+   },
+   {
+    "factor": "Summit wind",
+    "observed": "22 kn, gusts 34",
+    "weightPct": 20,
+    "score": 0.4,
+    "accent": "wind"
+   },
+   {
+    "factor": "Cold",
+    "observed": "−1° on the summit",
+    "weightPct": 15,
+    "score": 0.5,
+    "accent": "snow"
+   },
+   {
+    "factor": "Visibility",
+    "observed": "clear until 12 h",
+    "weightPct": 15,
+    "score": 0.7,
+    "accent": "sun"
+   },
+   {
+    "factor": "Daylight",
+    "observed": "9.4 h",
+    "weightPct": 15,
+    "score": 0.8,
+    "accent": "sun"
+   }
+  ],
+  "ratingTotal": "2.4",
+  "rating": 2,
+  "stationCheck": {
+   "title": "Station check · Gósol",
+   "note": "Yesterday’s blend against the XEMA station at Gósol, below the north face. Ridge wind is underforecast; today’s blend is corrected +2.6 kn.",
+   "tiles": [
+    {
+     "label": "Bias",
+     "value": "+2.6 kn",
+     "sub": "models too low",
+     "accent": "wind"
+    },
+    {
+     "label": "Error",
+     "value": "4.1 kn",
+     "sub": "mean, 30 days"
+    },
+    {
+     "label": "Hit rate",
+     "value": "69 %",
+     "sub": "rating ±1, 30 days"
+    }
+   ]
+  },
+  "tunedToYou": [
+   {
+    "fromProfile": "400 m/h · 8 kg pack",
+    "effect": "1290 m of ascent: summit at 10:45"
+   },
+   {
+    "fromProfile": "Max storm risk 20 %",
+    "effect": "passes 20 % at 13 h: turn back by 12:00"
+   },
+   {
+    "fromProfile": "Max summit wind 30 kn",
+    "effect": "22 kn, gusts 34: gusts are over"
+   },
+   {
+    "fromProfile": "Crampons and ice axe",
+    "effect": "snow above 2300 m is fine for you"
+   }
+  ],
+  "takeaway": "Clear until midday; storm risk passes 20 % at 13 h and peaks at 60 % at 15 h.",
+  "analysisSummary": [
+   "Medium agreement · spread 8 kn",
+   "Score 2.4 / 5",
+   "Station-corrected +2.6 kn"
+  ]
+ }
+}

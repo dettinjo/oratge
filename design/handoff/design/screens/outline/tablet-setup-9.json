@@ -1,0 +1,149 @@
+{
+ "title": "Tablet · Setup 9 · Alerts",
+ "outline": [
+  {
+   "component": "OratgeRoot",
+   "props": {
+    "width": 834
+   },
+   "children": [
+    {
+     "el": "nav",
+     "label": "Main",
+     "children": [
+      {
+       "link": "tablet-today.dc.html",
+       "label": null,
+       "children": [
+        "Today"
+       ]
+      },
+      {
+       "link": "tablet-activities.dc.html",
+       "label": null,
+       "children": [
+        "Activities"
+       ]
+      },
+      {
+       "link": "tablet-map.dc.html",
+       "label": null,
+       "children": [
+        "Map"
+       ]
+      },
+      {
+       "link": "tablet-spots.dc.html",
+       "label": null,
+       "children": [
+        "Spots"
+       ]
+      },
+      {
+       "link": "tablet-profile.dc.html",
+       "label": null,
+       "children": [
+        "Profile"
+       ]
+      }
+     ]
+    },
+    {
+     "el": "main",
+     "children": [
+      {
+       "link": "tablet-setup-8.dc.html",
+       "label": null,
+       "children": [
+        "‹ Back"
+       ]
+      },
+      "Step 9 of 10",
+      {
+       "link": "tablet-profile.dc.html",
+       "label": "Close setup",
+       "children": [
+        "✕"
+       ]
+      },
+      {
+       "el": "progressbar",
+       "label": "Setup progress",
+       "children": []
+      },
+      "Alerts",
+      {
+       "el": "h1",
+       "text": "When should we tell you?",
+       "children": null
+      },
+      {
+       "el": "p",
+       "text": "Alerts and privacy.",
+       "children": null
+      },
+      {
+       "el": "section",
+       "children": [
+        "Notify me when",
+        "A 4 or 5 window appears Up to 3 days ahead",
+        {
+         "input": "checkbox",
+         "label": "A 4 or 5 window appears",
+         "checked": true
+        },
+        "Official warnings hit my spots",
+        {
+         "input": "checkbox",
+         "label": "Official warnings hit my spots",
+         "checked": true
+        },
+        "The plan changes by a full point",
+        {
+         "input": "checkbox",
+         "label": "The plan changes by a full point",
+         "checked": true
+        },
+        "Morning summary at 07:00",
+        {
+         "input": "checkbox",
+         "label": "Morning summary at 07:00"
+        }
+       ]
+      },
+      {
+       "el": "section",
+       "children": [
+        "Privacy",
+        "Sync between my devices End-to-end encrypted",
+        {
+         "input": "checkbox",
+         "label": "Sync between my devices"
+        }
+       ]
+      },
+      {
+       "el": "p",
+       "text": "Your details stay on this device. Every field is optional.",
+       "children": null
+      },
+      {
+       "link": "tablet-setup-10.dc.html",
+       "label": null,
+       "children": [
+        "Continue"
+       ]
+      },
+      {
+       "link": "tablet-setup-10.dc.html",
+       "label": null,
+       "children": [
+        "Skip this step"
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,596 @@
+{
+ "title": "Desktop · Activities",
+ "outline": [
+  {
+   "component": "OratgeRoot",
+   "props": {
+    "width": "100%"
+   },
+   "children": [
+    {
+     "el": "nav",
+     "label": "Main",
+     "children": [
+      "Oratge",
+      {
+       "link": "desktop-today.dc.html",
+       "label": null,
+       "children": [
+        "Today"
+       ]
+      },
+      {
+       "link": "desktop-activities.dc.html",
+       "label": null,
+       "children": [
+        "Activities"
+       ]
+      },
+      {
+       "link": "desktop-map.dc.html",
+       "label": null,
+       "children": [
+        "Map"
+       ]
+      },
+      {
+       "link": "desktop-spots.dc.html",
+       "label": null,
+       "children": [
+        "Spots"
+       ]
+      },
+      {
+       "link": "desktop-profile.dc.html",
+       "label": null,
+       "children": [
+        "Profile"
+       ]
+      },
+      "Appearance",
+      {
+       "el": "group",
+       "label": "Appearance",
+       "children": [
+        {
+         "link": "desktop-activities-light.dc.html",
+         "label": null,
+         "children": [
+          "Light"
+         ]
+        },
+        {
+         "link": "desktop-activities.dc.html",
+         "label": null,
+         "children": [
+          "Dark"
+         ]
+        },
+        {
+         "link": "desktop-activities.dc.html",
+         "label": null,
+         "children": [
+          "System"
+         ]
+        }
+       ]
+      },
+      "Data: Meteocat"
+     ]
+    },
+    {
+     "el": "main",
+     "children": [
+      {
+       "el": "header",
+       "children": [
+        {
+         "el": "h1",
+         "text": "Activities",
+         "children": null
+        },
+        {
+         "el": "p",
+         "text": "Mon 9 Nov · Barcelona",
+         "children": null
+        }
+       ]
+      },
+      {
+       "el": "section",
+       "children": [
+        {
+         "component": "ChipGroup",
+         "props": {
+          "label": "Planner shows",
+          "options": [
+           "Today",
+           "Tomorrow",
+           "Week"
+          ],
+          "selected": "Today"
+         }
+        }
+       ]
+      },
+      {
+       "el": "section",
+       "children": [
+        {
+         "component": "SectionLabel",
+         "children": [
+          "Today for you"
+         ]
+        },
+        {
+         "component": "Card",
+         "props": {
+          "tight": true
+         },
+         "children": [
+          {
+           "link": "desktop-wing.dc.html",
+           "label": "Open the wing planner",
+           "children": [
+            {
+             "component": "ActivityRow",
+             "props": {
+              "sport": "wing",
+              "rating": 4,
+              "window": "13–17 h",
+              "reason": "side-on SW 16–19 kn"
+             }
+            }
+           ]
+          },
+          {
+           "link": "desktop-surf.dc.html",
+           "label": "Open the surf planner",
+           "children": [
+            {
+             "component": "ActivityRow",
+             "props": {
+              "sport": "surf",
+              "rating": 3,
+              "window": "08–11 h",
+              "reason": "E swell 1.1 m, offshore until 10 h"
+             }
+            }
+           ]
+          },
+          {
+           "link": "desktop-bike.dc.html",
+           "label": "Open the bike planner",
+           "children": [
+            {
+             "component": "ActivityRow",
+             "props": {
+              "sport": "bike",
+              "rating": 5,
+              "window": "09–12 h",
+              "reason": "dry before the 13 h showers"
+             }
+            }
+           ]
+          },
+          {
+           "link": "desktop-run.dc.html",
+           "label": "Open the run planner",
+           "children": [
+            {
+             "component": "ActivityRow",
+             "props": {
+              "sport": "run",
+              "rating": 5,
+              "window": "07:30–09:30",
+              "reason": "cool and dry, 11–14°"
+             }
+            }
+           ]
+          },
+          {
+           "link": "desktop-hike.dc.html",
+           "label": "Open the hike planner",
+           "children": [
+            {
+             "component": "ActivityRow",
+             "props": {
+              "sport": "hike",
+              "rating": 2,
+              "window": "07:30–12 h",
+              "reason": "45 % storm risk from 14 h"
+             }
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      },
+      {
+       "el": "section",
+       "children": [
+        {
+         "component": "DayTabs",
+         "props": {
+          "days": [
+           {
+            "weekday": "Mon",
+            "date": 9,
+            "rating": 4,
+            "outlook": false
+           },
+           {
+            "weekday": "Tue",
+            "date": 10,
+            "rating": 4,
+            "outlook": false
+           },
+           {
+            "weekday": "Wed",
+            "date": 11,
+            "rating": 2,
+            "outlook": false
+           },
+           {
+            "weekday": "Thu",
+            "date": 12,
+            "rating": 1,
+            "outlook": true
+           },
+           {
+            "weekday": "Fri",
+            "date": 13,
+            "rating": 1,
+            "outlook": true
+           },
+           {
+            "weekday": "Sat",
+            "date": 14,
+            "rating": 3,
+            "outlook": true
+           },
+           {
+            "weekday": "Sun",
+            "date": 15,
+            "rating": 4,
+            "outlook": true
+           },
+           {
+            "weekday": "Mon",
+            "date": 16,
+            "rating": 2,
+            "outlook": true
+           }
+          ],
+          "selected": 0
+         }
+        }
+       ]
+      },
+      {
+       "el": "section",
+       "children": [
+        {
+         "component": "SectionLabel",
+         "children": [
+          "Rideable hours · last 6 months"
+         ]
+        },
+        {
+         "component": "Card",
+         "children": [
+          {
+           "component": "CalendarHeatmap",
+           "props": {
+            "weeks": [
+             [
+              0,
+              1,
+              0,
+              0,
+              1,
+              0,
+              0
+             ],
+             [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              0
+             ],
+             [
+              0,
+              1,
+              1,
+              0,
+              1,
+              1,
+              2
+             ],
+             [
+              2,
+              0,
+              1,
+              2,
+              2,
+              1,
+              1
+             ],
+             [
+              3,
+              3,
+              1,
+              0,
+              2,
+              0,
+              0
+             ],
+             [
+              0,
+              1,
+              0,
+              3,
+              2,
+              2,
+              3
+             ],
+             [
+              0,
+              0,
+              2,
+              2,
+              1,
+              0,
+              3
+             ],
+             [
+              0,
+              1,
+              1,
+              3,
+              4,
+              2,
+              0
+             ],
+             [
+              1,
+              1,
+              1,
+              1,
+              1,
+              2,
+              2
+             ],
+             [
+              0,
+              4,
+              2,
+              4,
+              3,
+              3,
+              2
+             ],
+             [
+              2,
+              3,
+              5,
+              1,
+              3,
+              1,
+              3
+             ],
+             [
+              1,
+              1,
+              2,
+              4,
+              5,
+              0,
+              4
+             ],
+             [
+              0,
+              2,
+              0,
+              0,
+              5,
+              0,
+              3
+             ],
+             [
+              0,
+              2,
+              3,
+              0,
+              5,
+              5,
+              5
+             ],
+             [
+              5,
+              5,
+              4,
+              1,
+              0,
+              1,
+              0
+             ],
+             [
+              0,
+              3,
+              1,
+              4,
+              2,
+              3,
+              1
+             ],
+             [
+              5,
+              1,
+              1,
+              5,
+              0,
+              2,
+              0
+             ],
+             [
+              5,
+              3,
+              5,
+              0,
+              5,
+              0,
+              5
+             ],
+             [
+              2,
+              3,
+              1,
+              0,
+              0,
+              2,
+              0
+             ],
+             [
+              3,
+              3,
+              3,
+              2,
+              0,
+              0,
+              4
+             ],
+             [
+              0,
+              3,
+              4,
+              0,
+              4,
+              4,
+              4
+             ],
+             [
+              4,
+              3,
+              1,
+              0,
+              3,
+              4,
+              1
+             ],
+             [
+              0,
+              1,
+              3,
+              2,
+              1,
+              2,
+              3
+             ],
+             [
+              1,
+              2,
+              1,
+              0,
+              0,
+              3,
+              3
+             ],
+             [
+              2,
+              2,
+              3,
+              0,
+              2,
+              0,
+              1
+             ],
+             [
+              1,
+              2,
+              2,
+              1,
+              0,
+              1,
+              0
+             ]
+            ],
+            "months": [
+             "May",
+             "Jun",
+             "Jul",
+             "Aug",
+             "Sep",
+             "Oct",
+             "Nov"
+            ],
+            "legend": [
+             "0 h",
+             "6+ h"
+            ],
+            "cell": 14
+           }
+          }
+         ]
+        }
+       ]
+      },
+      {
+       "el": "section",
+       "children": [
+        {
+         "component": "SectionLabel",
+         "children": [
+          "Rideable days per month"
+         ]
+        },
+        {
+         "component": "Card",
+         "children": [
+          {
+           "component": "MonthBars",
+           "props": {
+            "values": [
+             6.1,
+             7.8,
+             10.2,
+             12.4,
+             10.9,
+             8.3,
+             7.1,
+             6.4,
+             7.0,
+             8.8,
+             8.1,
+             6.6
+            ],
+            "highlight": 3,
+            "current": 10,
+            "width": 645
+           }
+          }
+         ]
+        }
+       ]
+      },
+      {
+       "el": "section",
+       "children": [
+        {
+         "component": "DataSources",
+         "children": [
+          "Ratings from Meteocat hourly forecasts and your saved ranges; history from XEMA stations"
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

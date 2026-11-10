@@ -1,0 +1,160 @@
+{
+ "title": "Tablet · Setup 8 · Hike",
+ "outline": [
+  {
+   "component": "OratgeRoot",
+   "props": {
+    "width": 834
+   },
+   "children": [
+    {
+     "el": "nav",
+     "label": "Main",
+     "children": [
+      {
+       "link": "tablet-today.dc.html",
+       "label": null,
+       "children": [
+        "Today"
+       ]
+      },
+      {
+       "link": "tablet-activities.dc.html",
+       "label": null,
+       "children": [
+        "Activities"
+       ]
+      },
+      {
+       "link": "tablet-map.dc.html",
+       "label": null,
+       "children": [
+        "Map"
+       ]
+      },
+      {
+       "link": "tablet-spots.dc.html",
+       "label": null,
+       "children": [
+        "Spots"
+       ]
+      },
+      {
+       "link": "tablet-profile.dc.html",
+       "label": null,
+       "children": [
+        "Profile"
+       ]
+      }
+     ]
+    },
+    {
+     "el": "main",
+     "children": [
+      {
+       "link": "tablet-setup-7.dc.html",
+       "label": null,
+       "children": [
+        "‹ Back"
+       ]
+      },
+      "Step 8 of 10",
+      {
+       "link": "tablet-profile.dc.html",
+       "label": "Close setup",
+       "children": [
+        "✕"
+       ]
+      },
+      {
+       "el": "progressbar",
+       "label": "Setup progress",
+       "children": []
+      },
+      "Hike",
+      {
+       "el": "h1",
+       "text": "Your hiking setup",
+       "children": null
+      },
+      {
+       "el": "p",
+       "text": "Gear and safety limits.",
+       "children": null
+      },
+      {
+       "el": "section",
+       "children": [
+        "Your gear",
+        "Pack weight",
+        {
+         "input": "text",
+         "value": "8",
+         "label": "Pack weight"
+        },
+        "kg Crampons and ice axe Allows routes above the snow level",
+        {
+         "input": "checkbox",
+         "label": "Crampons and ice axe",
+         "checked": true
+        },
+        "Headlamp",
+        {
+         "input": "checkbox",
+         "label": "Headlamp",
+         "checked": true
+        }
+       ]
+      },
+      {
+       "el": "section",
+       "children": [
+        "Your limits",
+        "Max storm risk",
+        {
+         "input": "text",
+         "value": "20",
+         "label": "Max storm risk"
+        },
+        "% Max summit wind",
+        {
+         "input": "text",
+         "value": "30",
+         "label": "Max summit wind"
+        },
+        "kn Daylight margin Back before sunset by",
+        {
+         "input": "text",
+         "value": "1",
+         "label": "Daylight margin"
+        },
+        "h"
+       ]
+      },
+      {
+       "el": "section",
+       "children": [
+        "What this changes",
+        "Turn-back time = when storm risk passes 20 %. Summits rate lower when gusts pass 30 kn."
+       ]
+      },
+      {
+       "link": "tablet-setup-9.dc.html",
+       "label": null,
+       "children": [
+        "Continue"
+       ]
+      },
+      {
+       "link": "tablet-setup-9.dc.html",
+       "label": null,
+       "children": [
+        "Skip this step"
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,291 @@
+{
+ "title": "Desktop · Setup 6 · Bike",
+ "outline": [
+  {
+   "component": "OratgeRoot",
+   "props": {
+    "width": "100%"
+   },
+   "children": [
+    {
+     "el": "nav",
+     "label": "Main",
+     "children": [
+      "Oratge",
+      {
+       "link": "desktop-today.dc.html",
+       "label": null,
+       "children": [
+        "Today"
+       ]
+      },
+      {
+       "link": "desktop-activities.dc.html",
+       "label": null,
+       "children": [
+        "Activities"
+       ]
+      },
+      {
+       "link": "desktop-map.dc.html",
+       "label": null,
+       "children": [
+        "Map"
+       ]
+      },
+      {
+       "link": "desktop-spots.dc.html",
+       "label": null,
+       "children": [
+        "Spots"
+       ]
+      },
+      {
+       "link": "desktop-profile.dc.html",
+       "label": null,
+       "children": [
+        "Profile"
+       ]
+      },
+      "Appearance",
+      {
+       "el": "group",
+       "label": "Appearance",
+       "children": [
+        {
+         "link": "desktop-setup-6-light.dc.html",
+         "label": null,
+         "children": [
+          "Light"
+         ]
+        },
+        {
+         "link": "desktop-setup-6.dc.html",
+         "label": null,
+         "children": [
+          "Dark"
+         ]
+        },
+        {
+         "link": "desktop-setup-6.dc.html",
+         "label": null,
+         "children": [
+          "System"
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "el": "main",
+     "children": [
+      {
+       "el": "nav",
+       "label": "Setup steps",
+       "children": [
+        {
+         "link": "desktop-setup-1.dc.html",
+         "label": null,
+         "children": [
+          "✓",
+          "You"
+         ]
+        },
+        {
+         "link": "desktop-setup-2.dc.html",
+         "label": null,
+         "children": [
+          "✓",
+          "Body and pace"
+         ]
+        },
+        {
+         "link": "desktop-setup-3.dc.html",
+         "label": null,
+         "children": [
+          "✓",
+          "Sports"
+         ]
+        },
+        {
+         "link": "desktop-setup-4.dc.html",
+         "label": null,
+         "children": [
+          "✓",
+          "Wing foil"
+         ]
+        },
+        {
+         "link": "desktop-setup-5.dc.html",
+         "label": null,
+         "children": [
+          "✓",
+          "Surf"
+         ]
+        },
+        {
+         "link": "desktop-setup-6.dc.html",
+         "label": null,
+         "children": [
+          "6",
+          "Bike"
+         ]
+        },
+        {
+         "link": "desktop-setup-7.dc.html",
+         "label": null,
+         "children": [
+          "7",
+          "Run"
+         ]
+        },
+        {
+         "link": "desktop-setup-8.dc.html",
+         "label": null,
+         "children": [
+          "8",
+          "Hike"
+         ]
+        },
+        {
+         "link": "desktop-setup-9.dc.html",
+         "label": null,
+         "children": [
+          "9",
+          "Alerts"
+         ]
+        },
+        {
+         "link": "desktop-setup-10.dc.html",
+         "label": null,
+         "children": [
+          "10",
+          "Done"
+         ]
+        }
+       ]
+      },
+      {
+       "link": "desktop-setup-5.dc.html",
+       "label": null,
+       "children": [
+        "‹ Back"
+       ]
+      },
+      "Step 6 of 10",
+      {
+       "link": "desktop-profile.dc.html",
+       "label": "Close setup",
+       "children": [
+        "✕"
+       ]
+      },
+      {
+       "el": "progressbar",
+       "label": "Setup progress",
+       "children": []
+      },
+      "Bike",
+      {
+       "el": "h1",
+       "text": "Your bike setup",
+       "children": null
+      },
+      {
+       "el": "p",
+       "text": "Bike, kit and your limits.",
+       "children": null
+      },
+      {
+       "el": "section",
+       "children": [
+        "Your bike",
+        "Type",
+        {
+         "input": "radio"
+        },
+        "Road",
+        {
+         "input": "radio",
+         "checked": true
+        },
+        "Gravel",
+        {
+         "input": "radio"
+        },
+        "MTB",
+        {
+         "input": "radio"
+        },
+        "E-bike Tyres",
+        {
+         "input": "text",
+         "value": "40",
+         "label": "Tyres"
+        },
+        "mm Bike and kit",
+        {
+         "input": "text",
+         "value": "11.5",
+         "label": "Bike and kit"
+        },
+        "kg Mudguards Without them, damp roads lower the rating",
+        {
+         "input": "checkbox",
+         "label": "Mudguards"
+        },
+        "Lights Allows windows after sunset",
+        {
+         "input": "checkbox",
+         "label": "Lights",
+         "checked": true
+        }
+       ]
+      },
+      {
+       "el": "section",
+       "children": [
+        "Your limits",
+        "Max wind",
+        {
+         "input": "text",
+         "value": "20",
+         "label": "Max wind"
+        },
+        "kn FTP Optional, for climb times",
+        {
+         "input": "text",
+         "value": "240",
+         "label": "FTP"
+        },
+        "W"
+       ]
+      },
+      {
+       "el": "section",
+       "children": [
+        "What this changes",
+        "Damp roads before 09 h lower the rating. Climb times use your FTP and weight."
+       ]
+      },
+      {
+       "link": "desktop-setup-7.dc.html",
+       "label": null,
+       "children": [
+        "Continue"
+       ]
+      },
+      {
+       "link": "desktop-setup-7.dc.html",
+       "label": null,
+       "children": [
+        "Skip this step"
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,143 @@
+{
+ "title": "Phone · Setup 1 · You",
+ "outline": [
+  {
+   "component": "OratgeRoot",
+   "props": {
+    "width": 390
+   },
+   "children": [
+    {
+     "link": "phone-profile.dc.html",
+     "label": null,
+     "children": [
+      "‹ Profile"
+     ]
+    },
+    "Step 1 of 10",
+    {
+     "link": "phone-profile.dc.html",
+     "label": "Close setup",
+     "children": [
+      "✕"
+     ]
+    },
+    {
+     "el": "progressbar",
+     "label": "Setup progress",
+     "children": []
+    },
+    "You",
+    {
+     "el": "h1",
+     "text": "Where are you and how do you measure?",
+     "children": null
+    },
+    {
+     "el": "p",
+     "text": "Two quick questions so readings come from your stations.",
+     "children": null
+    },
+    {
+     "el": "section",
+     "children": [
+      "Personal",
+      "Name",
+      {
+       "input": "text",
+       "value": "Alex",
+       "label": "Name"
+      },
+      "Home",
+      {
+       "input": "text",
+       "value": "Barcelona",
+       "label": "Home"
+      }
+     ]
+    },
+    {
+     "el": "section",
+     "children": [
+      "Units",
+      "Wind",
+      {
+       "input": "radio",
+       "checked": true
+      },
+      "kn",
+      {
+       "input": "radio"
+      },
+      "km/h",
+      {
+       "input": "radio"
+      },
+      "m/s",
+      {
+       "input": "radio"
+      },
+      "Bft Temperature",
+      {
+       "input": "radio",
+       "checked": true
+      },
+      "°C",
+      {
+       "input": "radio"
+      },
+      "°F"
+     ]
+    },
+    {
+     "el": "section",
+     "children": [
+      "Appearance",
+      {
+       "el": "radiogroup",
+       "label": "Appearance",
+       "children": [
+        {
+         "link": "phone-setup-1-light.dc.html",
+         "label": null,
+         "children": [
+          "Light"
+         ]
+        },
+        {
+         "link": "phone-setup-1.dc.html",
+         "label": null,
+         "children": [
+          "Dark"
+         ]
+        },
+        {
+         "link": "phone-setup-1.dc.html",
+         "label": null,
+         "children": [
+          "System"
+         ]
+        }
+       ]
+      },
+      "System follows your device’s light or dark setting."
+     ]
+    },
+    {
+     "el": "section",
+     "children": [
+      "What this changes",
+      "Your home sets the stations used for live readings. Every screen shows wind and temperature in your units."
+     ]
+    },
+    {
+     "link": "phone-setup-2.dc.html",
+     "label": null,
+     "children": [
+      "Continue"
+     ]
+    }
+   ]
+  }
+ ]
+}

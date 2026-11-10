@@ -1,0 +1,304 @@
+{
+ "title": "Desktop · Setup 1 · You",
+ "outline": [
+  {
+   "component": "OratgeRoot",
+   "props": {
+    "width": "100%"
+   },
+   "children": [
+    {
+     "el": "nav",
+     "label": "Main",
+     "children": [
+      "Oratge",
+      {
+       "link": "desktop-today.dc.html",
+       "label": null,
+       "children": [
+        "Today"
+       ]
+      },
+      {
+       "link": "desktop-activities.dc.html",
+       "label": null,
+       "children": [
+        "Activities"
+       ]
+      },
+      {
+       "link": "desktop-map.dc.html",
+       "label": null,
+       "children": [
+        "Map"
+       ]
+      },
+      {
+       "link": "desktop-spots.dc.html",
+       "label": null,
+       "children": [
+        "Spots"
+       ]
+      },
+      {
+       "link": "desktop-profile.dc.html",
+       "label": null,
+       "children": [
+        "Profile"
+       ]
+      },
+      "Appearance",
+      {
+       "el": "group",
+       "label": "Appearance",
+       "children": [
+        {
+         "link": "desktop-setup-1-light.dc.html",
+         "label": null,
+         "children": [
+          "Light"
+         ]
+        },
+        {
+         "link": "desktop-setup-1.dc.html",
+         "label": null,
+         "children": [
+          "Dark"
+         ]
+        },
+        {
+         "link": "desktop-setup-1.dc.html",
+         "label": null,
+         "children": [
+          "System"
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "el": "main",
+     "children": [
+      {
+       "el": "nav",
+       "label": "Setup steps",
+       "children": [
+        {
+         "link": "desktop-setup-1.dc.html",
+         "label": null,
+         "children": [
+          "1",
+          "You"
+         ]
+        },
+        {
+         "link": "desktop-setup-2.dc.html",
+         "label": null,
+         "children": [
+          "2",
+          "Body and pace"
+         ]
+        },
+        {
+         "link": "desktop-setup-3.dc.html",
+         "label": null,
+         "children": [
+          "3",
+          "Sports"
+         ]
+        },
+        {
+         "link": "desktop-setup-4.dc.html",
+         "label": null,
+         "children": [
+          "4",
+          "Wing foil"
+         ]
+        },
+        {
+         "link": "desktop-setup-5.dc.html",
+         "label": null,
+         "children": [
+          "5",
+          "Surf"
+         ]
+        },
+        {
+         "link": "desktop-setup-6.dc.html",
+         "label": null,
+         "children": [
+          "6",
+          "Bike"
+         ]
+        },
+        {
+         "link": "desktop-setup-7.dc.html",
+         "label": null,
+         "children": [
+          "7",
+          "Run"
+         ]
+        },
+        {
+         "link": "desktop-setup-8.dc.html",
+         "label": null,
+         "children": [
+          "8",
+          "Hike"
+         ]
+        },
+        {
+         "link": "desktop-setup-9.dc.html",
+         "label": null,
+         "children": [
+          "9",
+          "Alerts"
+         ]
+        },
+        {
+         "link": "desktop-setup-10.dc.html",
+         "label": null,
+         "children": [
+          "10",
+          "Done"
+         ]
+        }
+       ]
+      },
+      {
+       "link": "desktop-profile.dc.html",
+       "label": null,
+       "children": [
+        "‹ Profile"
+       ]
+      },
+      "Step 1 of 10",
+      {
+       "link": "desktop-profile.dc.html",
+       "label": "Close setup",
+       "children": [
+        "✕"
+       ]
+      },
+      {
+       "el": "progressbar",
+       "label": "Setup progress",
+       "children": []
+      },
+      "You",
+      {
+       "el": "h1",
+       "text": "Where are you and how do you measure?",
+       "children": null
+      },
+      {
+       "el": "p",
+       "text": "Two quick questions so readings come from your stations.",
+       "children": null
+      },
+      {
+       "el": "section",
+       "children": [
+        "Personal",
+        "Name",
+        {
+         "input": "text",
+         "value": "Alex",
+         "label": "Name"
+        },
+        "Home",
+        {
+         "input": "text",
+         "value": "Barcelona",
+         "label": "Home"
+        }
+       ]
+      },
+      {
+       "el": "section",
+       "children": [
+        "Units",
+        "Wind",
+        {
+         "input": "radio",
+         "checked": true
+        },
+        "kn",
+        {
+         "input": "radio"
+        },
+        "km/h",
+        {
+         "input": "radio"
+        },
+        "m/s",
+        {
+         "input": "radio"
+        },
+        "Bft Temperature",
+        {
+         "input": "radio",
+         "checked": true
+        },
+        "°C",
+        {
+         "input": "radio"
+        },
+        "°F"
+       ]
+      },
+      {
+       "el": "section",
+       "children": [
+        "Appearance",
+        {
+         "el": "radiogroup",
+         "label": "Appearance",
+         "children": [
+          {
+           "link": "desktop-setup-1-light.dc.html",
+           "label": null,
+           "children": [
+            "Light"
+           ]
+          },
+          {
+           "link": "desktop-setup-1.dc.html",
+           "label": null,
+           "children": [
+            "Dark"
+           ]
+          },
+          {
+           "link": "desktop-setup-1.dc.html",
+           "label": null,
+           "children": [
+            "System"
+           ]
+          }
+         ]
+        },
+        "System follows your device’s light or dark setting."
+       ]
+      },
+      {
+       "el": "section",
+       "children": [
+        "What this changes",
+        "Your home sets the stations used for live readings. Every screen shows wind and temperature in your units."
+       ]
+      },
+      {
+       "link": "desktop-setup-2.dc.html",
+       "label": null,
+       "children": [
+        "Continue"
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

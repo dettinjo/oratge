@@ -1,0 +1,950 @@
+{
+ "title": "Desktop · Surf · Ocata",
+ "outline": [
+  {
+   "component": "OratgeRoot",
+   "props": {
+    "width": "100%"
+   },
+   "children": [
+    {
+     "el": "nav",
+     "label": "Main",
+     "children": [
+      "Oratge",
+      {
+       "link": "desktop-today.dc.html",
+       "label": null,
+       "children": [
+        "Today"
+       ]
+      },
+      {
+       "link": "desktop-activities.dc.html",
+       "label": null,
+       "children": [
+        "Activities"
+       ]
+      },
+      {
+       "link": "desktop-map.dc.html",
+       "label": null,
+       "children": [
+        "Map"
+       ]
+      },
+      {
+       "link": "desktop-spots.dc.html",
+       "label": null,
+       "children": [
+        "Spots"
+       ]
+      },
+      {
+       "link": "desktop-profile.dc.html",
+       "label": null,
+       "children": [
+        "Profile"
+       ]
+      },
+      "Appearance",
+      {
+       "el": "group",
+       "label": "Appearance",
+       "children": [
+        {
+         "link": "desktop-surf-light.dc.html",
+         "label": null,
+         "children": [
+          "Light"
+         ]
+        },
+        {
+         "link": "desktop-surf.dc.html",
+         "label": null,
+         "children": [
+          "Dark"
+         ]
+        },
+        {
+         "link": "desktop-surf.dc.html",
+         "label": null,
+         "children": [
+          "System"
+         ]
+        }
+       ]
+      },
+      "Data: Meteocat"
+     ]
+    },
+    {
+     "el": "main",
+     "children": [
+      {
+       "el": "header",
+       "children": [
+        {
+         "link": "desktop-activities.dc.html",
+         "label": null,
+         "children": [
+          "‹ Back to Activities"
+         ]
+        },
+        {
+         "el": "h1",
+         "text": "Surf · Ocata",
+         "children": null
+        },
+        {
+         "el": "p",
+         "text": "Mon 9 Nov · Barcelona",
+         "children": null
+        }
+       ]
+      },
+      {
+       "el": "section",
+       "children": [
+        {
+         "component": "DayTabs",
+         "props": {
+          "days": [
+           {
+            "weekday": "Mon",
+            "date": 9,
+            "rating": 3,
+            "outlook": false
+           },
+           {
+            "weekday": "Tue",
+            "date": 10,
+            "rating": 3,
+            "outlook": false
+           },
+           {
+            "weekday": "Wed",
+            "date": 11,
+            "rating": 4,
+            "outlook": false
+           },
+           {
+            "weekday": "Thu",
+            "date": 12,
+            "rating": 2,
+            "outlook": true
+           },
+           {
+            "weekday": "Fri",
+            "date": 13,
+            "rating": 1,
+            "outlook": true
+           },
+           {
+            "weekday": "Sat",
+            "date": 14,
+            "rating": 1,
+            "outlook": true
+           },
+           {
+            "weekday": "Sun",
+            "date": 15,
+            "rating": 2,
+            "outlook": true
+           },
+           {
+            "weekday": "Mon",
+            "date": 16,
+            "rating": 3,
+            "outlook": true
+           }
+          ],
+          "selected": 0
+         }
+        }
+       ]
+      },
+      {
+       "el": "section",
+       "children": [
+        {
+         "component": "VerdictCard",
+         "props": {
+          "rating": 3,
+          "best": "Best 08–11 h · before the sea breeze",
+          "confidence": "Medium confidence",
+          "summary": "E swell 1.1 m at 9 s, offshore NW until 10 h. Sea breeze turns side-on from 13 h and the swell fades to 0.7 m."
+         }
+        }
+       ]
+      },
+      {
+       "el": "section",
+       "children": [
+        {
+         "component": "SectionLabel",
+         "children": [
+          "In the window"
+         ]
+        },
+        {
+         "component": "FactTile",
+         "props": {
+          "size": "lg",
+          "label": "Swell",
+          "value": "1.1 m",
+          "sub": "E · fading to 0.7 m",
+          "accent": "water"
+         }
+        },
+        {
+         "component": "FactTile",
+         "props": {
+          "size": "lg",
+          "label": "Period",
+          "value": "9 s",
+          "sub": "groundswell",
+          "accent": "water"
+         }
+        },
+        {
+         "component": "FactTile",
+         "props": {
+          "size": "lg",
+          "label": "Wind",
+          "value": "6 kn",
+          "sub": "NW offshore",
+          "accent": "wind"
+         }
+        },
+        {
+         "component": "FactTile",
+         "props": {
+          "size": "lg",
+          "label": "Water",
+          "value": "18.6°",
+          "sub": "3/2 suit",
+          "accent": "water"
+         }
+        }
+       ]
+      },
+      {
+       "el": "section",
+       "children": [
+        {
+         "component": "SectionLabel",
+         "children": [
+          "Tuned to you"
+         ]
+        },
+        {
+         "component": "Card",
+         "children": [
+          "48 l mid-length 1.1 m at 9 s is in your sweet spot",
+          "Minimum period 8 s window ends when it drops below 8 s at 16 h",
+          "Avoid crowds weekday morning: quieter than Sat",
+          "Feels the cold 3/2 fine; 4/3 if you stay past 11 h",
+          {
+           "link": "desktop-setup-5.dc.html",
+           "label": null,
+           "children": [
+            "Edit your setup ›"
+           ]
+          }
+         ]
+        }
+       ]
+      },
+      {
+       "el": "section",
+       "children": [
+        {
+         "component": "SectionLabel",
+         "children": [
+          "Swell window"
+         ]
+        },
+        {
+         "component": "Card",
+         "children": [
+          {
+           "component": "SwellWindow",
+           "props": {
+            "swellFrom": 95,
+            "exposure": [
+             40,
+             180
+            ],
+            "size": 180
+           }
+          }
+         ]
+        }
+       ]
+      },
+      {
+       "el": "section",
+       "children": [
+        {
+         "component": "SectionLabel",
+         "children": [
+          "Plan"
+         ]
+        },
+        {
+         "component": "FactTile",
+         "props": {
+          "label": "Sunrise",
+          "value": "07:47",
+          "sub": "first light 07:20",
+          "accent": "sun"
+         }
+        },
+        {
+         "component": "FactTile",
+         "props": {
+          "label": "Sea breeze",
+          "value": "from 13 h",
+          "sub": "side-on",
+          "accent": "wind"
+         }
+        },
+        {
+         "component": "FactTile",
+         "props": {
+          "label": "Air",
+          "value": "15°",
+          "sub": "at 09 h",
+          "accent": "heat"
+         }
+        },
+        {
+         "component": "FactTile",
+         "props": {
+          "label": "UV max",
+          "value": "2",
+          "sub": "low",
+          "accent": "sun"
+         }
+        }
+       ]
+      },
+      {
+       "el": "section",
+       "children": [
+        {
+         "component": "SectionLabel",
+         "children": [
+          "Hour by hour"
+         ]
+        },
+        {
+         "el": "p",
+         "text": "Best before 11 h: 1.1 m at 9 s with offshore wind, then the sea breeze turns it messy.",
+         "children": null
+        },
+        {
+         "el": "group",
+         "label": "Best before 11 h: 1.1 m at 9 s with offshore wind, then the sea breeze turns it messy.",
+         "children": [
+          {
+           "component": "Card",
+           "children": [
+            {
+             "component": "HourChart",
+             "props": {
+              "hours": [
+               7,
+               8,
+               9,
+               10,
+               11,
+               12,
+               13,
+               14,
+               15,
+               16,
+               17,
+               18,
+               19,
+               20
+              ],
+              "rows": [
+               {
+                "type": "icons",
+                "label": "Sky",
+                "values": [
+                 "sun",
+                 "sun",
+                 "sun",
+                 "partly",
+                 "partly",
+                 "partly",
+                 "cloud",
+                 "cloud",
+                 "cloud",
+                 "cloud",
+                 "partly",
+                 "night",
+                 "night",
+                 "night"
+                ]
+               },
+               {
+                "type": "rating",
+                "label": "Rating",
+                "values": [
+                 3,
+                 3,
+                 3,
+                 3,
+                 2,
+                 2,
+                 1,
+                 1,
+                 1,
+                 1,
+                 1,
+                 0,
+                 0,
+                 0
+                ]
+               },
+               {
+                "type": "bars",
+                "label": "Waves",
+                "unit": "m",
+                "accent": "water",
+                "max": 1.6,
+                "labelEvery": 2,
+                "decimals": 1,
+                "values": [
+                 1.1,
+                 1.1,
+                 1.0,
+                 1.0,
+                 0.9,
+                 0.9,
+                 0.8,
+                 0.8,
+                 0.7,
+                 0.7,
+                 0.7,
+                 0.6,
+                 0.6,
+                 0.6
+                ],
+                "height": 44
+               },
+               {
+                "type": "numbers",
+                "label": "Period",
+                "unit": "s",
+                "accent": "water",
+                "values": [
+                 9,
+                 9,
+                 9,
+                 9,
+                 8,
+                 8,
+                 8,
+                 8,
+                 8,
+                 7,
+                 7,
+                 7,
+                 7,
+                 7
+                ]
+               },
+               {
+                "type": "arrows",
+                "label": "Wind",
+                "unit": "vs shore",
+                "accent": "wind",
+                "directions": [
+                 330,
+                 330,
+                 320,
+                 300,
+                 260,
+                 230,
+                 220,
+                 210,
+                 200,
+                 200,
+                 210,
+                 230,
+                 260,
+                 300
+                ],
+                "shore": [
+                 "off",
+                 "off",
+                 "off",
+                 "off",
+                 "side",
+                 "side-on",
+                 "side-on",
+                 "side-on",
+                 "side-on",
+                 "side-on",
+                 "side-on",
+                 "side-on",
+                 "side",
+                 "off"
+                ]
+               },
+               {
+                "type": "numbers",
+                "label": "Speed",
+                "unit": "kn",
+                "values": [
+                 6,
+                 6,
+                 7,
+                 8,
+                 9,
+                 10,
+                 12,
+                 13,
+                 13,
+                 12,
+                 10,
+                 8,
+                 7,
+                 6
+                ],
+                "emphasizeAbove": 12
+               },
+               {
+                "type": "numbers",
+                "label": "Air",
+                "unit": "°C",
+                "accent": "heat",
+                "suffix": "°",
+                "values": [
+                 12,
+                 13,
+                 15,
+                 17,
+                 18,
+                 19,
+                 19,
+                 19,
+                 18,
+                 17,
+                 16,
+                 15,
+                 14,
+                 14
+                ]
+               }
+              ],
+              "best": [
+               8,
+               11
+              ],
+              "width": 645
+             }
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      },
+      {
+       "el": "section",
+       "children": [
+        {
+         "component": "SectionLabel",
+         "children": [
+          "Next 3 days"
+         ]
+        },
+        {
+         "component": "Card",
+         "children": [
+          {
+           "component": "WaveBars",
+           "props": {
+            "heights": [
+             0.35,
+             0.44,
+             0.5,
+             0.52,
+             0.51,
+             0.49,
+             0.5,
+             0.57,
+             0.71,
+             0.88,
+             1.03,
+             1.12,
+             1.11,
+             1.0,
+             0.84,
+             0.65,
+             0.47,
+             0.32,
+             0.23,
+             0.21,
+             0.24,
+             0.32,
+             0.41,
+             0.47
+            ],
+            "periods": [
+             6,
+             7,
+             7,
+             7,
+             7,
+             7,
+             7,
+             7,
+             8,
+             9,
+             10,
+             10,
+             10,
+             10,
+             8,
+             7,
+             7,
+             6,
+             6,
+             6,
+             6,
+             6,
+             6,
+             7
+            ],
+            "windFrom": [
+             290,
+             290,
+             290,
+             110,
+             110,
+             110,
+             200,
+             200,
+             290,
+             290,
+             290,
+             110,
+             110,
+             110,
+             200,
+             200,
+             290,
+             290,
+             290,
+             110,
+             110,
+             110,
+             200,
+             200
+            ],
+            "days": [
+             "Mon",
+             "Tue",
+             "Wed"
+            ],
+            "best": [
+             8,
+             9
+            ],
+            "width": 1088
+           }
+          }
+         ]
+        }
+       ]
+      },
+      {
+       "el": "section",
+       "children": [
+        {
+         "el": "details",
+         "collapsedByDefault": false,
+         "children": [
+          {
+           "el": "summary",
+           "text": "How this forecast was made Hide details › Coastal models agree · spread 0.4 m Score 3.3 / 5 Buoy check: no correction",
+           "children": null
+          },
+          {
+           "component": "SectionLabel",
+           "children": [
+            "Model agreement · waves at 09 h"
+           ]
+          },
+          {
+           "component": "Card",
+           "children": [
+            "model blend scale 0.4–1.8 m",
+            "Meteocat SWAN coastal 1 km · weight 35 % 1.1",
+            "Copernicus MED 4 km waves · weight 25 % 1.2",
+            "Puertos del Estado buoy-assimilated · weight 20 % 1.0",
+            "ECMWF WAM 9 km · weight 15 % 0.9",
+            "GFS WaveWatch III 25 km · weight 5 % 0.8",
+            "Oratge blend 1.1 m Model spread 0.4 m Coastal models agree; global models miss the short-fetch E swell."
+           ]
+          },
+          {
+           "component": "SectionLabel",
+           "children": [
+            "Why 3 of 5"
+           ]
+          },
+          {
+           "component": "Card",
+           "children": [
+            "Swell height 1.1 m · weight 30 % 0.5",
+            "Period 9 s · weight 25 % 0.5",
+            "Wind vs shore offshore NW · weight 25 % 0.9",
+            "Swell direction E, inside 40–180° · weight 10 % 0.9",
+            "Daylight sunrise 07:47 · weight 10 % 0.8",
+            "3.3 / 5",
+            {
+             "component": "RatingDots",
+             "props": {
+              "value": 3,
+              "size": "lg",
+              "showWord": true
+             }
+            }
+           ]
+          },
+          {
+           "component": "SectionLabel",
+           "children": [
+            "Ensemble · waves"
+           ]
+          },
+          {
+           "component": "Card",
+           "children": [
+            "Solid line: ensemble median. Shading up to the 90th percentile, dashed line at the 10th, from 67 members (ECMWF ENS 51 + AROME-EPS 16). Bars: chance the condition holds.",
+            {
+             "component": "HourChart",
+             "props": {
+              "hours": [
+               7,
+               8,
+               9,
+               10,
+               11,
+               12,
+               13,
+               14,
+               15,
+               16,
+               17,
+               18,
+               19,
+               20
+              ],
+              "rows": [
+               {
+                "type": "line",
+                "label": "Waves P50",
+                "unit": "m",
+                "accent": "water",
+                "min": 0,
+                "max": 1.8,
+                "values": [
+                 1.1,
+                 1.1,
+                 1.0,
+                 1.0,
+                 0.9,
+                 0.9,
+                 0.8,
+                 0.8,
+                 0.7,
+                 0.7,
+                 0.7,
+                 0.6,
+                 0.6,
+                 0.6
+                ],
+                "band": [
+                 1.3,
+                 1.3,
+                 1.2,
+                 1.2,
+                 1.1,
+                 1.1,
+                 1.0,
+                 1.0,
+                 0.9,
+                 0.9,
+                 0.9,
+                 0.8,
+                 0.8,
+                 0.8
+                ],
+                "labelAt": [
+                 0
+                ],
+                "height": 80,
+                "companion": [
+                 0.9,
+                 0.9,
+                 0.8,
+                 0.8,
+                 0.7,
+                 0.7,
+                 0.6,
+                 0.6,
+                 0.5,
+                 0.5,
+                 0.5,
+                 0.4,
+                 0.4,
+                 0.4
+                ]
+               },
+               {
+                "type": "bars",
+                "label": "≥ 0.9 m",
+                "unit": "%",
+                "accent": "water",
+                "max": 100,
+                "labelEvery": 2,
+                "values": [
+                 80,
+                 78,
+                 70,
+                 65,
+                 50,
+                 45,
+                 30,
+                 25,
+                 15,
+                 12,
+                 10,
+                 5,
+                 5,
+                 5
+                ],
+                "height": 40
+               }
+              ],
+              "best": [
+               8,
+               11
+              ],
+              "width": 536
+             }
+            }
+           ]
+          },
+          {
+           "component": "SectionLabel",
+           "children": [
+            "Buoy check · Barcelona coast"
+           ]
+          },
+          {
+           "component": "Card",
+           "children": [
+            {
+             "component": "TrendLine",
+             "props": {
+              "accent": "water",
+              "values": [
+               0.6,
+               0.6,
+               0.7,
+               0.9,
+               1.0,
+               1.1,
+               1.2,
+               1.2,
+               1.1,
+               1.0,
+               1.0,
+               1.1
+              ],
+              "compare": [
+               0.6,
+               0.7,
+               0.8,
+               0.9,
+               1.0,
+               1.0,
+               1.1,
+               1.1,
+               1.0,
+               1.0,
+               1.1,
+               1.1
+              ],
+              "nowIndex": 11,
+              "nowLabel": "now 1.1",
+              "caption": [
+               "−24 h",
+               "now"
+              ],
+              "min": 0,
+              "max": 2,
+              "height": 90,
+              "width": 536
+             }
+            },
+            "solid: measured at the station dashed: yesterday’s forecast",
+            "Yesterday’s blend against the Barcelona coastal buoy. Small negative bias, no correction applied.",
+            {
+             "component": "FactTile",
+             "props": {
+              "label": "Bias",
+              "value": "−0.1 m",
+              "sub": "models slightly high",
+              "accent": "water"
+             }
+            },
+            {
+             "component": "FactTile",
+             "props": {
+              "label": "Error",
+              "value": "0.15 m",
+              "sub": "mean, 30 days"
+             }
+            },
+            {
+             "component": "FactTile",
+             "props": {
+              "label": "Hit rate",
+              "value": "78 %",
+              "sub": "rating ±1, 30 days"
+             }
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      },
+      {
+       "el": "section",
+       "children": [
+        {
+         "component": "DataSources",
+         "children": [
+          "beach forecast Ocata (waves, period, water), XEMA wind, buoy Barcelona coast, municipal hourly, warnings"
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

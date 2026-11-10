@@ -1,0 +1,217 @@
+{
+ "title": "Tablet · Setup 4 · Wing foil",
+ "outline": [
+  {
+   "component": "OratgeRoot",
+   "props": {
+    "width": 834
+   },
+   "children": [
+    {
+     "el": "nav",
+     "label": "Main",
+     "children": [
+      {
+       "link": "tablet-today.dc.html",
+       "label": null,
+       "children": [
+        "Today"
+       ]
+      },
+      {
+       "link": "tablet-activities.dc.html",
+       "label": null,
+       "children": [
+        "Activities"
+       ]
+      },
+      {
+       "link": "tablet-map.dc.html",
+       "label": null,
+       "children": [
+        "Map"
+       ]
+      },
+      {
+       "link": "tablet-spots.dc.html",
+       "label": null,
+       "children": [
+        "Spots"
+       ]
+      },
+      {
+       "link": "tablet-profile.dc.html",
+       "label": null,
+       "children": [
+        "Profile"
+       ]
+      }
+     ]
+    },
+    {
+     "el": "main",
+     "children": [
+      {
+       "link": "tablet-setup-3.dc.html",
+       "label": null,
+       "children": [
+        "‹ Back"
+       ]
+      },
+      "Step 4 of 10",
+      {
+       "link": "tablet-profile.dc.html",
+       "label": "Close setup",
+       "children": [
+        "✕"
+       ]
+      },
+      {
+       "el": "progressbar",
+       "label": "Setup progress",
+       "children": []
+      },
+      "Wing foil",
+      {
+       "el": "h1",
+       "text": "Your wing foil setup",
+       "children": null
+      },
+      {
+       "el": "p",
+       "text": "Gear and the conditions you enjoy.",
+       "children": null
+      },
+      {
+       "el": "section",
+       "children": [
+        "Your gear",
+        "Wings you own",
+        {
+         "input": "checkbox"
+        },
+        "3 m",
+        {
+         "input": "checkbox",
+         "checked": true
+        },
+        "✓ 4 m",
+        {
+         "input": "checkbox",
+         "checked": true
+        },
+        "✓ 5 m",
+        {
+         "input": "checkbox"
+        },
+        "6 m Board volume",
+        {
+         "input": "text",
+         "value": "95",
+         "label": "Board volume"
+        },
+        "l Front wing",
+        {
+         "input": "text",
+         "value": "1100",
+         "label": "Front wing"
+        },
+        "cm²"
+       ]
+      },
+      {
+       "el": "section",
+       "children": [
+        "Your conditions",
+        "Wind range Where you ride comfortably",
+        {
+         "input": "text",
+         "value": "14",
+         "label": "Wind range from"
+        },
+        "–",
+        {
+         "input": "text",
+         "value": "24",
+         "label": "Wind range to"
+        },
+        "kn Gust limit",
+        {
+         "input": "text",
+         "value": "26",
+         "label": "Gust limit"
+        },
+        "kn Allowed directions",
+        {
+         "input": "checkbox",
+         "checked": true
+        },
+        "✓ Onshore",
+        {
+         "input": "checkbox",
+         "checked": true
+        },
+        "✓ Side-on",
+        {
+         "input": "checkbox",
+         "checked": true
+        },
+        "✓ Side",
+        {
+         "input": "checkbox"
+        },
+        "Offshore Offshore never rates above 1"
+       ]
+      },
+      {
+       "el": "section",
+       "children": [
+        "Level and wetsuit",
+        "Level",
+        {
+         "input": "radio"
+        },
+        "Learning",
+        {
+         "input": "radio",
+         "checked": true
+        },
+        "Riding upwind",
+        {
+         "input": "radio"
+        },
+        "Jumping Wetsuits",
+        {
+         "input": "text",
+         "value": "3/2, 4/3 + booties",
+         "label": "Wetsuits"
+        }
+       ]
+      },
+      {
+       "el": "section",
+       "children": [
+        "What this changes",
+        "Rideable from 14 kn instead of the default 12. 5 m wing until gusts pass 22 kn, then 4 m. Offshore hours drop to a 1 rating."
+       ]
+      },
+      {
+       "link": "tablet-setup-5.dc.html",
+       "label": null,
+       "children": [
+        "Continue"
+       ]
+      },
+      {
+       "link": "tablet-setup-5.dc.html",
+       "label": null,
+       "children": [
+        "Skip this step"
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

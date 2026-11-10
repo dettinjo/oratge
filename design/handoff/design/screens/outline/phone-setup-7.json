@@ -1,0 +1,108 @@
+{
+ "title": "Phone · Setup 7 · Run",
+ "outline": [
+  {
+   "component": "OratgeRoot",
+   "props": {
+    "width": 390
+   },
+   "children": [
+    {
+     "link": "phone-setup-6.dc.html",
+     "label": null,
+     "children": [
+      "‹ Back"
+     ]
+    },
+    "Step 7 of 10",
+    {
+     "link": "phone-profile.dc.html",
+     "label": "Close setup",
+     "children": [
+      "✕"
+     ]
+    },
+    {
+     "el": "progressbar",
+     "label": "Setup progress",
+     "children": []
+    },
+    "Run",
+    {
+     "el": "h1",
+     "text": "Your running setup",
+     "children": null
+    },
+    {
+     "el": "p",
+     "text": "How and where you run.",
+     "children": null
+    },
+    {
+     "el": "section",
+     "children": [
+      "Your runs",
+      "Usually on",
+      {
+       "input": "radio",
+       "checked": true
+      },
+      "Road",
+      {
+       "input": "radio"
+      },
+      "Trail",
+      {
+       "input": "radio"
+      },
+      "Track Typical distance",
+      {
+       "input": "text",
+       "value": "10",
+       "label": "Typical distance"
+      },
+      "km Comfortable temperature",
+      {
+       "input": "text",
+       "value": "5",
+       "label": "Comfortable temperature from"
+      },
+      "–",
+      {
+       "input": "text",
+       "value": "22",
+       "label": "Comfortable temperature to"
+      },
+      "° Light rain is fine",
+      {
+       "input": "checkbox",
+       "label": "Light rain is fine",
+       "checked": true
+      }
+     ]
+    },
+    {
+     "el": "section",
+     "children": [
+      "What this changes",
+      "Best windows stay between 5 and 22°. What to wear uses how you feel the cold."
+     ]
+    },
+    {
+     "link": "phone-setup-8.dc.html",
+     "label": null,
+     "children": [
+      "Continue"
+     ]
+    },
+    {
+     "link": "phone-setup-8.dc.html",
+     "label": null,
+     "children": [
+      "Skip this step"
+     ]
+    }
+   ]
+  }
+ ]
+}

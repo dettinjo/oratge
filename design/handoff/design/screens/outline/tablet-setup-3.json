@@ -1,0 +1,136 @@
+{
+ "title": "Tablet · Setup 3 · Sports",
+ "outline": [
+  {
+   "component": "OratgeRoot",
+   "props": {
+    "width": 834
+   },
+   "children": [
+    {
+     "el": "nav",
+     "label": "Main",
+     "children": [
+      {
+       "link": "tablet-today.dc.html",
+       "label": null,
+       "children": [
+        "Today"
+       ]
+      },
+      {
+       "link": "tablet-activities.dc.html",
+       "label": null,
+       "children": [
+        "Activities"
+       ]
+      },
+      {
+       "link": "tablet-map.dc.html",
+       "label": null,
+       "children": [
+        "Map"
+       ]
+      },
+      {
+       "link": "tablet-spots.dc.html",
+       "label": null,
+       "children": [
+        "Spots"
+       ]
+      },
+      {
+       "link": "tablet-profile.dc.html",
+       "label": null,
+       "children": [
+        "Profile"
+       ]
+      }
+     ]
+    },
+    {
+     "el": "main",
+     "children": [
+      {
+       "link": "tablet-setup-2.dc.html",
+       "label": null,
+       "children": [
+        "‹ Back"
+       ]
+      },
+      "Step 3 of 10",
+      {
+       "link": "tablet-profile.dc.html",
+       "label": "Close setup",
+       "children": [
+        "✕"
+       ]
+      },
+      {
+       "el": "progressbar",
+       "label": "Setup progress",
+       "children": []
+      },
+      "Sports",
+      {
+       "el": "h1",
+       "text": "Which sports do you do?",
+       "children": null
+      },
+      {
+       "el": "p",
+       "text": "Pick all that apply.",
+       "children": null
+      },
+      {
+       "input": "checkbox",
+       "checked": true
+      },
+      "Wing foil Wind range, wing size, gusts",
+      {
+       "input": "checkbox",
+       "checked": true
+      },
+      "Surf Swell, period, offshore wind",
+      {
+       "input": "checkbox",
+       "checked": true
+      },
+      "Bike Dry windows, route wind, roads",
+      {
+       "input": "checkbox",
+       "checked": true
+      },
+      "Run Temperature, heat, rain",
+      {
+       "input": "checkbox",
+       "checked": true
+      },
+      "Hike Storms, summit wind, snow",
+      {
+       "el": "section",
+       "children": [
+        "What this changes",
+        "Only the sports you pick get ratings, planners and alerts. You can add or remove sports any time."
+       ]
+      },
+      {
+       "link": "tablet-setup-4.dc.html",
+       "label": null,
+       "children": [
+        "Continue"
+       ]
+      },
+      {
+       "link": "tablet-setup-4.dc.html",
+       "label": null,
+       "children": [
+        "Skip this step"
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

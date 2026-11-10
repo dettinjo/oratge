@@ -1,0 +1,1171 @@
+{
+ "title": "Phone · Wing foil · Castelldefels",
+ "outline": [
+  {
+   "component": "OratgeRoot",
+   "props": {
+    "width": 390
+   },
+   "children": [
+    {
+     "el": "header",
+     "children": [
+      {
+       "link": "phone-profile.dc.html",
+       "label": "Profile and setup",
+       "children": []
+      },
+      {
+       "link": "phone-activities.dc.html",
+       "label": null,
+       "children": [
+        "‹ Back to Activities"
+       ]
+      },
+      {
+       "el": "h1",
+       "text": "Wing foil · Castelldefels",
+       "children": null
+      },
+      {
+       "el": "p",
+       "text": "Mon 9 Nov · Barcelona",
+       "children": null
+      }
+     ]
+    },
+    {
+     "el": "section",
+     "children": [
+      {
+       "component": "DayTabs",
+       "props": {
+        "days": [
+         {
+          "weekday": "Mon",
+          "date": 9,
+          "rating": 4,
+          "outlook": false
+         },
+         {
+          "weekday": "Tue",
+          "date": 10,
+          "rating": 4,
+          "outlook": false
+         },
+         {
+          "weekday": "Wed",
+          "date": 11,
+          "rating": 2,
+          "outlook": false
+         },
+         {
+          "weekday": "Thu",
+          "date": 12,
+          "rating": 1,
+          "outlook": true
+         },
+         {
+          "weekday": "Fri",
+          "date": 13,
+          "rating": 1,
+          "outlook": true
+         },
+         {
+          "weekday": "Sat",
+          "date": 14,
+          "rating": 3,
+          "outlook": true
+         },
+         {
+          "weekday": "Sun",
+          "date": 15,
+          "rating": 4,
+          "outlook": true
+         },
+         {
+          "weekday": "Mon",
+          "date": 16,
+          "rating": 2,
+          "outlook": true
+         }
+        ],
+        "selected": 0
+       }
+      }
+     ]
+    },
+    {
+     "el": "section",
+     "children": [
+      {
+       "component": "VerdictCard",
+       "props": {
+        "rating": 4,
+        "best": "Best 13–17 h · peak 14–16 h",
+        "confidence": "High confidence",
+        "summary": "Side-on SW building to 16–19 kn, gusts ≤ 24. Chop rising to 0.8 m. Morning offshore NW, so stay ashore before 10 h."
+       }
+      }
+     ]
+    },
+    {
+     "el": "section",
+     "children": [
+      {
+       "component": "SectionLabel",
+       "children": [
+        "In the window"
+       ]
+      },
+      {
+       "component": "FactTile",
+       "props": {
+        "size": "lg",
+        "label": "Wind",
+        "value": "16–19 kn",
+        "sub": "side-on SW",
+        "accent": "wind"
+       }
+      },
+      {
+       "component": "FactTile",
+       "props": {
+        "size": "lg",
+        "label": "Gusts",
+        "value": "≤ 24 kn",
+        "sub": "peak 15 h",
+        "accent": "wind"
+       }
+      },
+      {
+       "component": "FactTile",
+       "props": {
+        "size": "lg",
+        "label": "Waves",
+        "value": "0.8 m",
+        "sub": "chop",
+        "accent": "water"
+       }
+      },
+      {
+       "component": "FactTile",
+       "props": {
+        "size": "lg",
+        "label": "Air",
+        "value": "19°",
+        "sub": "feels 18°",
+        "accent": "heat"
+       }
+      }
+     ]
+    },
+    {
+     "el": "section",
+     "children": [
+      {
+       "component": "SectionLabel",
+       "children": [
+        "Hour by hour"
+       ]
+      },
+      {
+       "el": "p",
+       "text": "Inside your range from 13 to 17 h, peaking at 19 kn around 15 h.",
+       "children": null
+      },
+      {
+       "el": "group",
+       "label": "Inside your range from 13 to 17 h, peaking at 19 kn around 15 h.",
+       "children": [
+        {
+         "component": "Card",
+         "children": [
+          {
+           "component": "HourChart",
+           "props": {
+            "hours": [
+             7,
+             8,
+             9,
+             10,
+             11,
+             12,
+             13,
+             14,
+             15,
+             16,
+             17,
+             18,
+             19,
+             20
+            ],
+            "rows": [
+             {
+              "type": "icons",
+              "label": "Sky",
+              "values": [
+               "partly",
+               "sun",
+               "sun",
+               "sun",
+               "sun",
+               "partly",
+               "partly",
+               "partly",
+               "partly",
+               "cloud",
+               "cloud",
+               "night",
+               "night",
+               "night"
+              ]
+             },
+             {
+              "type": "rating",
+              "label": "Rating",
+              "values": [
+               0,
+               0,
+               0,
+               1,
+               2,
+               3,
+               4,
+               5,
+               5,
+               4,
+               2,
+               0,
+               0,
+               0
+              ]
+             },
+             {
+              "type": "line",
+              "label": "Wind",
+              "unit": "kn",
+              "accent": "wind",
+              "min": 0,
+              "max": 30,
+              "range": [
+               14,
+               24
+              ],
+              "rangeLabel": "your range 14–24",
+              "values": [
+               6,
+               7,
+               8,
+               10,
+               12,
+               14,
+               16,
+               18,
+               19,
+               18,
+               16,
+               13,
+               10,
+               8
+              ],
+              "band": [
+               9,
+               10,
+               11,
+               13,
+               16,
+               18,
+               21,
+               23,
+               24,
+               23,
+               21,
+               17,
+               14,
+               11
+              ],
+              "labelAt": [
+               8
+              ],
+              "height": 96
+             },
+             {
+              "type": "arrows",
+              "label": "From",
+              "unit": "vs shore",
+              "accent": "wind",
+              "directions": [
+               320,
+               320,
+               300,
+               260,
+               240,
+               230,
+               225,
+               225,
+               220,
+               220,
+               225,
+               230,
+               240,
+               260
+              ],
+              "shore": [
+               "off",
+               "off",
+               "off",
+               "side",
+               "side",
+               "side-on",
+               "side-on",
+               "side-on",
+               "side-on",
+               "side-on",
+               "side-on",
+               "side-on",
+               "side",
+               "side"
+              ]
+             },
+             {
+              "type": "numbers",
+              "label": "Gust",
+              "unit": "kn",
+              "values": [
+               9,
+               10,
+               11,
+               13,
+               16,
+               18,
+               21,
+               23,
+               24,
+               23,
+               21,
+               17,
+               14,
+               11
+              ],
+              "emphasizeAbove": 22
+             },
+             {
+              "type": "bars",
+              "label": "Waves",
+              "unit": "m",
+              "accent": "water",
+              "max": 1.2,
+              "labelEvery": 2,
+              "decimals": 1,
+              "values": [
+               0.3,
+               0.3,
+               0.3,
+               0.4,
+               0.4,
+               0.5,
+               0.6,
+               0.7,
+               0.8,
+               0.8,
+               0.8,
+               0.7,
+               0.7,
+               0.6
+              ],
+              "height": 38
+             },
+             {
+              "type": "numbers",
+              "label": "Air",
+              "unit": "°C",
+              "accent": "heat",
+              "suffix": "°",
+              "values": [
+               12,
+               13,
+               15,
+               17,
+               18,
+               19,
+               19,
+               19,
+               18,
+               17,
+               16,
+               15,
+               14,
+               14
+              ]
+             },
+             {
+              "type": "bars",
+              "label": "Rain",
+              "unit": "%",
+              "accent": "water",
+              "max": 100,
+              "labelEvery": 2,
+              "values": [
+               0,
+               0,
+               0,
+               0,
+               0,
+               5,
+               5,
+               10,
+               10,
+               20,
+               30,
+               40,
+               30,
+               20
+              ]
+             }
+            ],
+            "best": [
+             13,
+             17
+            ],
+            "width": 318
+           }
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "el": "section",
+     "children": [
+      {
+       "component": "SectionLabel",
+       "children": [
+        "Tuned to you"
+       ]
+      },
+      {
+       "component": "Card",
+       "children": [
+        "78 kg · 95 l board · upwind level rideable from 14 kn, not 12",
+        "Wings 4 m and 5 m 5 m until gusts pass 22 kn, then 4 m",
+        "Gust limit 26 kn peak 24 kn at 15 h stays inside",
+        "Feels the cold · water 18.6° 3/2 is enough, bring a hood after 17 h",
+        {
+         "link": "phone-setup-4.dc.html",
+         "label": null,
+         "children": [
+          "Edit your setup ›"
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "el": "section",
+     "children": [
+      {
+       "component": "SectionLabel",
+       "children": [
+        "Live at the spot"
+       ]
+      },
+      {
+       "component": "Card",
+       "children": [
+        {
+         "component": "WindCompass",
+         "props": {
+          "direction": 225,
+          "speed": 14,
+          "shoreFacing": 170,
+          "caption": "live · side-shore",
+          "size": 140
+         }
+        },
+        {
+         "component": "TrendLine",
+         "props": {
+          "accent": "wind",
+          "values": [
+           8,
+           9,
+           9,
+           10,
+           11,
+           11,
+           12,
+           13,
+           12,
+           13,
+           14,
+           14
+          ],
+          "band": [
+           12,
+           13,
+           14,
+           15,
+           16,
+           16,
+           18,
+           19,
+           18,
+           19,
+           21,
+           21
+          ],
+          "nowIndex": 11,
+          "nowLabel": "14 kn",
+          "caption": [
+           "−4 h",
+           "now"
+          ],
+          "min": 0,
+          "max": 24,
+          "height": 64,
+          "width": 318
+         }
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "el": "section",
+     "children": [
+      {
+       "component": "SectionLabel",
+       "children": [
+        "Plan"
+       ]
+      },
+      {
+       "component": "FactTile",
+       "props": {
+        "label": "Wing",
+        "value": "5 m → 4 m",
+        "sub": "4 m when gusts > 22",
+        "accent": "wind"
+       }
+      },
+      {
+       "component": "FactTile",
+       "props": {
+        "label": "Water",
+        "value": "18.6°",
+        "sub": "3/2 suit",
+        "accent": "water"
+       }
+      },
+      {
+       "component": "FactTile",
+       "props": {
+        "label": "Sunset",
+        "value": "17:35",
+        "sub": "last light 18:03",
+        "accent": "sun"
+       }
+      },
+      {
+       "component": "FactTile",
+       "props": {
+        "label": "Lightning",
+        "value": "none",
+        "sub": "50 km · 24 h",
+        "accent": "storm"
+       }
+      }
+     ]
+    },
+    {
+     "el": "section",
+     "children": [
+      {
+       "component": "SectionLabel",
+       "children": [
+        "Next 3 days"
+       ]
+      },
+      {
+       "component": "Card",
+       "children": [
+        {
+         "component": "WindBand",
+         "props": {
+          "mean": [
+           6.0,
+           6.6,
+           7.2,
+           7.6,
+           7.9,
+           8.0,
+           7.9,
+           7.5,
+           10.1,
+           9.6,
+           9.2,
+           9.4,
+           10.4,
+           12.3,
+           13.8,
+           13.8,
+           12.2,
+           10.3,
+           9.2,
+           9.0,
+           9.4,
+           10.0,
+           10.5,
+           10.8,
+           10.0,
+           10.0,
+           9.7,
+           9.3,
+           8.8,
+           8.1,
+           7.5,
+           6.9,
+           9.4,
+           9.2,
+           9.4,
+           10.2,
+           12.1,
+           14.8,
+           17.1,
+           17.8,
+           16.7,
+           15.0,
+           13.8,
+           13.3,
+           13.1,
+           12.9,
+           12.5,
+           12.0,
+           12.4,
+           11.8,
+           11.2,
+           10.6,
+           10.2,
+           10.0,
+           10.0,
+           10.2,
+           13.6,
+           14.2,
+           15.1,
+           16.5,
+           18.7,
+           21.5,
+           23.6,
+           23.7,
+           22.0,
+           19.5,
+           17.4,
+           16.1,
+           15.2,
+           14.5,
+           13.9,
+           13.4
+          ],
+          "gust": [
+           9.7,
+           11.1,
+           12.4,
+           13.2,
+           13.6,
+           13.5,
+           12.9,
+           11.7,
+           14.4,
+           13.2,
+           12.4,
+           12.5,
+           14.0,
+           16.9,
+           19.4,
+           20.0,
+           18.6,
+           16.5,
+           15.3,
+           14.9,
+           15.0,
+           15.2,
+           15.2,
+           15.0,
+           13.5,
+           13.3,
+           13.0,
+           12.8,
+           12.7,
+           12.4,
+           12.3,
+           12.0,
+           15.5,
+           15.2,
+           15.2,
+           15.8,
+           17.6,
+           20.4,
+           22.8,
+           23.4,
+           21.9,
+           19.9,
+           18.8,
+           18.8,
+           19.2,
+           19.5,
+           19.4,
+           18.9,
+           19.2,
+           18.1,
+           16.7,
+           15.3,
+           14.2,
+           13.5,
+           13.3,
+           13.6,
+           18.3,
+           19.7,
+           21.5,
+           23.9,
+           27.2,
+           31.0,
+           33.7,
+           33.5,
+           30.8,
+           27.0,
+           23.7,
+           21.5,
+           20.0,
+           19.1,
+           18.5,
+           18.4
+          ],
+          "directions": [
+           330,
+           330,
+           330,
+           330,
+           330,
+           330,
+           330,
+           330,
+           330,
+           280,
+           280,
+           280,
+           225,
+           225,
+           225,
+           225,
+           225,
+           225,
+           225,
+           225,
+           225,
+           280,
+           280,
+           280,
+           330,
+           330,
+           330,
+           330,
+           330,
+           330,
+           330,
+           330,
+           330,
+           280,
+           280,
+           280,
+           225,
+           225,
+           225,
+           225,
+           225,
+           225,
+           225,
+           225,
+           225,
+           280,
+           280,
+           280,
+           330,
+           330,
+           330,
+           330,
+           330,
+           330,
+           330,
+           330,
+           330,
+           280,
+           280,
+           280,
+           225,
+           225,
+           225,
+           225,
+           225,
+           225,
+           225,
+           225,
+           225,
+           280,
+           280,
+           280
+          ],
+          "range": [
+           14,
+           24
+          ],
+          "days": [
+           "Mon",
+           "Tue",
+           "Wed"
+          ],
+          "night": [
+           [
+            0,
+            7.5
+           ],
+           [
+            17.6,
+            31.5
+           ],
+           [
+            41.6,
+            55.5
+           ],
+           [
+            65.6,
+            71
+           ]
+          ],
+          "best": [
+           37,
+           41
+          ],
+          "width": 318
+         }
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "el": "section",
+     "children": [
+      {
+       "el": "details",
+       "collapsedByDefault": true,
+       "children": [
+        {
+         "el": "summary",
+         "text": "How this forecast was made Show details › Models agree · spread 6 kn Score 4.4 / 5 Station-corrected +1.8 kn",
+         "children": null
+        },
+        {
+         "component": "SectionLabel",
+         "children": [
+          "Model agreement · wind at 15 h"
+         ]
+        },
+        {
+         "component": "Card",
+         "children": [
+          "model blend scale 8–26 kn",
+          "Meteocat WRF 3 km · 4×/day · weight 30 % 17",
+          "AROME 1.3 km · Météo-France · weight 25 % 19",
+          "HARMONIE-AROME 2.5 km · AEMET · weight 20 % 18",
+          "ICON-EU 7 km · DWD · weight 10 % 16",
+          "ECMWF IFS 9 km · weight 10 % 15",
+          "GFS 13 km · NOAA · weight 5 % 13",
+          "Oratge blend 17.2 kn Model spread 6 kn High agreement. Station correction +1.8 kn → 19 kn in the plan."
+         ]
+        },
+        {
+         "component": "SectionLabel",
+         "children": [
+          "Why 4 of 5"
+         ]
+        },
+        {
+         "component": "Card",
+         "children": [
+          "Wind in range 17–19 kn vs your 14–24 · weight 35 % 0.9",
+          "Gust factor gusts × 1.26 · weight 15 % 0.7",
+          "Direction side-on SW · weight 20 % 1.0",
+          "Chop 0.8 m · weight 10 % 0.7",
+          "Rain ≤ 10 % · weight 10 % 0.9",
+          "Daylight sunset 17:35 · weight 10 % 0.8",
+          "4.4 / 5",
+          {
+           "component": "RatingDots",
+           "props": {
+            "value": 4,
+            "size": "lg",
+            "showWord": true
+           }
+          }
+         ]
+        },
+        {
+         "component": "SectionLabel",
+         "children": [
+          "Ensemble · wind"
+         ]
+        },
+        {
+         "component": "Card",
+         "children": [
+          "Solid line: ensemble median. Shading up to the 90th percentile, dashed line at the 10th, from 67 members (ECMWF ENS 51 + AROME-EPS 16). Bars: chance the condition holds.",
+          {
+           "component": "HourChart",
+           "props": {
+            "hours": [
+             7,
+             8,
+             9,
+             10,
+             11,
+             12,
+             13,
+             14,
+             15,
+             16,
+             17,
+             18,
+             19,
+             20
+            ],
+            "rows": [
+             {
+              "type": "line",
+              "label": "Wind P50",
+              "unit": "kn",
+              "accent": "wind",
+              "min": 0,
+              "max": 30,
+              "range": [
+               14,
+               24
+              ],
+              "values": [
+               6,
+               7,
+               8,
+               10,
+               12,
+               14,
+               16,
+               18,
+               19,
+               18,
+               16,
+               13,
+               10,
+               8
+              ],
+              "band": [
+               9,
+               10,
+               11,
+               13,
+               15,
+               17,
+               20,
+               22,
+               23,
+               22,
+               20,
+               17,
+               14,
+               11
+              ],
+              "labelAt": [
+               8
+              ],
+              "height": 96,
+              "companion": [
+               4,
+               5,
+               5,
+               7,
+               9,
+               11,
+               13,
+               15,
+               16,
+               15,
+               13,
+               10,
+               7,
+               5
+              ]
+             },
+             {
+              "type": "bars",
+              "label": "In range",
+              "unit": "%",
+              "accent": "wind",
+              "max": 100,
+              "labelEvery": 2,
+              "values": [
+               0,
+               0,
+               2,
+               8,
+               25,
+               45,
+               70,
+               85,
+               88,
+               80,
+               55,
+               20,
+               5,
+               0
+              ],
+              "height": 40
+             }
+            ],
+            "best": [
+             13,
+             17
+            ],
+            "width": 318
+           }
+          }
+         ]
+        },
+        {
+         "component": "SectionLabel",
+         "children": [
+          "Station check · Castelldefels"
+         ]
+        },
+        {
+         "component": "Card",
+         "children": [
+          {
+           "component": "TrendLine",
+           "props": {
+            "accent": "wind",
+            "values": [
+             9,
+             9,
+             11,
+             13,
+             15,
+             16,
+             17,
+             16,
+             14,
+             11,
+             10,
+             9
+            ],
+            "compare": [
+             8,
+             8,
+             9,
+             11,
+             13,
+             14,
+             15,
+             14,
+             12,
+             10,
+             9,
+             8
+            ],
+            "nowIndex": 11,
+            "nowLabel": "now 9",
+            "caption": [
+             "−24 h",
+             "now"
+            ],
+            "min": 0,
+            "max": 24,
+            "height": 90,
+            "width": 318
+           }
+          },
+          "solid: measured at the station dashed: yesterday’s forecast",
+          "Yesterday’s blend against the XEMA station. The SW sea breeze runs 1.8 kn stronger than modelled here, so today’s blend is corrected by that amount.",
+          {
+           "component": "FactTile",
+           "props": {
+            "label": "Bias",
+            "value": "+1.8 kn",
+            "sub": "models too low",
+            "accent": "wind"
+           }
+          },
+          {
+           "component": "FactTile",
+           "props": {
+            "label": "Error",
+            "value": "2.4 kn",
+            "sub": "mean, 30 days"
+           }
+          },
+          {
+           "component": "FactTile",
+           "props": {
+            "label": "Hit rate",
+            "value": "82 %",
+            "sub": "rating ±1, 30 days"
+           }
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "el": "section",
+     "children": [
+      {
+       "component": "DataSources",
+       "children": [
+        "beach forecast Castelldefels (hourly wind, waves, water), XEMA wind and gusts, pressure, municipal hourly, UV, lightning, warnings; Open-Meteo gust forecast"
+       ]
+      }
+     ]
+    },
+    {
+     "component": "BottomNav",
+     "props": {
+      "active": "Activities"
+     }
+    },
+    {
+     "link": "Main.dc.html",
+     "label": "Today",
+     "children": []
+    },
+    {
+     "link": "phone-activities.dc.html",
+     "label": "Activities",
+     "children": []
+    },
+    {
+     "link": "phone-map.dc.html",
+     "label": "Map",
+     "children": []
+    },
+    {
+     "link": "phone-spots.dc.html",
+     "label": "Spots",
+     "children": []
+    }
+   ]
+  }
+ ]
+}

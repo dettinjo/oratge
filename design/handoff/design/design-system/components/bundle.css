@@ -1,0 +1,55 @@
+/* Oratge design system — warm monochrome UI with pastel weather accents. */
+:root {
+  --og-font:'DM Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+.og-root{background:var(--og-bg);color:var(--og-text);font-family:var(--og-font);font-feature-settings:"tnum" 1;-webkit-font-smoothing:antialiased;font-size:14px;line-height:1.4}
+.og-root.og-padded{padding:var(--og-space-5)}
+.og-root *{box-sizing:border-box}
+.og-root svg text{font-family:var(--og-font)}
+.og-card{background:var(--og-surface);border-radius:var(--og-radius);padding:var(--og-space-4)}
+.og-card.og-raised{background:var(--og-surface-2)}
+.og-card.og-tight{padding:var(--og-space-3)}
+.og-label{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--og-text-2);font-weight:500;margin:18px 0 8px}
+.og-muted{color:var(--og-text-2)} .og-faint{color:var(--og-text-3)}
+.og-row{display:flex;align-items:center}
+.og-grow{flex:1}
+.og-dots{display:inline-flex;gap:4px;align-items:center}
+.og-dots i{display:block;width:8px;height:8px;border-radius:50%}
+.og-dots.og-lg i{width:12px;height:12px}
+.og-dots .og-dots-word{margin-left:8px;font-size:13px;font-weight:600}
+.og-warn{display:flex;gap:10px;align-items:flex-start;border-radius:16px;padding:12px 14px;border:1px solid}
+.og-warn-title{font-size:13px;font-weight:600}
+.og-warn-detail{font-size:12px;color:var(--og-text-2);margin-top:2px}
+.og-pill{font-size:12px;border-radius:999px;padding:3px 9px;border:1px solid var(--og-line);color:var(--og-text-2);white-space:nowrap}
+.og-verdict-best{font-size:24px;font-weight:600;margin-top:10px;letter-spacing:-.01em}
+.og-verdict-summary{font-size:14px;color:var(--og-text-2);margin-top:3px;line-height:1.45}
+.og-fact{background:var(--og-surface);border-radius:16px;padding:12px}
+.og-fact-label{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--og-text-2);font-weight:500}
+.og-fact-value{font-size:24px;font-weight:600;margin-top:6px;letter-spacing:-.01em}
+.og-fact-sub{font-size:12px;color:var(--og-text-2);margin-top:2px}
+.og-fact-lg{padding:14px}
+.og-fact-lg .og-fact-value{font-size:36px;line-height:1.05;letter-spacing:-.02em;margin-top:8px}
+.og-fact-lg .og-fact-sub{font-size:13px;margin-top:4px}
+.og-tabs{display:flex;gap:6px}
+.og-tab{flex:1;background:var(--og-surface);border-radius:12px;padding:6px 0 7px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;color:var(--og-text-2);min-width:36px}
+.og-tab b{font-size:14px;color:var(--og-text);font-weight:600}
+.og-tab i{display:block;width:14px;height:4px;border-radius:2px;margin-top:3px}
+.og-tab.og-on{background:var(--og-text);color:var(--og-bg)} .og-tab.og-on b{color:var(--og-bg)}
+.og-tab.og-outlook:not(.og-on){opacity:.55}
+.og-chips{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.og-chip{white-space:nowrap;font-size:12px;border-radius:999px;padding:6px 12px;background:var(--og-surface);color:var(--og-text-2);border:0;font-family:inherit}
+.og-chip.og-on{background:var(--og-text);color:var(--og-bg);font-weight:600}
+.og-act{display:flex;align-items:center;padding:9px 0;border-bottom:1px solid var(--og-line);gap:10px}
+.og-act:last-child{border-bottom:0}
+.og-act-name{font-size:14px;font-weight:500}
+.og-act-why{font-size:13px;color:var(--og-text-2);margin-top:1px}
+.og-act-window{font-size:15px;font-weight:600;text-align:right;width:76px}
+.og-legend{display:flex;gap:14px;font-size:12px;color:var(--og-text-2);flex-wrap:wrap;margin-top:6px}
+.og-legend span{display:inline-flex;align-items:center;gap:6px}
+.og-sw{width:10px;height:10px;border-radius:3px;display:inline-block}
+.og-day{display:flex;align-items:center;font-size:13px;padding:7px 0;gap:8px}
+.og-nav{display:flex;justify-content:space-around;align-items:center;height:72px;border-top:1px solid var(--og-line);background:var(--og-bg)}
+.og-nav div{font-size:11px;color:var(--og-text-3);display:flex;flex-direction:column;align-items:center;gap:5px}
+.og-nav div.og-on{color:var(--og-text)}
+.og-hero-temp{font-size:64px;font-weight:300;letter-spacing:-.04em;line-height:1}
+.og-src{font-size:12px;color:var(--og-text-2);margin-top:16px;line-height:1.5;border-top:1px solid var(--og-line);padding-top:10px}

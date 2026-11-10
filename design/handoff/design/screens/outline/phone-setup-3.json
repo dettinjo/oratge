@@ -1,0 +1,90 @@
+{
+ "title": "Phone · Setup 3 · Sports",
+ "outline": [
+  {
+   "component": "OratgeRoot",
+   "props": {
+    "width": 390
+   },
+   "children": [
+    {
+     "link": "phone-setup-2.dc.html",
+     "label": null,
+     "children": [
+      "‹ Back"
+     ]
+    },
+    "Step 3 of 10",
+    {
+     "link": "phone-profile.dc.html",
+     "label": "Close setup",
+     "children": [
+      "✕"
+     ]
+    },
+    {
+     "el": "progressbar",
+     "label": "Setup progress",
+     "children": []
+    },
+    "Sports",
+    {
+     "el": "h1",
+     "text": "Which sports do you do?",
+     "children": null
+    },
+    {
+     "el": "p",
+     "text": "Pick all that apply.",
+     "children": null
+    },
+    {
+     "input": "checkbox",
+     "checked": true
+    },
+    "Wing foil Wind range, wing size, gusts",
+    {
+     "input": "checkbox",
+     "checked": true
+    },
+    "Surf Swell, period, offshore wind",
+    {
+     "input": "checkbox",
+     "checked": true
+    },
+    "Bike Dry windows, route wind, roads",
+    {
+     "input": "checkbox",
+     "checked": true
+    },
+    "Run Temperature, heat, rain",
+    {
+     "input": "checkbox",
+     "checked": true
+    },
+    "Hike Storms, summit wind, snow",
+    {
+     "el": "section",
+     "children": [
+      "What this changes",
+      "Only the sports you pick get ratings, planners and alerts. You can add or remove sports any time."
+     ]
+    },
+    {
+     "link": "phone-setup-4.dc.html",
+     "label": null,
+     "children": [
+      "Continue"
+     ]
+    },
+    {
+     "link": "phone-setup-4.dc.html",
+     "label": null,
+     "children": [
+      "Skip this step"
+     ]
+    }
+   ]
+  }
+ ]
+}

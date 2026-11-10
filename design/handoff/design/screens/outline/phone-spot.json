@@ -1,0 +1,557 @@
+{
+ "title": "Phone · Castelldefels",
+ "outline": [
+  {
+   "component": "OratgeRoot",
+   "props": {
+    "width": 390
+   },
+   "children": [
+    {
+     "el": "header",
+     "children": [
+      {
+       "link": "phone-profile.dc.html",
+       "label": "Profile and setup",
+       "children": []
+      },
+      {
+       "link": "phone-spots.dc.html",
+       "label": null,
+       "children": [
+        "‹ Back to Spots"
+       ]
+      },
+      {
+       "el": "h1",
+       "text": "Castelldefels",
+       "children": null
+      },
+      {
+       "el": "p",
+       "text": "Mon 9 Nov · Barcelona",
+       "children": null
+      }
+     ]
+    },
+    {
+     "el": "section",
+     "children": [
+      {
+       "component": "SectionLabel",
+       "children": [
+        "Live"
+       ]
+      },
+      {
+       "component": "FactTile",
+       "props": {
+        "size": "lg",
+        "label": "Wind",
+        "value": "14 kn",
+        "sub": "SW · side-shore",
+        "accent": "wind"
+       }
+      },
+      {
+       "component": "FactTile",
+       "props": {
+        "size": "lg",
+        "label": "Gusts",
+        "value": "21 kn",
+        "sub": "last 10 min",
+        "accent": "wind"
+       }
+      },
+      {
+       "component": "FactTile",
+       "props": {
+        "size": "lg",
+        "label": "Waves",
+        "value": "0.6 m",
+        "sub": "buoy · 25 min ago",
+        "accent": "water"
+       }
+      },
+      {
+       "component": "FactTile",
+       "props": {
+        "size": "lg",
+        "label": "Water",
+        "value": "18.6°",
+        "sub": "3/2 suit",
+        "accent": "water"
+       }
+      }
+     ]
+    },
+    {
+     "el": "section",
+     "children": [
+      {
+       "component": "SectionLabel",
+       "children": [
+        "Live at the spot"
+       ]
+      },
+      {
+       "component": "Card",
+       "children": [
+        {
+         "component": "WindCompass",
+         "props": {
+          "direction": 225,
+          "speed": 14,
+          "shoreFacing": 170,
+          "caption": "live · side-shore",
+          "size": 140
+         }
+        },
+        {
+         "component": "TrendLine",
+         "props": {
+          "accent": "wind",
+          "values": [
+           8,
+           9,
+           9,
+           10,
+           11,
+           11,
+           12,
+           13,
+           12,
+           13,
+           14,
+           14
+          ],
+          "band": [
+           12,
+           13,
+           14,
+           15,
+           16,
+           16,
+           18,
+           19,
+           18,
+           19,
+           21,
+           21
+          ],
+          "nowIndex": 11,
+          "nowLabel": "14 kn",
+          "caption": [
+           "−4 h",
+           "now"
+          ],
+          "min": 0,
+          "max": 24,
+          "height": 64,
+          "width": 318
+         }
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "el": "section",
+     "children": [
+      {
+       "component": "SectionLabel",
+       "children": [
+        "Forecast vs measured"
+       ]
+      },
+      {
+       "component": "Card",
+       "children": [
+        {
+         "component": "TrendLine",
+         "props": {
+          "accent": "wind",
+          "values": [
+           7,
+           9,
+           10,
+           12,
+           14,
+           16
+          ],
+          "compare": [
+           6,
+           7,
+           8,
+           10,
+           12,
+           14,
+           16,
+           18
+          ],
+          "nowIndex": 5,
+          "nowLabel": "now 16",
+          "caption": [
+           "07 h",
+           "14 h"
+          ],
+          "min": 0,
+          "max": 22,
+          "height": 96,
+          "width": 318
+         }
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "el": "section",
+     "children": [
+      {
+       "component": "SectionLabel",
+       "children": [
+        "Rideable days per month"
+       ]
+      },
+      {
+       "component": "Card",
+       "children": [
+        {
+         "component": "MonthBars",
+         "props": {
+          "values": [
+           6.1,
+           7.8,
+           10.2,
+           12.4,
+           10.9,
+           8.3,
+           7.1,
+           6.4,
+           7.0,
+           8.8,
+           8.1,
+           6.6
+          ],
+          "highlight": 3,
+          "current": 10,
+          "width": 318
+         }
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "el": "section",
+     "children": [
+      {
+       "component": "SectionLabel",
+       "children": [
+        "Rideable hours · last 6 months"
+       ]
+      },
+      {
+       "component": "Card",
+       "children": [
+        {
+         "component": "CalendarHeatmap",
+         "props": {
+          "weeks": [
+           [
+            0,
+            1,
+            0,
+            0,
+            1,
+            0,
+            0
+           ],
+           [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            0
+           ],
+           [
+            0,
+            1,
+            1,
+            0,
+            1,
+            1,
+            2
+           ],
+           [
+            2,
+            0,
+            1,
+            2,
+            2,
+            1,
+            1
+           ],
+           [
+            3,
+            3,
+            1,
+            0,
+            2,
+            0,
+            0
+           ],
+           [
+            0,
+            1,
+            0,
+            3,
+            2,
+            2,
+            3
+           ],
+           [
+            0,
+            0,
+            2,
+            2,
+            1,
+            0,
+            3
+           ],
+           [
+            0,
+            1,
+            1,
+            3,
+            4,
+            2,
+            0
+           ],
+           [
+            1,
+            1,
+            1,
+            1,
+            1,
+            2,
+            2
+           ],
+           [
+            0,
+            4,
+            2,
+            4,
+            3,
+            3,
+            2
+           ],
+           [
+            2,
+            3,
+            5,
+            1,
+            3,
+            1,
+            3
+           ],
+           [
+            1,
+            1,
+            2,
+            4,
+            5,
+            0,
+            4
+           ],
+           [
+            0,
+            2,
+            0,
+            0,
+            5,
+            0,
+            3
+           ],
+           [
+            0,
+            2,
+            3,
+            0,
+            5,
+            5,
+            5
+           ],
+           [
+            5,
+            5,
+            4,
+            1,
+            0,
+            1,
+            0
+           ],
+           [
+            0,
+            3,
+            1,
+            4,
+            2,
+            3,
+            1
+           ],
+           [
+            5,
+            1,
+            1,
+            5,
+            0,
+            2,
+            0
+           ],
+           [
+            5,
+            3,
+            5,
+            0,
+            5,
+            0,
+            5
+           ],
+           [
+            2,
+            3,
+            1,
+            0,
+            0,
+            2,
+            0
+           ],
+           [
+            3,
+            3,
+            3,
+            2,
+            0,
+            0,
+            4
+           ],
+           [
+            0,
+            3,
+            4,
+            0,
+            4,
+            4,
+            4
+           ],
+           [
+            4,
+            3,
+            1,
+            0,
+            3,
+            4,
+            1
+           ],
+           [
+            0,
+            1,
+            3,
+            2,
+            1,
+            2,
+            3
+           ],
+           [
+            1,
+            2,
+            1,
+            0,
+            0,
+            3,
+            3
+           ],
+           [
+            2,
+            2,
+            3,
+            0,
+            2,
+            0,
+            1
+           ],
+           [
+            1,
+            2,
+            2,
+            1,
+            0,
+            1,
+            0
+           ]
+          ],
+          "months": [
+           "May",
+           "Jun",
+           "Jul",
+           "Aug",
+           "Sep",
+           "Oct",
+           "Nov"
+          ],
+          "legend": [
+           "0 h",
+           "6+ h"
+          ],
+          "cell": 10
+         }
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "el": "section",
+     "children": [
+      {
+       "component": "DataSources",
+       "children": [
+        "XEMA station Castelldefels (live wind), beach forecast, 6 years of station history"
+       ]
+      }
+     ]
+    },
+    {
+     "component": "BottomNav",
+     "props": {
+      "active": "Spots"
+     }
+    },
+    {
+     "link": "Main.dc.html",
+     "label": "Today",
+     "children": []
+    },
+    {
+     "link": "phone-activities.dc.html",
+     "label": "Activities",
+     "children": []
+    },
+    {
+     "link": "phone-map.dc.html",
+     "label": "Map",
+     "children": []
+    },
+    {
+     "link": "phone-spots.dc.html",
+     "label": "Spots",
+     "children": []
+    }
+   ]
+  }
+ ]
+}

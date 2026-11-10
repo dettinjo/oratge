@@ -1,0 +1,118 @@
+{
+ "title": "Phone · Setup 5 · Surf",
+ "outline": [
+  {
+   "component": "OratgeRoot",
+   "props": {
+    "width": 390
+   },
+   "children": [
+    {
+     "link": "phone-setup-4.dc.html",
+     "label": null,
+     "children": [
+      "‹ Back"
+     ]
+    },
+    "Step 5 of 10",
+    {
+     "link": "phone-profile.dc.html",
+     "label": "Close setup",
+     "children": [
+      "✕"
+     ]
+    },
+    {
+     "el": "progressbar",
+     "label": "Setup progress",
+     "children": []
+    },
+    "Surf",
+    {
+     "el": "h1",
+     "text": "Your surf setup",
+     "children": null
+    },
+    {
+     "el": "p",
+     "text": "Board and the waves you want.",
+     "children": null
+    },
+    {
+     "el": "section",
+     "children": [
+      "Your board",
+      "Board",
+      {
+       "input": "text",
+       "value": "7'2\" mid-length",
+       "label": "Board"
+      },
+      "Volume",
+      {
+       "input": "text",
+       "value": "48",
+       "label": "Volume"
+      },
+      "l"
+     ]
+    },
+    {
+     "el": "section",
+     "children": [
+      "Your conditions",
+      "Wave height",
+      {
+       "input": "text",
+       "value": "0.6",
+       "label": "Wave height from"
+      },
+      "–",
+      {
+       "input": "text",
+       "value": "1.8",
+       "label": "Wave height to"
+      },
+      "m Minimum period",
+      {
+       "input": "text",
+       "value": "8",
+       "label": "Minimum period"
+      },
+      "s Crowds",
+      {
+       "input": "radio",
+       "checked": true
+      },
+      "Avoid",
+      {
+       "input": "radio"
+      },
+      "Don’t mind"
+     ]
+    },
+    {
+     "el": "section",
+     "children": [
+      "What this changes",
+      "Windows end when the period drops below 8 s. Weekend mornings rate lower when you avoid crowds."
+     ]
+    },
+    {
+     "link": "phone-setup-6.dc.html",
+     "label": null,
+     "children": [
+      "Continue"
+     ]
+    },
+    {
+     "link": "phone-setup-6.dc.html",
+     "label": null,
+     "children": [
+      "Skip this step"
+     ]
+    }
+   ]
+  }
+ ]
+}

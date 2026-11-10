@@ -1,0 +1,247 @@
+<!-- @dsCard group="charts" height=160 -->
+<!doctype html>
+<html><head><meta charset="utf-8"><title>HourChart — preview</title>
+  <style>
+    body{margin:0;padding:24px;background:var(--og-bg)}
+    /* auto-fit (not auto-fill): empty tracks collapse, so a 1-2 story card
+       fills the width instead of stranding stories in a half-width left
+       column beside phantom empty columns */
+    .ds-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px;align-items:start}
+    .ds-grid.ds-col{grid-template-columns:1fr}
+    .ds-cell{border:1px solid var(--og-line);border-radius:8px;padding:12px;min-width:0;overflow:hidden;transform:translateZ(0)}
+    .ds-cell>h4{margin:0 0 8px;font:600 12px system-ui;color:var(--og-text-3);text-transform:uppercase;letter-spacing:.04em}
+    .ds-single{transform:translateZ(0)}
+  </style>
+</head><body>
+  <div class="ds-grid" id="g"></div>
+  <script>
+"use strict";
+var __dsPreview = (() => {
+  var __create = Object.create;
+  var __defProp = Object.defineProperty;
+  var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+  var __getOwnPropNames = Object.getOwnPropertyNames;
+  var __getProtoOf = Object.getPrototypeOf;
+  var __hasOwnProp = Object.prototype.hasOwnProperty;
+  var __esm = (fn, res, err) => function __init() {
+    if (err) throw err[0];
+    try {
+      return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
+    } catch (e) {
+      throw err = [e], e;
+    }
+  };
+  var __commonJS = (cb, mod) => function __require() {
+    try {
+      return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
+    } catch (e) {
+      throw mod = 0, e;
+    }
+  };
+  var __export = (target, all) => {
+    for (var name in all)
+      __defProp(target, name, { get: all[name], enumerable: true });
+  };
+  var __copyProps = (to, from, except, desc) => {
+    if (from && typeof from === "object" || typeof from === "function") {
+      for (let key of __getOwnPropNames(from))
+        if (!__hasOwnProp.call(to, key) && key !== except)
+          __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+    }
+    return to;
+  };
+  var __reExport = (target, mod, secondTarget) => (__copyProps(target, mod, "default"), secondTarget && __copyProps(secondTarget, mod, "default"));
+  var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+    // If the importer is in node compatibility mode or this is not an ESM
+    // file that has been converted to a CommonJS file using a Babel-
+    // compatible transform (i.e. "__esModule" has not been set), then set
+    // "default" to the CommonJS "module.exports" for node compatibility.
+    isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+    mod
+  ));
+  var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+
+  // <define:import.meta.env>
+  var init_define_import_meta_env = __esm({
+    "<define:import.meta.env>"() {
+    }
+  });
+
+  // ds-raw:__ds_raw__
+  var require_ds_raw = __commonJS({
+    "ds-raw:__ds_raw__"(exports, module) {
+      init_define_import_meta_env();
+      module.exports = window.OratgeUI;
+    }
+  });
+
+  // shim:react-shim
+  var require_react_shim = __commonJS({
+    "shim:react-shim"(exports, module) {
+      init_define_import_meta_env();
+      var R = window.React;
+      function np(p, k) {
+        var o = {};
+        for (var x in p) if (x !== "children") o[x] = p[x];
+        if (k !== void 0) o.key = k;
+        return o;
+      }
+      function jsx2(t, p, k) {
+        var c = p && p.children;
+        return c === void 0 ? R.createElement(t, np(p, k)) : R.createElement(t, np(p, k), c);
+      }
+      function jsxs(t, p, k) {
+        return R.createElement.apply(R, [t, np(p, k)].concat(p.children));
+      }
+      module.exports = R;
+      module.exports.jsx = jsx2;
+      module.exports.jsxs = jsxs;
+      module.exports.jsxDEV = function(t, p, k, s) {
+        return (s ? jsxs : jsx2)(t, p, k);
+      };
+      module.exports.Fragment = R.Fragment;
+    }
+  });
+
+  // .design-sync/previews/HourChart.tsx
+  var HourChart_exports = {};
+  __export(HourChart_exports, {
+    BikeDay: () => BikeDay,
+    HikeSummit: () => HikeSummit,
+    WingFoilDay: () => WingFoilDay
+  });
+  init_define_import_meta_env();
+
+  // ds-shim:ds
+  var ds_exports = {};
+  __export(ds_exports, {
+    default: () => ds_default
+  });
+  init_define_import_meta_env();
+  __reExport(ds_exports, __toESM(require_ds_raw()));
+  var g = window.OratgeUI;
+  var ds_default = "default" in g ? g.default : g;
+
+  // .design-sync/previews/HourChart.tsx
+  var import_jsx_runtime = __toESM(require_react_shim(), 1);
+  var hours = [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
+  var WingFoilDay = () => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ds_exports.HourChart, { hours, best: [13, 17], rows: [
+    { type: "icons", label: "Sky", values: ["partly", "sun", "sun", "sun", "sun", "partly", "partly", "partly", "partly", "cloud", "cloud", "night", "night", "night"] },
+    { type: "rating", label: "Rating", values: [0, 0, 0, 1, 2, 3, 4, 5, 5, 4, 2, 0, 0, 0] },
+    {
+      type: "line",
+      label: "Wind",
+      unit: "kn",
+      accent: "wind",
+      min: 0,
+      max: 30,
+      range: [14, 24],
+      rangeLabel: "your range 14–24",
+      values: [6, 7, 8, 10, 12, 14, 16, 18, 19, 18, 16, 13, 10, 8],
+      band: [9, 10, 11, 13, 16, 18, 21, 23, 24, 23, 21, 17, 14, 11],
+      labelAt: [8],
+      height: 96
+    },
+    {
+      type: "arrows",
+      label: "From",
+      unit: "vs shore",
+      accent: "wind",
+      directions: [320, 320, 300, 260, 240, 230, 225, 225, 220, 220, 225, 230, 240, 260],
+      shore: ["off", "off", "off", "side", "side", "side-on", "side-on", "side-on", "side-on", "side-on", "side-on", "side-on", "side", "side"]
+    },
+    { type: "numbers", label: "Gust", unit: "kn", values: [9, 10, 11, 13, 16, 18, 21, 23, 24, 23, 21, 17, 14, 11], emphasizeAbove: 22 },
+    { type: "bars", label: "Waves", unit: "m", accent: "water", max: 1.2, labelEvery: 2, decimals: 1, values: [0.3, 0.3, 0.3, 0.4, 0.4, 0.5, 0.6, 0.7, 0.8, 0.8, 0.8, 0.7, 0.7, 0.6], height: 38 },
+    { type: "numbers", label: "Air", unit: "°C", accent: "heat", suffix: "°", values: [12, 13, 15, 17, 18, 19, 19, 19, 18, 17, 16, 15, 14, 14] },
+    { type: "bars", label: "Rain", unit: "%", accent: "water", max: 100, labelEvery: 2, values: [0, 0, 0, 0, 0, 5, 5, 10, 10, 20, 30, 40, 30, 20] }
+  ] });
+  var BikeDay = () => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ds_exports.HourChart, { hours, best: [9, 12], rows: [
+    { type: "icons", label: "Sky", values: ["partly", "sun", "sun", "sun", "partly", "cloud", "rain", "rain", "rain", "cloud", "partly", "night", "night", "night"] },
+    { type: "rating", label: "Rating", values: [1, 2, 4, 5, 5, 4, 2, 1, 1, 2, 2, 1, 0, 0] },
+    {
+      type: "line",
+      label: "Temp",
+      unit: "°C",
+      accent: "heat",
+      min: 6,
+      max: 22,
+      values: [9, 10, 12, 14, 16, 18, 19, 20, 20, 19, 17, 15, 14, 13],
+      companion: [7, 8, 11, 13, 15, 17, 18, 19, 19, 18, 16, 14, 12, 11],
+      labelAt: [0, 7],
+      height: 80
+    },
+    { type: "bars", label: "Rain", unit: "mm", accent: "water", max: 3, labelEvery: 1, decimals: 1, values: [0, 0, 0, 0, 0, 0, 0.4, 2.1, 1.6, 0.3, 0, 0, 0, 0], height: 40 },
+    {
+      type: "category",
+      label: "Roads",
+      values: ["wet", "damp", "dry", "dry", "dry", "dry", "damp", "wet", "wet", "wet", "damp", "damp", "dry", "dry"],
+      styles: { wet: { color: "#8AAEF2", opacity: 0.9, text: "wet" }, damp: { color: "#8AAEF2", opacity: 0.45, text: "damp" }, dry: { color: "#2A261F" } }
+    },
+    { type: "arrows", label: "Wind", accent: "wind", directions: [330, 330, 320, 300, 250, 230, 225, 225, 230, 240, 260, 300, 320, 330] },
+    { type: "numbers", label: "Speed", unit: "kn", values: [5, 5, 6, 7, 8, 10, 12, 14, 13, 11, 9, 7, 6, 5], emphasizeAbove: 12 },
+    { type: "bars", label: "UV", accent: "sun", max: 6, labelEvery: 1, values: [0, 0, 1, 2, 3, 3, 3, 2, 1, 1, 0, 0, 0, 0], height: 30 }
+  ] });
+  var HikeSummit = () => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ds_exports.HourChart, { hours, best: [7.5, 12], sunrise: 7.97, sunset: 17.4, rows: [
+    { type: "icons", label: "Sky", values: ["sun", "sun", "sun", "sun", "partly", "cloud", "storm", "storm", "storm", "rain", "cloud", "night", "night", "night"] },
+    { type: "rating", label: "Rating", values: [2, 4, 5, 5, 4, 3, 1, 1, 1, 1, 1, 0, 0, 0] },
+    { type: "bars", label: "Storm", unit: "%", accent: "storm", max: 70, labelEvery: 1, values: [0, 0, 0, 0, 5, 10, 25, 45, 60, 55, 40, 20, 10, 0], height: 40 },
+    {
+      type: "line",
+      label: "Wind",
+      unit: "kn",
+      accent: "wind",
+      min: 0,
+      max: 45,
+      values: [22, 24, 22, 18, 15, 14, 16, 20, 25, 28, 30, 30, 28, 26],
+      band: [31, 34, 31, 25, 21, 20, 22, 28, 35, 39, 42, 42, 39, 36],
+      labelAt: [1, 10],
+      height: 70
+    },
+    { type: "numbers", label: "Temp", unit: "°C", accent: "snow", suffix: "°", values: [-2, -1, 0, 2, 3, 4, 4, 3, 2, 1, 0, -1, -2, -2] },
+    { type: "numbers", label: "Snow lvl", unit: "m", accent: "snow", every: 2, values: [2300, 2300, 2350, 2400, 2400, 2400, 2350, 2300, 2200, 2100, 2e3, 1900, 1900, 1900] }
+  ] });
+  return __toCommonJS(HourChart_exports);
+})();
+
+  </script>
+  <script>
+    var h=React.createElement, g=document.getElementById('g');
+    var E=[]; for (var k in (window.__dsPreview||{})) {
+      if (typeof window.__dsPreview[k]==='function' && /^[A-Z]/.test(k)) E.push(k);
+    }
+    window.__dsCells=E.slice();
+    var q=null; try{q=new URLSearchParams(location.search).get('story')}catch(e){}
+    var MODE="column";
+    window.__dsMode=MODE;
+    var PRIMARY="";
+    if(MODE==='column'){
+      g.className+=' ds-col';
+      // primaryStory renders first — it's what shows above the product's fold.
+      var cpi=PRIMARY?E.indexOf(PRIMARY):-1;
+      if(cpi>0){E.splice(cpi,1);E.unshift(PRIMARY)}
+    }
+    function mount(id,key){try{ReactDOM.createRoot(document.getElementById(id)).render(h(window.OratgeUI.OratgeRoot,{"padded":true},h(window.__dsPreview[key])))}catch(e){document.getElementById(id).textContent='⚠ '+(e&&e.message||e)}}
+    var pick=null;
+    if(q){for(var j=0;j<E.length;j++){if(E[j]===q||E[j].toLowerCase()===q.toLowerCase()){pick=E[j];break}}}
+    else if(MODE==='single'&&E.length){pick=E.indexOf(PRIMARY)>=0?PRIMARY:E[0]}
+    if(q&&!pick){g.textContent='⚠ no export named '+q}
+    else if(pick){
+      var s=document.createElement('div'); s.className='ds-single'; s.id='r0';
+      // The PRODUCT's default single render is full-bleed: a full-viewport
+      // story root (100vh / Grommet full) plus body padding guarantees a
+      // permanent 48px whitespace scrollbar in the card otherwise. Gated on
+      // !q so ?story= captures keep the padding gutter — the graded framing
+      // (and its edge-shadow room vs the storybook reference) stays
+      // byte-identical to what every existing verdict was minted on.
+      if(!q)document.body.style.padding='0';
+      g.parentNode.replaceChild(s,g); mount('r0',pick);
+    } else {
+      for(var i=0;i<E.length;i++){
+        var cell=document.createElement('section'); cell.className='ds-cell';
+        cell.innerHTML='<h4>'+E[i]+'</h4><div id="r'+i+'"></div>'; g.appendChild(cell);
+        mount('r'+i,E[i]);
+      }
+      if(E.length===0){g.textContent='⚠ no examples'}
+    }
+  </script>
+</body></html>

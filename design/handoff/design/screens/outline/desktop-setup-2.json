@@ -1,0 +1,315 @@
+{
+ "title": "Desktop · Setup 2 · Body and pace",
+ "outline": [
+  {
+   "component": "OratgeRoot",
+   "props": {
+    "width": "100%"
+   },
+   "children": [
+    {
+     "el": "nav",
+     "label": "Main",
+     "children": [
+      "Oratge",
+      {
+       "link": "desktop-today.dc.html",
+       "label": null,
+       "children": [
+        "Today"
+       ]
+      },
+      {
+       "link": "desktop-activities.dc.html",
+       "label": null,
+       "children": [
+        "Activities"
+       ]
+      },
+      {
+       "link": "desktop-map.dc.html",
+       "label": null,
+       "children": [
+        "Map"
+       ]
+      },
+      {
+       "link": "desktop-spots.dc.html",
+       "label": null,
+       "children": [
+        "Spots"
+       ]
+      },
+      {
+       "link": "desktop-profile.dc.html",
+       "label": null,
+       "children": [
+        "Profile"
+       ]
+      },
+      "Appearance",
+      {
+       "el": "group",
+       "label": "Appearance",
+       "children": [
+        {
+         "link": "desktop-setup-2-light.dc.html",
+         "label": null,
+         "children": [
+          "Light"
+         ]
+        },
+        {
+         "link": "desktop-setup-2.dc.html",
+         "label": null,
+         "children": [
+          "Dark"
+         ]
+        },
+        {
+         "link": "desktop-setup-2.dc.html",
+         "label": null,
+         "children": [
+          "System"
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "el": "main",
+     "children": [
+      {
+       "el": "nav",
+       "label": "Setup steps",
+       "children": [
+        {
+         "link": "desktop-setup-1.dc.html",
+         "label": null,
+         "children": [
+          "✓",
+          "You"
+         ]
+        },
+        {
+         "link": "desktop-setup-2.dc.html",
+         "label": null,
+         "children": [
+          "2",
+          "Body and pace"
+         ]
+        },
+        {
+         "link": "desktop-setup-3.dc.html",
+         "label": null,
+         "children": [
+          "3",
+          "Sports"
+         ]
+        },
+        {
+         "link": "desktop-setup-4.dc.html",
+         "label": null,
+         "children": [
+          "4",
+          "Wing foil"
+         ]
+        },
+        {
+         "link": "desktop-setup-5.dc.html",
+         "label": null,
+         "children": [
+          "5",
+          "Surf"
+         ]
+        },
+        {
+         "link": "desktop-setup-6.dc.html",
+         "label": null,
+         "children": [
+          "6",
+          "Bike"
+         ]
+        },
+        {
+         "link": "desktop-setup-7.dc.html",
+         "label": null,
+         "children": [
+          "7",
+          "Run"
+         ]
+        },
+        {
+         "link": "desktop-setup-8.dc.html",
+         "label": null,
+         "children": [
+          "8",
+          "Hike"
+         ]
+        },
+        {
+         "link": "desktop-setup-9.dc.html",
+         "label": null,
+         "children": [
+          "9",
+          "Alerts"
+         ]
+        },
+        {
+         "link": "desktop-setup-10.dc.html",
+         "label": null,
+         "children": [
+          "10",
+          "Done"
+         ]
+        }
+       ]
+      },
+      {
+       "link": "desktop-setup-1.dc.html",
+       "label": null,
+       "children": [
+        "‹ Back"
+       ]
+      },
+      "Step 2 of 10",
+      {
+       "link": "desktop-profile.dc.html",
+       "label": "Close setup",
+       "children": [
+        "✕"
+       ]
+      },
+      {
+       "el": "progressbar",
+       "label": "Setup progress",
+       "children": []
+      },
+      "Body and pace",
+      {
+       "el": "h1",
+       "text": "Tell us about you",
+       "children": null
+      },
+      {
+       "el": "p",
+       "text": "Used for gear size, turn-back times and what to wear.",
+       "children": null
+      },
+      {
+       "el": "section",
+       "children": [
+        "Body",
+        "Weight",
+        {
+         "input": "text",
+         "value": "78",
+         "label": "Weight"
+        },
+        "kg Height",
+        {
+         "input": "text",
+         "value": "180",
+         "label": "Height"
+        },
+        "cm Age",
+        {
+         "input": "text",
+         "value": "31",
+         "label": "Age"
+        },
+        "yrs Max heart rate Optional",
+        {
+         "input": "text",
+         "value": "188",
+         "label": "Max heart rate"
+        },
+        "bpm"
+       ]
+      },
+      {
+       "el": "section",
+       "children": [
+        "How you handle the weather",
+        "Fitness",
+        {
+         "input": "radio"
+        },
+        "Easy-going",
+        {
+         "input": "radio",
+         "checked": true
+        },
+        "Regular",
+        {
+         "input": "radio"
+        },
+        "Athletic You feel the cold",
+        {
+         "input": "radio"
+        },
+        "Less",
+        {
+         "input": "radio"
+        },
+        "Average",
+        {
+         "input": "radio",
+         "checked": true
+        },
+        "More"
+       ]
+      },
+      {
+       "el": "section",
+       "children": [
+        "Pace",
+        "Running pace",
+        {
+         "input": "text",
+         "value": "5:15",
+         "label": "Running pace"
+        },
+        "/km Climbing pace Hiking ascent",
+        {
+         "input": "text",
+         "value": "400",
+         "label": "Climbing pace"
+        },
+        "m/h Riding speed Flat, average",
+        {
+         "input": "text",
+         "value": "24",
+         "label": "Riding speed"
+        },
+        "km/h"
+       ]
+      },
+      {
+       "el": "section",
+       "children": [
+        "What this changes",
+        "Wing and board advice uses your weight. Hike turn-back times use your climbing pace. Layer and wetsuit advice use how you feel the cold."
+       ]
+      },
+      {
+       "link": "desktop-setup-3.dc.html",
+       "label": null,
+       "children": [
+        "Continue"
+       ]
+      },
+      {
+       "link": "desktop-setup-3.dc.html",
+       "label": null,
+       "children": [
+        "Skip this step"
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

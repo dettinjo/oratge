@@ -1,0 +1,95 @@
+/* Oratge — generated from tokens.json */
+:root, [data-theme="dark"] {
+  --og-bg: #150f0b;
+  --og-night: #1b1511;
+  --og-surface: #201b16;
+  --og-surface-2: #2b2521;
+  --og-line: #3b3531;
+  --og-text: #f2edea;
+  --og-text-2: #bfb5ae;
+  --og-text-3: #948b83;
+  --og-cloud: #b1a79f;
+  --og-sand: #c9b49a;
+  --og-wind: #4fbe8a;
+  --og-heat: #ff8a5b;
+  --og-water: #2db4fb;
+  --og-sun: #ef9600;
+  --og-storm: #be9ce6;
+  --og-snow: #94c4d7;
+  --og-r0: var(--og-surface-2);
+  --og-r1: #6e7962;
+  --og-r2: #809468;
+  --og-r3: #92b169;
+  --og-r4: #a5ce6f;
+  --og-r5: #bae581;
+  --og-wind-1: #657b6e;
+  --og-wind-2: #6d9780;
+  --og-wind-3: #70b691;
+  --og-wind-4: #78d4a5;
+  --og-wind-5: #8aecb9;
+  --og-warn-yellow: #d2a400;
+  --og-warn-orange: #ff8c3b;
+  --og-warn-red: #f18e96;
+}
+[data-theme="light"] {
+  --og-bg: #f8f2ee;
+  --og-night: #efe8e3;
+  --og-surface: #fffdfb;
+  --og-surface-2: #ede6e2;
+  --og-line: #dad3cd;
+  --og-text: #211c17;
+  --og-text-2: #534a43;
+  --og-text-3: #70665f;
+  --og-cloud: #6f665f;
+  --og-sand: #8c765f;
+  --og-wind: #3a8f67;
+  --og-heat: #dd5300;
+  --og-water: #1787c0;
+  --og-sun: #b67000;
+  --og-storm: #9752d6;
+  --og-snow: #628594;
+  --og-r0: var(--og-surface-2);
+  --og-r1: #7b8273;
+  --og-r2: #758562;
+  --og-r3: #6f884f;
+  --og-r4: #698a39;
+  --og-r5: #638c14;
+  --og-wind-1: #75837b;
+  --og-wind-2: #668775;
+  --og-wind-3: #558b6e;
+  --og-wind-4: #3e8e68;
+  --og-wind-5: #189161;
+  --og-warn-yellow: #9f7b00;
+  --og-warn-orange: #cb6200;
+  --og-warn-red: #e6425f;
+}
+:root {
+  --og-space-1: 4px;
+  --og-space-2: 8px;
+  --og-space-3: 12px;
+  --og-space-4: 16px;
+  --og-space-5: 20px;
+  --og-space-6: 24px;
+  --og-radius: 20px;
+  --og-radius-sm: 14px;
+  --font-sans: "DM Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+.hero-temp { font-family: var(--font-sans); font-size: 64px; line-height: 1; font-weight: 300; letter-spacing: -0.04em; }
+.verdict-best { font-family: var(--font-sans); font-size: 24px; font-weight: 600; letter-spacing: -0.01em; }
+.fact-value-lg { font-family: var(--font-sans); font-size: 36px; line-height: 1.05; font-weight: 600; letter-spacing: -0.02em; }
+.fact-value { font-family: var(--font-sans); font-size: 24px; font-weight: 600; letter-spacing: -0.01em; }
+.body { font-family: var(--font-sans); font-size: 14px; line-height: 1.4; font-weight: 400; }
+.act-name { font-family: var(--font-sans); font-size: 14px; font-weight: 500; }
+.act-window { font-family: var(--font-sans); font-size: 15px; font-weight: 600; }
+.day { font-family: var(--font-sans); font-size: 13px; font-weight: 400; }
+.verdict-summary { font-family: var(--font-sans); font-size: 14px; line-height: 1.45; font-weight: 400; }
+.chip { font-family: var(--font-sans); font-size: 12px; font-weight: 400; }
+.act-why { font-family: var(--font-sans); font-size: 13px; font-weight: 400; }
+.label { font-family: var(--font-sans); font-size: 12px; font-weight: 500; letter-spacing: 0.08em; }
+.src { font-family: var(--font-sans); font-size: 12px; line-height: 1.5; font-weight: 400; }
+.tab { font-family: var(--font-sans); font-size: 11px; font-weight: 400; }
+@font-face { font-family: "DM Sans"; src: url("fonts/dm-sans-latin-300-normal.woff2") format("woff2"); font-weight: 300; font-style: normal; font-display: swap; }
+@font-face { font-family: "DM Sans"; src: url("fonts/dm-sans-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: "DM Sans"; src: url("fonts/dm-sans-latin-500-normal.woff2") format("woff2"); font-weight: 500; font-style: normal; font-display: swap; }
+@font-face { font-family: "DM Sans"; src: url("fonts/dm-sans-latin-600-normal.woff2") format("woff2"); font-weight: 600; font-style: normal; font-display: swap; }
+@font-face { font-family: "DM Sans"; src: url("fonts/dm-sans-latin-700-normal.woff2") format("woff2"); font-weight: 700; font-style: normal; font-display: swap; }

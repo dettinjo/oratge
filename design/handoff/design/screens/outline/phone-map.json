@@ -1,0 +1,131 @@
+{
+ "title": "Phone · Map",
+ "outline": [
+  {
+   "component": "OratgeRoot",
+   "props": {
+    "width": 390
+   },
+   "children": [
+    {
+     "el": "header",
+     "children": [
+      {
+       "link": "phone-profile.dc.html",
+       "label": "Profile and setup",
+       "children": []
+      },
+      {
+       "el": "h1",
+       "text": "Map",
+       "children": null
+      },
+      {
+       "el": "p",
+       "text": "Mon 9 Nov · Barcelona",
+       "children": null
+      }
+     ]
+    },
+    {
+     "el": "section",
+     "children": [
+      {
+       "component": "ChipGroup",
+       "props": {
+        "options": [
+         "Wind",
+         "Temp",
+         "Rain 1 h",
+         "Lightning 60 min",
+         "Warnings"
+        ],
+        "selected": "Wind"
+       }
+      },
+      "Base map · Catalonia (placeholder) Pedraforca Montseny Collserola Ocata Castelldefels",
+      "Pins show today’s rating",
+      {
+       "component": "RatingDots",
+       "props": {
+        "value": 4
+       }
+      }
+     ]
+    },
+    {
+     "el": "section",
+     "children": [
+      {
+       "component": "SectionLabel",
+       "children": [
+        "Official warnings"
+       ]
+      },
+      {
+       "component": "WarningBanner",
+       "props": {
+        "level": "yellow",
+        "title": "Yellow warning · Wind",
+        "detail": "Barcelona coast · Tue 14–22 h · gusts above 70 km/h"
+       }
+      },
+      {
+       "component": "WarningBanner",
+       "props": {
+        "level": "orange",
+        "title": "Orange warning · Rain",
+        "detail": "Garrotxa · Thu 06–18 h · 40 mm in 1 h"
+       }
+      },
+      {
+       "component": "WarningBanner",
+       "props": {
+        "level": "red",
+        "title": "Red warning · Snow",
+        "detail": "Val d'Aran · Fri · 60 cm above 1000 m"
+       }
+      }
+     ]
+    },
+    {
+     "el": "section",
+     "children": [
+      {
+       "component": "DataSources",
+       "children": [
+        "Meteocat warnings and XEMA stations; ratings from your saved spots"
+       ]
+      }
+     ]
+    },
+    {
+     "component": "BottomNav",
+     "props": {
+      "active": "Map"
+     }
+    },
+    {
+     "link": "Main.dc.html",
+     "label": "Today",
+     "children": []
+    },
+    {
+     "link": "phone-activities.dc.html",
+     "label": "Activities",
+     "children": []
+    },
+    {
+     "link": "phone-map.dc.html",
+     "label": "Map",
+     "children": []
+    },
+    {
+     "link": "phone-spots.dc.html",
+     "label": "Spots",
+     "children": []
+    }
+   ]
+  }
+ ]
+}

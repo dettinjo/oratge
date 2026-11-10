@@ -1,0 +1,276 @@
+{
+ "title": "Desktop · Profile",
+ "outline": [
+  {
+   "component": "OratgeRoot",
+   "props": {
+    "width": "100%"
+   },
+   "children": [
+    {
+     "el": "nav",
+     "label": "Main",
+     "children": [
+      "Oratge",
+      {
+       "link": "desktop-today.dc.html",
+       "label": null,
+       "children": [
+        "Today"
+       ]
+      },
+      {
+       "link": "desktop-activities.dc.html",
+       "label": null,
+       "children": [
+        "Activities"
+       ]
+      },
+      {
+       "link": "desktop-map.dc.html",
+       "label": null,
+       "children": [
+        "Map"
+       ]
+      },
+      {
+       "link": "desktop-spots.dc.html",
+       "label": null,
+       "children": [
+        "Spots"
+       ]
+      },
+      {
+       "link": "desktop-profile.dc.html",
+       "label": null,
+       "children": [
+        "Profile"
+       ]
+      },
+      "Appearance",
+      {
+       "el": "group",
+       "label": "Appearance",
+       "children": [
+        {
+         "link": "desktop-profile-light.dc.html",
+         "label": null,
+         "children": [
+          "Light"
+         ]
+        },
+        {
+         "link": "desktop-profile.dc.html",
+         "label": null,
+         "children": [
+          "Dark"
+         ]
+        },
+        {
+         "link": "desktop-profile.dc.html",
+         "label": null,
+         "children": [
+          "System"
+         ]
+        }
+       ]
+      },
+      "Data: Meteocat"
+     ]
+    },
+    {
+     "el": "main",
+     "children": [
+      {
+       "el": "header",
+       "children": [
+        {
+         "el": "h1",
+         "text": "Profile",
+         "children": null
+        },
+        {
+         "el": "p",
+         "text": "Mon 9 Nov · Barcelona",
+         "children": null
+        }
+       ]
+      },
+      {
+       "el": "section",
+       "children": [
+        {
+         "component": "Card",
+         "children": [
+          "A Alex Barcelona · kn · °C",
+          "Setup 8 of 10 done 80 % Add your run and alert preferences to sharpen those ratings."
+         ]
+        }
+       ]
+      },
+      {
+       "el": "section",
+       "children": [
+        {
+         "el": "section",
+         "children": [
+          "You",
+          {
+           "link": "desktop-setup-1.dc.html",
+           "label": null,
+           "children": [
+            "Personal and units Alex · Barcelona · kn, °C",
+            "✓",
+            "›"
+           ]
+          },
+          {
+           "link": "desktop-setup-2.dc.html",
+           "label": null,
+           "children": [
+            "Body and pace 78 kg · 180 cm · 5:15 /km",
+            "✓",
+            "›"
+           ]
+          }
+         ]
+        }
+       ]
+      },
+      {
+       "el": "section",
+       "children": [
+        {
+         "el": "section",
+         "children": [
+          "Appearance",
+          {
+           "el": "radiogroup",
+           "label": "Appearance",
+           "children": [
+            {
+             "link": "desktop-profile-light.dc.html",
+             "label": null,
+             "children": [
+              "Light"
+             ]
+            },
+            {
+             "link": "desktop-profile.dc.html",
+             "label": null,
+             "children": [
+              "Dark"
+             ]
+            },
+            {
+             "link": "desktop-profile.dc.html",
+             "label": null,
+             "children": [
+              "System"
+             ]
+            }
+           ]
+          },
+          "System follows your device’s light or dark setting."
+         ]
+        }
+       ]
+      },
+      {
+       "el": "section",
+       "children": [
+        {
+         "el": "section",
+         "children": [
+          "App",
+          {
+           "link": "desktop-setup-9.dc.html",
+           "label": null,
+           "children": [
+            "Alerts and privacy Not set up yet",
+            "Add details",
+            "›"
+           ]
+          },
+          {
+           "link": "desktop-setup-1.dc.html",
+           "label": null,
+           "children": [
+            "Units kn · °C",
+            "›"
+           ]
+          }
+         ]
+        }
+       ]
+      },
+      {
+       "el": "section",
+       "children": [
+        {
+         "el": "section",
+         "children": [
+          "Sports and gear",
+          {
+           "link": "desktop-setup-4.dc.html",
+           "label": null,
+           "children": [
+            "Wing foil 4 + 5 m · 95 l · 14–24 kn",
+            "✓",
+            "›"
+           ]
+          },
+          {
+           "link": "desktop-setup-5.dc.html",
+           "label": null,
+           "children": [
+            "Surf 7'2\" 48 l · 0.6–1.8 m",
+            "✓",
+            "›"
+           ]
+          },
+          {
+           "link": "desktop-setup-6.dc.html",
+           "label": null,
+           "children": [
+            "Bike Gravel · 40 mm · max 20 kn",
+            "✓",
+            "›"
+           ]
+          },
+          {
+           "link": "desktop-setup-7.dc.html",
+           "label": null,
+           "children": [
+            "Run Not set up yet",
+            "Add details",
+            "›"
+           ]
+          },
+          {
+           "link": "desktop-setup-8.dc.html",
+           "label": null,
+           "children": [
+            "Hike 8 kg · storms ≤ 20 %",
+            "✓",
+            "›"
+           ]
+          },
+          {
+           "link": "desktop-setup-3.dc.html",
+           "label": null,
+           "children": [
+            "Add or remove sports 5 sports",
+            "›"
+           ]
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

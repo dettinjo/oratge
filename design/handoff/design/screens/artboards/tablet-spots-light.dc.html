@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Tablet · Spots · Light</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/oratgeui/tokens.css">
+<link rel="stylesheet" href="ds/oratgeui/components/bundle.css">
+<script src="ds/oratgeui/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0;background:#f8f2ee}
+a{color:#534a43}a:hover{color:#211c17}
+</style>
+</helmet>
+<div data-theme="light"><div style="width: 834px; min-height: 1194px"><x-import component-from-global-scope="OratgeUI.OratgeRoot" width="{{p21}}"><div style="display: flex; min-height: 1194px"><nav aria-label="Main" style="flex: 0 0 96px; border-right: 1px solid var(--og-line); padding: 24px 8px; display: flex; flex-direction: column; gap: 8px"><a href="tablet-today-light.dc.html" style="display: flex; flex-direction: column; gap: 4px; padding: 10px 0; font-size: 11px; align-items: center; min-height: 44px; text-decoration: none; color: var(--og-text-2);  font-weight: 400"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg><span>Today</span></a><a href="tablet-activities-light.dc.html" style="display: flex; flex-direction: column; gap: 4px; padding: 10px 0; font-size: 11px; align-items: center; min-height: 44px; text-decoration: none; color: var(--og-text-2);  font-weight: 400"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h4l3-8 4 16 3-8h4"></path></svg><span>Activities</span></a><a href="tablet-map-light.dc.html" style="display: flex; flex-direction: column; gap: 4px; padding: 10px 0; font-size: 11px; align-items: center; min-height: 44px; text-decoration: none; color: var(--og-text-2);  font-weight: 400"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"></path><path d="M9 4v14M15 6v14"></path></svg><span>Map</span></a><a href="tablet-spots-light.dc.html" style="display: flex; flex-direction: column; gap: 4px; padding: 10px 0; font-size: 11px; align-items: center; min-height: 44px; text-decoration: none; color: var(--og-text);  font-weight: 600" aria-current="page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"></path><circle cx="12" cy="10" r="2.5"></circle></svg><span>Spots</span></a><a href="tablet-profile-light.dc.html" style="display: flex; flex-direction: column; gap: 4px; padding: 10px 0; font-size: 11px; align-items: center; min-height: 44px; text-decoration: none; color: var(--og-text-2);  font-weight: 400"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"></path></svg><span>Profile</span></a></nav><main style="flex: 1 1 auto; min-width: 0; padding: 28px; display: flex; flex-direction: column; gap: 12px"><header style="margin-bottom: 8px; position: relative; padding-right: 52px"><h1 style="margin: 0; font-size: 28px; font-weight: 600; letter-spacing: -0.01em">Spots</h1><p style="margin: 4px 0 0; font-size: 13px; color: var(--og-text-2)">Mon 9 Nov · Barcelona</p></header><div style="display: flex; flex-direction: column; gap: 12px"><section style="min-width: 0"><x-import component-from-global-scope="OratgeUI.SectionLabel">Saved spots</x-import><div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px"><a href="tablet-spot-light.dc.html" style="display: block; color: inherit; text-decoration: none" aria-label="Open Castelldefels"><x-import component-from-global-scope="OratgeUI.SpotCard" name="Castelldefels" kind="Wing · flatwater" wind="{{p1}}" gust="{{p2}}" wind-from="{{p3}}" today="{{p4}}" window="13–17 h" rating="{{p5}}"></x-import></a><x-import component-from-global-scope="OratgeUI.SpotCard" name="Ocata" kind="Surf · beach" wind="{{p6}}" gust="{{p7}}" wind-from="{{p8}}" today="{{p9}}" window="08–11 h" rating="{{p10}}"></x-import><x-import component-from-global-scope="OratgeUI.SpotCard" name="Collserola loop" kind="Bike · 42 km" wind="{{p11}}" gust="{{p12}}" wind-from="{{p13}}" today="{{p14}}" window="all day" rating="{{p15}}"></x-import><x-import component-from-global-scope="OratgeUI.SpotCard" name="Montseny · Turó de l&#x27;Home" kind="Hike · 1706 m" wind="{{p16}}" gust="{{p17}}" wind-from="{{p18}}" today="{{p19}}" window="until 13 h" rating="{{p20}}"></x-import></div></section></div><div style="display: flex; flex-direction: column; gap: 12px"><section style="min-width: 0"><button type="button" style="width: 100%; min-height: 48px; border-radius: 999px; border: 1px solid var(--og-line); background: transparent; color: var(--og-text); font: inherit; font-weight: 600">Add a spot</button></section></div></main></div></x-import></div></div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":834,"height":1194}}'>
+class Component extends DCLogic {
+renderVals() {
+return {"p1": 14, "p2": 21, "p3": 225, "p4": [0, 1, 3, 4, 4, 3, 0, 0], "p5": 4, "p6": 6, "p7": 9, "p8": 330, "p9": [3, 3, 2, 1, 1, 1, 0, 0], "p10": 3, "p11": 7, "p12": 12, "p13": 240, "p14": [5, 5, 5, 5, 5, 4, 4, 4], "p15": 5, "p16": 22, "p17": 34, "p18": 300, "p19": [3, 3, 2, 1, 1, 0, 0, 0], "p20": 2, "p21": 834};
+}
+}
+</script>
+</body>
+</html>

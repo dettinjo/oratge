@@ -1,0 +1,546 @@
+{
+ "title": "Phone · Today",
+ "outline": [
+  {
+   "component": "OratgeRoot",
+   "props": {
+    "width": 390
+   },
+   "children": [
+    {
+     "el": "header",
+     "children": [
+      {
+       "link": "phone-profile.dc.html",
+       "label": "Profile and setup",
+       "children": []
+      },
+      {
+       "el": "h1",
+       "text": "Today",
+       "children": null
+      },
+      {
+       "el": "p",
+       "text": "Mon 9 Nov · Barcelona",
+       "children": null
+      }
+     ]
+    },
+    {
+     "el": "section",
+     "children": [
+      {
+       "link": "phone-bike.dc.html",
+       "label": "Open the bike planner",
+       "children": [
+        {
+         "component": "Card",
+         "children": [
+          "Best today",
+          "Bike · 09–12 h",
+          {
+           "component": "RatingDots",
+           "props": {
+            "value": 5,
+            "size": "lg",
+            "showWord": true
+           }
+          },
+          "Dry window before the 13 h showers, tailwind on the climb.",
+          "No rain for the next 2 hours"
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "el": "section",
+     "children": [
+      {
+       "component": "WarningBanner",
+       "props": {
+        "level": "yellow",
+        "kind": "pre",
+        "title": "Pre-warning · Wed",
+        "detail": "Yellow wind warning likely for the Barcelona coast"
+       }
+      }
+     ]
+    },
+    {
+     "el": "section",
+     "children": [
+      {
+       "component": "CurrentConditions",
+       "props": {
+        "place": "Barcelona",
+        "source": "Meteocat · Zoo station · 8 min ago",
+        "sky": "partly",
+        "temp": 18,
+        "summary": "Mostly sunny",
+        "feels": 17,
+        "min": 11,
+        "max": 21,
+        "wind": "SW 14 kn · gusts 21"
+       }
+      }
+     ]
+    },
+    {
+     "el": "section",
+     "children": [
+      {
+       "component": "SectionLabel",
+       "children": [
+        "Right now"
+       ]
+      },
+      {
+       "component": "FactTile",
+       "props": {
+        "size": "lg",
+        "label": "Wind",
+        "value": "14 kn",
+        "sub": "SW · gusts 21",
+        "accent": "wind"
+       }
+      },
+      {
+       "component": "FactTile",
+       "props": {
+        "size": "lg",
+        "label": "Rain",
+        "value": "0 %",
+        "sub": "likely from 00 h",
+        "accent": "water"
+       }
+      },
+      {
+       "component": "FactTile",
+       "props": {
+        "size": "lg",
+        "label": "UV",
+        "value": "2",
+        "sub": "low · max at 13 h",
+        "accent": "sun"
+       }
+      },
+      {
+       "component": "FactTile",
+       "props": {
+        "size": "lg",
+        "label": "Water",
+        "value": "18.6°",
+        "sub": "3/2 suit",
+        "accent": "water"
+       }
+      }
+     ]
+    },
+    {
+     "el": "section",
+     "children": [
+      {
+       "component": "SectionLabel",
+       "children": [
+        "Next 24 hours"
+       ]
+      },
+      {
+       "component": "Card",
+       "children": [
+        {
+         "component": "NextHours",
+         "props": {
+          "startHour": 10,
+          "temps": [
+           17,
+           16,
+           15,
+           14,
+           14,
+           13,
+           13,
+           14,
+           16,
+           18,
+           19,
+           20,
+           21,
+           21,
+           20,
+           19,
+           18,
+           17,
+           16,
+           15,
+           15,
+           14,
+           14,
+           13
+          ],
+          "rain": [
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           5,
+           10,
+           20,
+           45,
+           60,
+           40,
+           20,
+           10,
+           5,
+           0,
+           0,
+           0,
+           0
+          ],
+          "sky": [
+           "partly",
+           "partly",
+           "cloud",
+           "cloud",
+           "night",
+           "night",
+           "night",
+           "night",
+           "night",
+           "night",
+           "night",
+           "night",
+           "partly",
+           "cloud",
+           "storm",
+           "rain",
+           "rain",
+           "cloud",
+           "cloud",
+           "sun",
+           "sun",
+           "sun",
+           "partly",
+           "partly"
+          ],
+          "width": 318
+         }
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "el": "section",
+     "children": [
+      {
+       "component": "SectionLabel",
+       "children": [
+        "Today for you"
+       ]
+      },
+      {
+       "component": "Card",
+       "props": {
+        "tight": true
+       },
+       "children": [
+        {
+         "link": "phone-wing.dc.html",
+         "label": "Open the wing planner",
+         "children": [
+          {
+           "component": "ActivityRow",
+           "props": {
+            "sport": "wing",
+            "rating": 4,
+            "window": "13–17 h",
+            "reason": "side-on SW 16–19 kn"
+           }
+          }
+         ]
+        },
+        {
+         "link": "phone-surf.dc.html",
+         "label": "Open the surf planner",
+         "children": [
+          {
+           "component": "ActivityRow",
+           "props": {
+            "sport": "surf",
+            "rating": 3,
+            "window": "08–11 h",
+            "reason": "E swell 1.1 m, offshore until 10 h"
+           }
+          }
+         ]
+        },
+        {
+         "link": "phone-bike.dc.html",
+         "label": "Open the bike planner",
+         "children": [
+          {
+           "component": "ActivityRow",
+           "props": {
+            "sport": "bike",
+            "rating": 5,
+            "window": "09–12 h",
+            "reason": "dry before the 13 h showers"
+           }
+          }
+         ]
+        },
+        {
+         "link": "phone-run.dc.html",
+         "label": "Open the run planner",
+         "children": [
+          {
+           "component": "ActivityRow",
+           "props": {
+            "sport": "run",
+            "rating": 5,
+            "window": "07:30–09:30",
+            "reason": "cool and dry, 11–14°"
+           }
+          }
+         ]
+        },
+        {
+         "link": "phone-hike.dc.html",
+         "label": "Open the hike planner",
+         "children": [
+          {
+           "component": "ActivityRow",
+           "props": {
+            "sport": "hike",
+            "rating": 2,
+            "window": "07:30–12 h",
+            "reason": "45 % storm risk from 14 h"
+           }
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "el": "section",
+     "children": [
+      {
+       "component": "SectionLabel",
+       "children": [
+        "7 days"
+       ]
+      },
+      {
+       "component": "Card",
+       "props": {
+        "tight": true
+       },
+       "children": [
+        {
+         "component": "ForecastDayRow",
+         "props": {
+          "day": "Today",
+          "sky": "partly",
+          "rainChance": 0,
+          "min": 11,
+          "max": 21,
+          "scale": [
+           8,
+           22
+          ]
+         }
+        },
+        {
+         "component": "ForecastDayRow",
+         "props": {
+          "day": "Tue",
+          "sky": "storm",
+          "rainChance": 60,
+          "min": 13,
+          "max": 19,
+          "scale": [
+           8,
+           22
+          ]
+         }
+        },
+        {
+         "component": "ForecastDayRow",
+         "props": {
+          "day": "Wed",
+          "sky": "rain",
+          "rainChance": 80,
+          "min": 12,
+          "max": 16,
+          "scale": [
+           8,
+           22
+          ]
+         }
+        },
+        {
+         "component": "ForecastDayRow",
+         "props": {
+          "day": "Thu",
+          "sky": "partly",
+          "rainChance": 20,
+          "min": 10,
+          "max": 17,
+          "scale": [
+           8,
+           22
+          ]
+         }
+        },
+        {
+         "component": "ForecastDayRow",
+         "props": {
+          "day": "Fri",
+          "sky": "sun",
+          "rainChance": 0,
+          "min": 9,
+          "max": 18,
+          "scale": [
+           8,
+           22
+          ]
+         }
+        },
+        {
+         "component": "ForecastDayRow",
+         "props": {
+          "day": "Sat",
+          "sky": "sun",
+          "rainChance": 0,
+          "min": 10,
+          "max": 19,
+          "scale": [
+           8,
+           22
+          ]
+         }
+        },
+        {
+         "component": "ForecastDayRow",
+         "props": {
+          "day": "Sun",
+          "sky": "cloud",
+          "rainChance": 10,
+          "min": 11,
+          "max": 18,
+          "scale": [
+           8,
+           22
+          ]
+         }
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "el": "section",
+     "children": [
+      {
+       "component": "SectionLabel",
+       "children": [
+        "Forecast confidence"
+       ]
+      },
+      {
+       "component": "Card",
+       "children": [
+        "Share of 67 ensemble members (ECMWF ENS 51 + AROME-EPS 16) that agree with the blend within your thresholds.",
+        "Today models agree within 2 kn / 1° 92 %",
+        "Tue storm timing ±2 h 84 %",
+        "Wed rain total 8–22 mm 71 %",
+        "Thu front position uncertain 63 %",
+        "Fri ensemble splits in two 55 %",
+        "Sat climatology weight 30 % 48 %",
+        "Sun climatology weight 45 % 41 %"
+       ]
+      }
+     ]
+    },
+    {
+     "el": "section",
+     "children": [
+      {
+       "component": "SectionLabel",
+       "children": [
+        "Daylight"
+       ]
+      },
+      {
+       "component": "FactTile",
+       "props": {
+        "label": "Sunrise",
+        "value": "07:47",
+        "accent": "sun"
+       }
+      },
+      {
+       "component": "FactTile",
+       "props": {
+        "label": "Sunset",
+        "value": "17:35",
+        "sub": "last light 18:03",
+        "accent": "sun"
+       }
+      }
+     ]
+    },
+    {
+     "el": "section",
+     "children": [
+      {
+       "component": "DataSources",
+       "children": [
+        "Meteocat: XEMA station Zoo (live), municipal hourly forecast, 7-day forecast, warnings; sea temperature buoy"
+       ]
+      }
+     ]
+    },
+    {
+     "component": "BottomNav",
+     "props": {
+      "active": "Today"
+     }
+    },
+    {
+     "link": "Main.dc.html",
+     "label": "Today",
+     "children": []
+    },
+    {
+     "link": "phone-activities.dc.html",
+     "label": "Activities",
+     "children": []
+    },
+    {
+     "link": "phone-map.dc.html",
+     "label": "Map",
+     "children": []
+    },
+    {
+     "link": "phone-spots.dc.html",
+     "label": "Spots",
+     "children": []
+    }
+   ]
+  }
+ ]
+}

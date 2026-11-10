@@ -1,0 +1,758 @@
+{
+ "Main.dc.html": {
+  "title": "Phone · Today",
+  "device": "phone",
+  "width": 390,
+  "theme": "dark"
+ },
+ "phone-activities.dc.html": {
+  "title": "Phone · Activities",
+  "device": "phone",
+  "width": 390,
+  "theme": "dark"
+ },
+ "phone-wing.dc.html": {
+  "title": "Phone · Wing foil · Castelldefels",
+  "device": "phone",
+  "width": 390,
+  "theme": "dark"
+ },
+ "phone-surf.dc.html": {
+  "title": "Phone · Surf · Ocata",
+  "device": "phone",
+  "width": 390,
+  "theme": "dark"
+ },
+ "phone-bike.dc.html": {
+  "title": "Phone · Bike · Collserola loop",
+  "device": "phone",
+  "width": 390,
+  "theme": "dark"
+ },
+ "phone-run.dc.html": {
+  "title": "Phone · Run · Passeig Marítim",
+  "device": "phone",
+  "width": 390,
+  "theme": "dark"
+ },
+ "phone-hike.dc.html": {
+  "title": "Phone · Hike · Pedraforca",
+  "device": "phone",
+  "width": 390,
+  "theme": "dark"
+ },
+ "phone-map.dc.html": {
+  "title": "Phone · Map",
+  "device": "phone",
+  "width": 390,
+  "theme": "dark"
+ },
+ "phone-spots.dc.html": {
+  "title": "Phone · Spots",
+  "device": "phone",
+  "width": 390,
+  "theme": "dark"
+ },
+ "phone-spot.dc.html": {
+  "title": "Phone · Castelldefels",
+  "device": "phone",
+  "width": 390,
+  "theme": "dark"
+ },
+ "tablet-today.dc.html": {
+  "title": "Tablet · Today",
+  "device": "tablet",
+  "width": 834,
+  "theme": "dark"
+ },
+ "tablet-activities.dc.html": {
+  "title": "Tablet · Activities",
+  "device": "tablet",
+  "width": 834,
+  "theme": "dark"
+ },
+ "tablet-wing.dc.html": {
+  "title": "Tablet · Wing foil · Castelldefels",
+  "device": "tablet",
+  "width": 834,
+  "theme": "dark"
+ },
+ "tablet-surf.dc.html": {
+  "title": "Tablet · Surf · Ocata",
+  "device": "tablet",
+  "width": 834,
+  "theme": "dark"
+ },
+ "tablet-bike.dc.html": {
+  "title": "Tablet · Bike · Collserola loop",
+  "device": "tablet",
+  "width": 834,
+  "theme": "dark"
+ },
+ "tablet-run.dc.html": {
+  "title": "Tablet · Run · Passeig Marítim",
+  "device": "tablet",
+  "width": 834,
+  "theme": "dark"
+ },
+ "tablet-hike.dc.html": {
+  "title": "Tablet · Hike · Pedraforca",
+  "device": "tablet",
+  "width": 834,
+  "theme": "dark"
+ },
+ "tablet-map.dc.html": {
+  "title": "Tablet · Map",
+  "device": "tablet",
+  "width": 834,
+  "theme": "dark"
+ },
+ "tablet-spots.dc.html": {
+  "title": "Tablet · Spots",
+  "device": "tablet",
+  "width": 834,
+  "theme": "dark"
+ },
+ "tablet-spot.dc.html": {
+  "title": "Tablet · Castelldefels",
+  "device": "tablet",
+  "width": 834,
+  "theme": "dark"
+ },
+ "desktop-today.dc.html": {
+  "title": "Desktop · Today",
+  "device": "desktop",
+  "width": 1440,
+  "theme": "dark"
+ },
+ "desktop-activities.dc.html": {
+  "title": "Desktop · Activities",
+  "device": "desktop",
+  "width": 1440,
+  "theme": "dark"
+ },
+ "desktop-wing.dc.html": {
+  "title": "Desktop · Wing foil · Castelldefels",
+  "device": "desktop",
+  "width": 1440,
+  "theme": "dark"
+ },
+ "desktop-surf.dc.html": {
+  "title": "Desktop · Surf · Ocata",
+  "device": "desktop",
+  "width": 1440,
+  "theme": "dark"
+ },
+ "desktop-bike.dc.html": {
+  "title": "Desktop · Bike · Collserola loop",
+  "device": "desktop",
+  "width": 1440,
+  "theme": "dark"
+ },
+ "desktop-run.dc.html": {
+  "title": "Desktop · Run · Passeig Marítim",
+  "device": "desktop",
+  "width": 1440,
+  "theme": "dark"
+ },
+ "desktop-hike.dc.html": {
+  "title": "Desktop · Hike · Pedraforca",
+  "device": "desktop",
+  "width": 1440,
+  "theme": "dark"
+ },
+ "desktop-map.dc.html": {
+  "title": "Desktop · Map",
+  "device": "desktop",
+  "width": 1440,
+  "theme": "dark"
+ },
+ "desktop-spots.dc.html": {
+  "title": "Desktop · Spots",
+  "device": "desktop",
+  "width": 1440,
+  "theme": "dark"
+ },
+ "desktop-spot.dc.html": {
+  "title": "Desktop · Castelldefels",
+  "device": "desktop",
+  "width": 1440,
+  "theme": "dark"
+ },
+ "phone-today-light.dc.html": {
+  "title": "Phone · Today · Light",
+  "device": "phone",
+  "width": 390,
+  "theme": "light"
+ },
+ "phone-activities-light.dc.html": {
+  "title": "Phone · Activities · Light",
+  "device": "phone",
+  "width": 390,
+  "theme": "light"
+ },
+ "phone-wing-light.dc.html": {
+  "title": "Phone · Wing foil · Castelldefels · Light",
+  "device": "phone",
+  "width": 390,
+  "theme": "light"
+ },
+ "phone-surf-light.dc.html": {
+  "title": "Phone · Surf · Ocata · Light",
+  "device": "phone",
+  "width": 390,
+  "theme": "light"
+ },
+ "phone-bike-light.dc.html": {
+  "title": "Phone · Bike · Collserola loop · Light",
+  "device": "phone",
+  "width": 390,
+  "theme": "light"
+ },
+ "phone-run-light.dc.html": {
+  "title": "Phone · Run · Passeig Marítim · Light",
+  "device": "phone",
+  "width": 390,
+  "theme": "light"
+ },
+ "phone-hike-light.dc.html": {
+  "title": "Phone · Hike · Pedraforca · Light",
+  "device": "phone",
+  "width": 390,
+  "theme": "light"
+ },
+ "phone-map-light.dc.html": {
+  "title": "Phone · Map · Light",
+  "device": "phone",
+  "width": 390,
+  "theme": "light"
+ },
+ "phone-spots-light.dc.html": {
+  "title": "Phone · Spots · Light",
+  "device": "phone",
+  "width": 390,
+  "theme": "light"
+ },
+ "phone-spot-light.dc.html": {
+  "title": "Phone · Castelldefels · Light",
+  "device": "phone",
+  "width": 390,
+  "theme": "light"
+ },
+ "tablet-today-light.dc.html": {
+  "title": "Tablet · Today · Light",
+  "device": "tablet",
+  "width": 834,
+  "theme": "light"
+ },
+ "tablet-activities-light.dc.html": {
+  "title": "Tablet · Activities · Light",
+  "device": "tablet",
+  "width": 834,
+  "theme": "light"
+ },
+ "tablet-wing-light.dc.html": {
+  "title": "Tablet · Wing foil · Castelldefels · Light",
+  "device": "tablet",
+  "width": 834,
+  "theme": "light"
+ },
+ "tablet-surf-light.dc.html": {
+  "title": "Tablet · Surf · Ocata · Light",
+  "device": "tablet",
+  "width": 834,
+  "theme": "light"
+ },
+ "tablet-bike-light.dc.html": {
+  "title": "Tablet · Bike · Collserola loop · Light",
+  "device": "tablet",
+  "width": 834,
+  "theme": "light"
+ },
+ "tablet-run-light.dc.html": {
+  "title": "Tablet · Run · Passeig Marítim · Light",
+  "device": "tablet",
+  "width": 834,
+  "theme": "light"
+ },
+ "tablet-hike-light.dc.html": {
+  "title": "Tablet · Hike · Pedraforca · Light",
+  "device": "tablet",
+  "width": 834,
+  "theme": "light"
+ },
+ "tablet-map-light.dc.html": {
+  "title": "Tablet · Map · Light",
+  "device": "tablet",
+  "width": 834,
+  "theme": "light"
+ },
+ "tablet-spots-light.dc.html": {
+  "title": "Tablet · Spots · Light",
+  "device": "tablet",
+  "width": 834,
+  "theme": "light"
+ },
+ "tablet-spot-light.dc.html": {
+  "title": "Tablet · Castelldefels · Light",
+  "device": "tablet",
+  "width": 834,
+  "theme": "light"
+ },
+ "desktop-today-light.dc.html": {
+  "title": "Desktop · Today · Light",
+  "device": "desktop",
+  "width": 1440,
+  "theme": "light"
+ },
+ "desktop-activities-light.dc.html": {
+  "title": "Desktop · Activities · Light",
+  "device": "desktop",
+  "width": 1440,
+  "theme": "light"
+ },
+ "desktop-wing-light.dc.html": {
+  "title": "Desktop · Wing foil · Castelldefels · Light",
+  "device": "desktop",
+  "width": 1440,
+  "theme": "light"
+ },
+ "desktop-surf-light.dc.html": {
+  "title": "Desktop · Surf · Ocata · Light",
+  "device": "desktop",
+  "width": 1440,
+  "theme": "light"
+ },
+ "desktop-bike-light.dc.html": {
+  "title": "Desktop · Bike · Collserola loop · Light",
+  "device": "desktop",
+  "width": 1440,
+  "theme": "light"
+ },
+ "desktop-run-light.dc.html": {
+  "title": "Desktop · Run · Passeig Marítim · Light",
+  "device": "desktop",
+  "width": 1440,
+  "theme": "light"
+ },
+ "desktop-hike-light.dc.html": {
+  "title": "Desktop · Hike · Pedraforca · Light",
+  "device": "desktop",
+  "width": 1440,
+  "theme": "light"
+ },
+ "desktop-map-light.dc.html": {
+  "title": "Desktop · Map · Light",
+  "device": "desktop",
+  "width": 1440,
+  "theme": "light"
+ },
+ "desktop-spots-light.dc.html": {
+  "title": "Desktop · Spots · Light",
+  "device": "desktop",
+  "width": 1440,
+  "theme": "light"
+ },
+ "desktop-spot-light.dc.html": {
+  "title": "Desktop · Castelldefels · Light",
+  "device": "desktop",
+  "width": 1440,
+  "theme": "light"
+ },
+ "phone-profile.dc.html": {
+  "title": "Phone · Profile",
+  "device": "phone",
+  "width": 390,
+  "theme": "dark"
+ },
+ "phone-profile-light.dc.html": {
+  "title": "Phone · Profile · Light",
+  "device": "phone",
+  "width": 390,
+  "theme": "light"
+ },
+ "tablet-profile.dc.html": {
+  "title": "Tablet · Profile",
+  "device": "tablet",
+  "width": 834,
+  "theme": "dark"
+ },
+ "tablet-profile-light.dc.html": {
+  "title": "Tablet · Profile · Light",
+  "device": "tablet",
+  "width": 834,
+  "theme": "light"
+ },
+ "desktop-profile.dc.html": {
+  "title": "Desktop · Profile",
+  "device": "desktop",
+  "width": 1440,
+  "theme": "dark"
+ },
+ "desktop-profile-light.dc.html": {
+  "title": "Desktop · Profile · Light",
+  "device": "desktop",
+  "width": 1440,
+  "theme": "light"
+ },
+ "phone-setup-1.dc.html": {
+  "title": "Phone · Setup 1 · You",
+  "device": "phone",
+  "width": 390,
+  "theme": "dark"
+ },
+ "phone-setup-2.dc.html": {
+  "title": "Phone · Setup 2 · Body and pace",
+  "device": "phone",
+  "width": 390,
+  "theme": "dark"
+ },
+ "phone-setup-3.dc.html": {
+  "title": "Phone · Setup 3 · Sports",
+  "device": "phone",
+  "width": 390,
+  "theme": "dark"
+ },
+ "phone-setup-4.dc.html": {
+  "title": "Phone · Setup 4 · Wing foil",
+  "device": "phone",
+  "width": 390,
+  "theme": "dark"
+ },
+ "phone-setup-5.dc.html": {
+  "title": "Phone · Setup 5 · Surf",
+  "device": "phone",
+  "width": 390,
+  "theme": "dark"
+ },
+ "phone-setup-6.dc.html": {
+  "title": "Phone · Setup 6 · Bike",
+  "device": "phone",
+  "width": 390,
+  "theme": "dark"
+ },
+ "phone-setup-7.dc.html": {
+  "title": "Phone · Setup 7 · Run",
+  "device": "phone",
+  "width": 390,
+  "theme": "dark"
+ },
+ "phone-setup-8.dc.html": {
+  "title": "Phone · Setup 8 · Hike",
+  "device": "phone",
+  "width": 390,
+  "theme": "dark"
+ },
+ "phone-setup-9.dc.html": {
+  "title": "Phone · Setup 9 · Alerts",
+  "device": "phone",
+  "width": 390,
+  "theme": "dark"
+ },
+ "phone-setup-10.dc.html": {
+  "title": "Phone · Setup 10 · Done",
+  "device": "phone",
+  "width": 390,
+  "theme": "dark"
+ },
+ "phone-setup-1-light.dc.html": {
+  "title": "Phone · Setup 1 · You · Light",
+  "device": "phone",
+  "width": 390,
+  "theme": "light"
+ },
+ "phone-setup-2-light.dc.html": {
+  "title": "Phone · Setup 2 · Body and pace · Light",
+  "device": "phone",
+  "width": 390,
+  "theme": "light"
+ },
+ "phone-setup-3-light.dc.html": {
+  "title": "Phone · Setup 3 · Sports · Light",
+  "device": "phone",
+  "width": 390,
+  "theme": "light"
+ },
+ "phone-setup-4-light.dc.html": {
+  "title": "Phone · Setup 4 · Wing foil · Light",
+  "device": "phone",
+  "width": 390,
+  "theme": "light"
+ },
+ "phone-setup-5-light.dc.html": {
+  "title": "Phone · Setup 5 · Surf · Light",
+  "device": "phone",
+  "width": 390,
+  "theme": "light"
+ },
+ "phone-setup-6-light.dc.html": {
+  "title": "Phone · Setup 6 · Bike · Light",
+  "device": "phone",
+  "width": 390,
+  "theme": "light"
+ },
+ "phone-setup-7-light.dc.html": {
+  "title": "Phone · Setup 7 · Run · Light",
+  "device": "phone",
+  "width": 390,
+  "theme": "light"
+ },
+ "phone-setup-8-light.dc.html": {
+  "title": "Phone · Setup 8 · Hike · Light",
+  "device": "phone",
+  "width": 390,
+  "theme": "light"
+ },
+ "phone-setup-9-light.dc.html": {
+  "title": "Phone · Setup 9 · Alerts · Light",
+  "device": "phone",
+  "width": 390,
+  "theme": "light"
+ },
+ "phone-setup-10-light.dc.html": {
+  "title": "Phone · Setup 10 · Done · Light",
+  "device": "phone",
+  "width": 390,
+  "theme": "light"
+ },
+ "tablet-setup-1.dc.html": {
+  "title": "Tablet · Setup 1 · You",
+  "device": "tablet",
+  "width": 834,
+  "theme": "dark"
+ },
+ "tablet-setup-2.dc.html": {
+  "title": "Tablet · Setup 2 · Body and pace",
+  "device": "tablet",
+  "width": 834,
+  "theme": "dark"
+ },
+ "tablet-setup-3.dc.html": {
+  "title": "Tablet · Setup 3 · Sports",
+  "device": "tablet",
+  "width": 834,
+  "theme": "dark"
+ },
+ "tablet-setup-4.dc.html": {
+  "title": "Tablet · Setup 4 · Wing foil",
+  "device": "tablet",
+  "width": 834,
+  "theme": "dark"
+ },
+ "tablet-setup-5.dc.html": {
+  "title": "Tablet · Setup 5 · Surf",
+  "device": "tablet",
+  "width": 834,
+  "theme": "dark"
+ },
+ "tablet-setup-6.dc.html": {
+  "title": "Tablet · Setup 6 · Bike",
+  "device": "tablet",
+  "width": 834,
+  "theme": "dark"
+ },
+ "tablet-setup-7.dc.html": {
+  "title": "Tablet · Setup 7 · Run",
+  "device": "tablet",
+  "width": 834,
+  "theme": "dark"
+ },
+ "tablet-setup-8.dc.html": {
+  "title": "Tablet · Setup 8 · Hike",
+  "device": "tablet",
+  "width": 834,
+  "theme": "dark"
+ },
+ "tablet-setup-9.dc.html": {
+  "title": "Tablet · Setup 9 · Alerts",
+  "device": "tablet",
+  "width": 834,
+  "theme": "dark"
+ },
+ "tablet-setup-10.dc.html": {
+  "title": "Tablet · Setup 10 · Done",
+  "device": "tablet",
+  "width": 834,
+  "theme": "dark"
+ },
+ "tablet-setup-1-light.dc.html": {
+  "title": "Tablet · Setup 1 · You · Light",
+  "device": "tablet",
+  "width": 834,
+  "theme": "light"
+ },
+ "tablet-setup-2-light.dc.html": {
+  "title": "Tablet · Setup 2 · Body and pace · Light",
+  "device": "tablet",
+  "width": 834,
+  "theme": "light"
+ },
+ "tablet-setup-3-light.dc.html": {
+  "title": "Tablet · Setup 3 · Sports · Light",
+  "device": "tablet",
+  "width": 834,
+  "theme": "light"
+ },
+ "tablet-setup-4-light.dc.html": {
+  "title": "Tablet · Setup 4 · Wing foil · Light",
+  "device": "tablet",
+  "width": 834,
+  "theme": "light"
+ },
+ "tablet-setup-5-light.dc.html": {
+  "title": "Tablet · Setup 5 · Surf · Light",
+  "device": "tablet",
+  "width": 834,
+  "theme": "light"
+ },
+ "tablet-setup-6-light.dc.html": {
+  "title": "Tablet · Setup 6 · Bike · Light",
+  "device": "tablet",
+  "width": 834,
+  "theme": "light"
+ },
+ "tablet-setup-7-light.dc.html": {
+  "title": "Tablet · Setup 7 · Run · Light",
+  "device": "tablet",
+  "width": 834,
+  "theme": "light"
+ },
+ "tablet-setup-8-light.dc.html": {
+  "title": "Tablet · Setup 8 · Hike · Light",
+  "device": "tablet",
+  "width": 834,
+  "theme": "light"
+ },
+ "tablet-setup-9-light.dc.html": {
+  "title": "Tablet · Setup 9 · Alerts · Light",
+  "device": "tablet",
+  "width": 834,
+  "theme": "light"
+ },
+ "tablet-setup-10-light.dc.html": {
+  "title": "Tablet · Setup 10 · Done · Light",
+  "device": "tablet",
+  "width": 834,
+  "theme": "light"
+ },
+ "desktop-setup-1.dc.html": {
+  "title": "Desktop · Setup 1 · You",
+  "device": "desktop",
+  "width": 1440,
+  "theme": "dark"
+ },
+ "desktop-setup-2.dc.html": {
+  "title": "Desktop · Setup 2 · Body and pace",
+  "device": "desktop",
+  "width": 1440,
+  "theme": "dark"
+ },
+ "desktop-setup-3.dc.html": {
+  "title": "Desktop · Setup 3 · Sports",
+  "device": "desktop",
+  "width": 1440,
+  "theme": "dark"
+ },
+ "desktop-setup-4.dc.html": {
+  "title": "Desktop · Setup 4 · Wing foil",
+  "device": "desktop",
+  "width": 1440,
+  "theme": "dark"
+ },
+ "desktop-setup-5.dc.html": {
+  "title": "Desktop · Setup 5 · Surf",
+  "device": "desktop",
+  "width": 1440,
+  "theme": "dark"
+ },
+ "desktop-setup-6.dc.html": {
+  "title": "Desktop · Setup 6 · Bike",
+  "device": "desktop",
+  "width": 1440,
+  "theme": "dark"
+ },
+ "desktop-setup-7.dc.html": {
+  "title": "Desktop · Setup 7 · Run",
+  "device": "desktop",
+  "width": 1440,
+  "theme": "dark"
+ },
+ "desktop-setup-8.dc.html": {
+  "title": "Desktop · Setup 8 · Hike",
+  "device": "desktop",
+  "width": 1440,
+  "theme": "dark"
+ },
+ "desktop-setup-9.dc.html": {
+  "title": "Desktop · Setup 9 · Alerts",
+  "device": "desktop",
+  "width": 1440,
+  "theme": "dark"
+ },
+ "desktop-setup-10.dc.html": {
+  "title": "Desktop · Setup 10 · Done",
+  "device": "desktop",
+  "width": 1440,
+  "theme": "dark"
+ },
+ "desktop-setup-1-light.dc.html": {
+  "title": "Desktop · Setup 1 · You · Light",
+  "device": "desktop",
+  "width": 1440,
+  "theme": "light"
+ },
+ "desktop-setup-2-light.dc.html": {
+  "title": "Desktop · Setup 2 · Body and pace · Light",
+  "device": "desktop",
+  "width": 1440,
+  "theme": "light"
+ },
+ "desktop-setup-3-light.dc.html": {
+  "title": "Desktop · Setup 3 · Sports · Light",
+  "device": "desktop",
+  "width": 1440,
+  "theme": "light"
+ },
+ "desktop-setup-4-light.dc.html": {
+  "title": "Desktop · Setup 4 · Wing foil · Light",
+  "device": "desktop",
+  "width": 1440,
+  "theme": "light"
+ },
+ "desktop-setup-5-light.dc.html": {
+  "title": "Desktop · Setup 5 · Surf · Light",
+  "device": "desktop",
+  "width": 1440,
+  "theme": "light"
+ },
+ "desktop-setup-6-light.dc.html": {
+  "title": "Desktop · Setup 6 · Bike · Light",
+  "device": "desktop",
+  "width": 1440,
+  "theme": "light"
+ },
+ "desktop-setup-7-light.dc.html": {
+  "title": "Desktop · Setup 7 · Run · Light",
+  "device": "desktop",
+  "width": 1440,
+  "theme": "light"
+ },
+ "desktop-setup-8-light.dc.html": {
+  "title": "Desktop · Setup 8 · Hike · Light",
+  "device": "desktop",
+  "width": 1440,
+  "theme": "light"
+ },
+ "desktop-setup-9-light.dc.html": {
+  "title": "Desktop · Setup 9 · Alerts · Light",
+  "device": "desktop",
+  "width": 1440,
+  "theme": "light"
+ },
+ "desktop-setup-10-light.dc.html": {
+  "title": "Desktop · Setup 10 · Done · Light",
+  "device": "desktop",
+  "width": 1440,
+  "theme": "light"
+ }
+}

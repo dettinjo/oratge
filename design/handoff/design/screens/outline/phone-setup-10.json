@@ -1,0 +1,130 @@
+{
+ "title": "Phone · Setup 10 · Done",
+ "outline": [
+  {
+   "component": "OratgeRoot",
+   "props": {
+    "width": 390
+   },
+   "children": [
+    {
+     "link": "phone-setup-9.dc.html",
+     "label": null,
+     "children": [
+      "‹ Back"
+     ]
+    },
+    "Step 10 of 10",
+    {
+     "link": "phone-profile.dc.html",
+     "label": "Close setup",
+     "children": [
+      "✕"
+     ]
+    },
+    {
+     "el": "progressbar",
+     "label": "Setup progress",
+     "children": []
+    },
+    "Done",
+    {
+     "el": "h1",
+     "text": "You’re all set",
+     "children": null
+    },
+    {
+     "el": "p",
+     "text": "Change anything later in Profile.",
+     "children": null
+    },
+    "✓ Ratings, ranges and advice now use your setup.",
+    {
+     "el": "section",
+     "children": [
+      "Your setup",
+      "You Alex · Barcelona · kn, °C",
+      {
+       "link": "phone-setup-1.dc.html",
+       "label": null,
+       "children": [
+        "Edit"
+       ]
+      },
+      "Body and pace 78 kg · 180 cm · runs 5:15/km",
+      {
+       "link": "phone-setup-2.dc.html",
+       "label": null,
+       "children": [
+        "Edit"
+       ]
+      },
+      "Sports Wing foil, surf, bike, run, hike",
+      {
+       "link": "phone-setup-3.dc.html",
+       "label": null,
+       "children": [
+        "Edit"
+       ]
+      },
+      "Wing foil 4 + 5 m · 95 l · 14–24 kn",
+      {
+       "link": "phone-setup-4.dc.html",
+       "label": null,
+       "children": [
+        "Edit"
+       ]
+      },
+      "Surf 7'2\" 48 l · 0.6–1.8 m · ≥ 8 s",
+      {
+       "link": "phone-setup-5.dc.html",
+       "label": null,
+       "children": [
+        "Edit"
+       ]
+      },
+      "Bike Gravel · 40 mm · max 20 kn",
+      {
+       "link": "phone-setup-6.dc.html",
+       "label": null,
+       "children": [
+        "Edit"
+       ]
+      },
+      "Run Road · 10 km · 5–22°",
+      {
+       "link": "phone-setup-7.dc.html",
+       "label": null,
+       "children": [
+        "Edit"
+       ]
+      },
+      "Hike 8 kg · storms ≤ 20 % · wind ≤ 30 kn",
+      {
+       "link": "phone-setup-8.dc.html",
+       "label": null,
+       "children": [
+        "Edit"
+       ]
+      },
+      "Alerts 3 of 4 on",
+      {
+       "link": "phone-setup-9.dc.html",
+       "label": null,
+       "children": [
+        "Edit"
+       ]
+      }
+     ]
+    },
+    {
+     "link": "Main.dc.html",
+     "label": null,
+     "children": [
+      "Start using Oratge"
+     ]
+    }
+   ]
+  }
+ ]
+}

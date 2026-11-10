@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Phone · Spots</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/oratgeui/tokens.css">
+<link rel="stylesheet" href="ds/oratgeui/components/bundle.css">
+<script src="ds/oratgeui/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0;background:#150f0b}
+a{color:#bfb5ae}a:hover{color:#f2edea}
+</style>
+</helmet>
+<div data-theme="dark"><div style="width: 390px; min-height: 900px"><x-import component-from-global-scope="OratgeUI.OratgeRoot" width="{{p21}}"><div style="padding: 20px 20px 0; display: flex; flex-direction: column; gap: 12px"><header style="margin-bottom: 8px; position: relative; padding-right: 52px"><a href="phone-profile.dc.html" aria-label="Profile and setup" style="position: absolute; right: 0; top: 0; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: var(--og-surface); color: var(--og-text)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"></path></svg></a><h1 style="margin: 0; font-size: 24px; font-weight: 600; letter-spacing: -0.01em">Spots</h1><p style="margin: 4px 0 0; font-size: 13px; color: var(--og-text-2)">Mon 9 Nov · Barcelona</p></header><section style="min-width: 0"><x-import component-from-global-scope="OratgeUI.SectionLabel">Saved spots</x-import><div style="display: grid; grid-template-columns: repeat(1, minmax(0, 1fr)); gap: 10px"><a href="phone-spot.dc.html" style="display: block; color: inherit; text-decoration: none" aria-label="Open Castelldefels"><x-import component-from-global-scope="OratgeUI.SpotCard" name="Castelldefels" kind="Wing · flatwater" wind="{{p1}}" gust="{{p2}}" wind-from="{{p3}}" today="{{p4}}" window="13–17 h" rating="{{p5}}"></x-import></a><x-import component-from-global-scope="OratgeUI.SpotCard" name="Ocata" kind="Surf · beach" wind="{{p6}}" gust="{{p7}}" wind-from="{{p8}}" today="{{p9}}" window="08–11 h" rating="{{p10}}"></x-import><x-import component-from-global-scope="OratgeUI.SpotCard" name="Collserola loop" kind="Bike · 42 km" wind="{{p11}}" gust="{{p12}}" wind-from="{{p13}}" today="{{p14}}" window="all day" rating="{{p15}}"></x-import><x-import component-from-global-scope="OratgeUI.SpotCard" name="Montseny · Turó de l&#x27;Home" kind="Hike · 1706 m" wind="{{p16}}" gust="{{p17}}" wind-from="{{p18}}" today="{{p19}}" window="until 13 h" rating="{{p20}}"></x-import></div></section><section style="min-width: 0"><button type="button" style="width: 100%; min-height: 48px; border-radius: 999px; border: 1px solid var(--og-line); background: transparent; color: var(--og-text); font: inherit; font-weight: 600">Add a spot</button></section></div><div style="position: relative; margin-top: 16px"><x-import component-from-global-scope="OratgeUI.BottomNav" active="Spots"></x-import><div style="position: absolute; inset: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr))"><a href="Main.dc.html" aria-label="Today" style="display: block"></a><a href="phone-activities.dc.html" aria-label="Activities" style="display: block"></a><a href="phone-map.dc.html" aria-label="Map" style="display: block"></a><a href="phone-spots.dc.html" aria-label="Spots" style="display: block"></a></div></div></x-import></div></div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":900}}'>
+class Component extends DCLogic {
+renderVals() {
+return {"p1": 14, "p2": 21, "p3": 225, "p4": [0, 1, 3, 4, 4, 3, 0, 0], "p5": 4, "p6": 6, "p7": 9, "p8": 330, "p9": [3, 3, 2, 1, 1, 1, 0, 0], "p10": 3, "p11": 7, "p12": 12, "p13": 240, "p14": [5, 5, 5, 5, 5, 4, 4, 4], "p15": 5, "p16": 22, "p17": 34, "p18": 300, "p19": [3, 3, 2, 1, 1, 0, 0, 0], "p20": 2, "p21": 390};
+}
+}
+</script>
+</body>
+</html>
