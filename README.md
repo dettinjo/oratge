@@ -14,6 +14,7 @@ foiling, surfing, biking, running and hiking.
 | Part | State |
 |---|---|
 | **App** (`app/`, Flutter) | All screens from the Claude Design handoff: Today, Activities, 5 planners, Map (OSM, theme-toned), Spots, Spot detail, Profile, 10-step setup; light/dark/system; phone/tablet/desktop. 128 widget tests. Android APK verified on an Android 15 emulator against the live backend. |
+| **Detailed map** (0.5) | Wind / Temp / Rain / Rain chance fields from a 10×14 Open-Meteo grid (0.25°, 48 h, `/v1/map/forecast`), animated wind particles and rain streaks, 48 h timeline with play and area rain bars, tap-anywhere probe (wind, gusts, temp, rain, chance), value labels when zoomed in, spot pins. |
 | **Backend** (`backend/`, FastAPI) | Live on the home server via Coolify (`oratge-backend`, Tailscale only: `http://100.96.0.121:8199`, bearer token `ORATGE_API_TOKEN` in Infisical). Open-Meteo forecast/marine/models/ECMWF ensemble + archived high-res forecasts for history; Meteocat client with quota governor (idle until a key exists); rating engine; forecast/observation archive for the station check. 20 tests. |
 | **Install** | `oratge-0.2-arm64.apk` in Google Drive → `Oratge/`. Phone must be on Tailscale to reach the backend; otherwise the app falls back to bundled sample data. |
 

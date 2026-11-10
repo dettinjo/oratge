@@ -5,7 +5,9 @@ import threading
 import time
 from datetime import datetime, timezone
 
-_lock = threading.Lock()
+# One connection shared by FastAPI's worker threads: every statement (reads too) must hold the lock,
+# otherwise concurrent cursors on the same connection fail with 'bad parameter or other API misuse'.
+_lock = threading.RLock()
 
 
 class Store:
@@ -17,15 +19,23 @@ class Store:
             create table if not exists archive (kind text, spot text, ts text, payload text, primary key (kind, spot, ts));
         ''')
 
+    def _one(self, sql: str, args=()):
+        with _lock:
+            return self.db.execute(sql, args).fetchone()
+
+    def _all(self, sql: str, args=()):
+        with _lock:
+            return self.db.execute(sql, args).fetchall()
+
     # ── cache ──
     def get(self, key: str, max_age: float):
-        row = self.db.execute('select at, body from cache where key=?', (key,)).fetchone()
+        row = self._one('select at, body from cache where key=?', (key,))
         if row and time.time() - row[0] < max_age:
             return json.loads(row[1])
         return None
 
     def stale(self, key: str):
-        row = self.db.execute('select body from cache where key=?', (key,)).fetchone()
+        row = self._one('select body from cache where key=?', (key,))
         return json.loads(row[0]) if row else None
 
     def put(self, key: str, body):
@@ -39,7 +49,7 @@ class Store:
         return datetime.now(timezone.utc).strftime('%Y-%m')
 
     def used(self, plan: str) -> int:
-        row = self.db.execute('select used from quota where month=? and plan=?', (self.month(), plan)).fetchone()
+        row = self._one('select used from quota where month=? and plan=?', (self.month(), plan))
         return row[0] if row else 0
 
     def spend(self, plan: str):
@@ -55,6 +65,6 @@ class Store:
             self.db.commit()
 
     def archived(self, kind: str, spot: str, since: str):
-        rows = self.db.execute('select ts, payload from archive where kind=? and spot=? and ts>=? order by ts',
-                               (kind, spot, since)).fetchall()
+        rows = self._all('select ts, payload from archive where kind=? and spot=? and ts>=? order by ts',
+                         (kind, spot, since))
         return [(ts, json.loads(p)) for ts, p in rows]

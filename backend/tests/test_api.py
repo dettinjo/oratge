@@ -57,6 +57,13 @@ class FakeSources(Sources):
         return [{'latitude': a, 'longitude': b, 'current': {'time': '2026-11-10T09:00', 'wind_speed_10m': 10, 'wind_direction_10m': 220,
                  'wind_gusts_10m': 15, 'temperature_2m': 17, 'precipitation': 0}} for a, b in zip(lats, lons)]
 
+    def grid_forecast(self, lats, lons, hours=48):
+        times = [f'2026-11-10T{h:02d}:00' for h in range(hours)][:hours]
+        hourly = {'time': times, 'wind_speed_10m': [10.0] * hours, 'wind_direction_10m': [220] * hours, 'wind_gusts_10m': [15.0] * hours,
+                  'temperature_2m': [17.0] * hours, 'precipitation': [0.0] * hours, 'precipitation_probability': [10] * hours,
+                  'weather_code': [3] * hours}
+        return [{'latitude': a, 'longitude': b, 'hourly': hourly} for a, b in zip(lats, lons)]
+
     def _get(self, key, url, params, max_age, headers=None):
         # Archive requests: synthesise from the forecast's hourly wind.
         h = fx('fc.json')['hourly']
@@ -140,3 +147,10 @@ def test_reverse_and_grid():
     assert client.get('/v1/reverse?lat=41.225&lon=1.821').json()['name'] == 'Sitges'  # offshore → nearest town
     g = client.get('/v1/map/grid').json()
     assert len(g['points']) > 50 and g['time'] == '09:00'
+
+
+def test_map_forecast_grid():
+    d = client.get('/v1/map/forecast?hours=12').json()
+    n = len(d['lats']) * len(d['lons'])
+    assert len(d['times']) == 12 and len(d['fields']['wind']) == 12 and len(d['fields']['wind'][0]) == n
+    assert set(d['fields']) == {'wind', 'wdir', 'gust', 'temp', 'precip', 'pprob', 'code'}

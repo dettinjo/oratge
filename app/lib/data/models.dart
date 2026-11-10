@@ -308,3 +308,21 @@ class GridData {
   final String time, source;
   final List<GridPoint> points;
 }
+
+/// Hourly forecast on a regular grid (map timeline). fields[name][t][row * lons.length + col].
+class MapForecast {
+  MapForecast.fromJson(Json j)
+      : lats = [for (final v in j['lats'] as List? ?? const []) (v as num).toDouble()],
+        lons = [for (final v in j['lons'] as List? ?? const []) (v as num).toDouble()],
+        times = [for (final t in j['times'] as List? ?? const []) DateTime.parse(t as String)],
+        source = j['source'] as String? ?? '',
+        fields = {
+          for (final e in (j['fields'] as Json? ?? const {}).entries)
+            e.key: [for (final row in e.value as List) [for (final v in row as List) (v as num).toDouble()]]
+        };
+  final List<double> lats, lons;
+  final List<DateTime> times;
+  final Map<String, List<List<double>>> fields;
+  final String source;
+  bool get isEmpty => times.isEmpty;
+}

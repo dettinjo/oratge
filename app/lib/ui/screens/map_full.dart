@@ -1,7 +1,11 @@
+import 'dart:async';
 import 'dart:io' show Platform;
+import 'dart:math' as math;
+import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
@@ -16,11 +20,15 @@ import '../components/basics.dart';
 import '../components/og_map.dart';
 import '../components/rows_cards.dart';
 import '../components/sheets.dart';
+import '../map/field.dart';
+import '../map/layers.dart';
 import '../motion.dart';
 
 bool get _inTest => !kIsWeb && Platform.environment.containsKey('FLUTTER_TEST');
+const _wd = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
-/// Full-screen map: a live wind / temperature / rain field over Catalonia plus your spots.
+/// Full-screen weather map: smooth wind / temperature / rain / rain-chance fields with wind
+/// particles and falling rain, a 48-hour timeline (scrub or play), a tap-anywhere probe and your spots.
 class MapFullScreen extends StatefulWidget {
   const MapFullScreen({super.key});
   @override
@@ -29,15 +37,73 @@ class MapFullScreen extends StatefulWidget {
 
 class _MapFullScreenState extends State<MapFullScreen> {
   final _map = MapController();
-  String _layer = 'Wind';
-  LatLng? _me;
-  late Future<(GridData, MapData)> _data;
+  FieldLayer _layer = FieldLayer.wind;
+  int _t = 0;
+  bool _playing = false;
+  Timer? _play;
+  LatLng? _me, _probe;
+  MapForecast? _fc;
+  List<MapPin> _pins = const [];
+  String? _error;
+  final Map<(FieldLayer, int, Brightness), ui.Image> _images = {};
+  bool _rendering = false;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    if (_fc == null && _error == null) _load();
+  }
+
+  Future<void> _load() async {
     final repo = AppScope.of(context).repository;
-    _data = Future.wait([repo.grid(), repo.map()]).then((r) => (r[0] as GridData, r[1] as MapData));
+    try {
+      final r = await Future.wait([repo.mapForecast(), repo.map()]);
+      if (!mounted) return;
+      setState(() {
+        _fc = r[0] as MapForecast;
+        _pins = (r[1] as MapData).pins;
+      });
+    } catch (e) {
+      if (mounted) setState(() => _error = '$e');
+    }
+  }
+
+  @override
+  void dispose() {
+    _play?.cancel();
+    for (final img in _images.values) {
+      img.dispose();
+    }
+    super.dispose();
+  }
+
+  FieldSampler? get _sampler => (_fc == null || _fc!.isEmpty) ? null : FieldSampler(_fc!, _t.clamp(0, _fc!.times.length - 1));
+
+  /// Renders (and caches) the field image for the current layer and hour.
+  void _ensureImage(OratgeColors c, Brightness b) {
+    final s = _sampler;
+    if (s == null || _layer == FieldLayer.rating || _rendering) return;
+    final key = (_layer, _t, b);
+    if (_images.containsKey(key)) return;
+    _rendering = true;
+    renderField(s, _layer, FieldColors(c)).then((img) {
+      _rendering = false;
+      if (!mounted) return img.dispose();
+      setState(() => _images[key] = img);
+    });
+  }
+
+  void _togglePlay() {
+    final n = _fc?.times.length ?? 0;
+    if (n == 0) return;
+    setState(() => _playing = !_playing);
+    _play?.cancel();
+    if (_playing) {
+      _play = Timer.periodic(const Duration(milliseconds: 650), (_) {
+        if (!mounted) return;
+        setState(() => _t = (_t + 1) % n);
+      });
+    }
   }
 
   Future<void> _locate() async {
@@ -46,44 +112,56 @@ class _MapFullScreenState extends State<MapFullScreen> {
       if (perm == LocationPermission.denied) perm = await Geolocator.requestPermission();
       if (perm == LocationPermission.denied || perm == LocationPermission.deniedForever) return;
       final p = await Geolocator.getCurrentPosition(
-          locationSettings: const LocationSettings(accuracy: LocationAccuracy.low, timeLimit: Duration(seconds: 12)));
+        locationSettings: const LocationSettings(accuracy: LocationAccuracy.low, timeLimit: Duration(seconds: 12)),
+      );
       setState(() => _me = LatLng(p.latitude, p.longitude));
       _map.move(_me!, 10);
     } catch (_) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Couldn’t get your location.')));
-      }
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Couldn’t get your location.')));
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final c = context.og;
+    final b = Theme.of(context).brightness;
+    _ensureImage(c, b);
+    final s = _sampler;
+    final img =
+        _images[(_layer, _t, b)] ??
+        // While the next hour renders, keep showing the closest finished one so scrubbing stays smooth.
+        _images.entries.where((e) => e.key.$1 == _layer && e.key.$3 == b).map((e) => e.value).firstOrNull;
+    final motionOn = !reduceMotion(context);
+
     return Scaffold(
-      body: FutureBuilder<(GridData, MapData)>(
-        future: _data,
-        builder: (context, snap) {
-          final grid = snap.data?.$1;
-          final pins = snap.data?.$2.pins ?? const <MapPin>[];
-          return Stack(children: [
-            if (_inTest)
-              Positioned.fill(child: ColoredBox(color: c.surface))
-            else
-              FlutterMap(
-                mapController: _map,
-                options: MapOptions(
-                  initialCenter: const LatLng(41.75, 1.85),
-                  initialZoom: 7.6,
-                  minZoom: 6,
-                  maxZoom: 14,
-                  backgroundColor: c.bg,
-                  interactionOptions: const InteractionOptions(flags: InteractiveFlag.all & ~InteractiveFlag.rotate),
-                ),
-                children: [
-                  oratgeTiles(context),
-                  if (grid != null) _FieldLayer(points: grid.points, layer: _layer),
-                  MarkerLayer(markers: [
-                    for (final p in pins.where((p) => p.lat != null))
+      body: Stack(
+        children: [
+          if (_inTest)
+            Positioned.fill(child: ColoredBox(color: c.surface))
+          else
+            FlutterMap(
+              mapController: _map,
+              options: MapOptions(
+                initialCenter: const LatLng(41.75, 1.85),
+                initialZoom: 7.6,
+                minZoom: 6,
+                maxZoom: 13,
+                backgroundColor: c.bg,
+                interactionOptions: const InteractionOptions(flags: InteractiveFlag.all & ~InteractiveFlag.rotate),
+                onTap: (_, ll) {
+                  HapticFeedback.selectionClick();
+                  setState(() => _probe = ll);
+                },
+              ),
+              children: [
+                oratgeTiles(context),
+                if (s != null && img != null && _layer != FieldLayer.rating) FieldImageLayer(image: img, nw: s.nw, se: s.se),
+                if (s != null && _layer == FieldLayer.wind && motionOn) WindParticleLayer(sampler: s),
+                if (s != null && (_layer == FieldLayer.rain || _layer == FieldLayer.chance)) RainLayer(sampler: s),
+                if (s != null) ValueLabelsLayer(sampler: s, layer: _layer),
+                MarkerLayer(
+                  markers: [
+                    for (final p in _pins.where((p) => p.lat != null))
                       Marker(
                         point: LatLng(p.lat!, p.lon!),
                         width: 130,
@@ -93,25 +171,53 @@ class _MapFullScreenState extends State<MapFullScreen> {
                           child: Semantics(
                             button: true,
                             label: '${p.name}, rating ${p.rating}. Open',
-                            child: Column(children: [
-                              Container(
-                                width: 28,
-                                height: 28,
-                                decoration: BoxDecoration(
+                            child: Column(
+                              children: [
+                                AnimatedContainer(
+                                  duration: motion(context, 250),
+                                  width: _layer == FieldLayer.rating ? 30 : 22,
+                                  height: _layer == FieldLayer.rating ? 30 : 22,
+                                  decoration: BoxDecoration(
                                     color: c.ratingColor(p.rating),
                                     shape: BoxShape.circle,
                                     border: Border.all(color: c.bg, width: 2.5),
-                                    boxShadow: [BoxShadow(color: c.bg.withValues(alpha: 0.5), blurRadius: 6)]),
-                                child: Center(
-                                    child: Text('${p.rating}',
-                                        style: OgText.chip.copyWith(color: c.bg, fontWeight: FontWeight.w800))),
-                              ),
-                              Text(p.name.split(' · ').first,
-                                  style: OgText.chip.copyWith(color: c.text, fontWeight: FontWeight.w700, shadows: [
-                                    Shadow(color: c.bg, blurRadius: 3),
-                                    Shadow(color: c.bg, blurRadius: 8),
-                                  ])),
-                            ]),
+                                    boxShadow: [BoxShadow(color: c.bg.withValues(alpha: 0.5), blurRadius: 6)],
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      '${p.rating}',
+                                      style: OgText.chip.copyWith(color: c.bg, fontWeight: FontWeight.w800, fontSize: 12),
+                                    ),
+                                  ),
+                                ),
+                                Text(
+                                  p.name.split(' · ').first,
+                                  style: OgText.chip.copyWith(
+                                    color: c.text,
+                                    fontWeight: FontWeight.w700,
+                                    shadows: [
+                                      Shadow(color: c.bg, blurRadius: 3),
+                                      Shadow(color: c.bg, blurRadius: 8),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    if (_probe != null)
+                      Marker(
+                        point: _probe!,
+                        width: 26,
+                        height: 26,
+                        child: IgnorePointer(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(color: c.text, width: 2.5),
+                              color: c.text.withValues(alpha: 0.15),
+                            ),
                           ),
                         ),
                       ),
@@ -122,199 +228,431 @@ class _MapFullScreenState extends State<MapFullScreen> {
                         height: 22,
                         child: Container(
                           decoration: BoxDecoration(
-                              color: c.water, shape: BoxShape.circle, border: Border.all(color: Colors.white, width: 3)),
+                            color: c.water,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.white, width: 3),
+                          ),
                         ),
                       ),
-                  ]),
-                  const SimpleAttributionWidget(source: Text('OpenStreetMap contributors')),
-                ],
-              ),
-            // Top bar: back, title + time, layer chips.
-            SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
-                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Row(children: [
-                    _RoundButton(icon: Icons.arrow_back, label: 'Back', onTap: () => context.pop()),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
-                        decoration: BoxDecoration(color: c.bg.withValues(alpha: 0.88), borderRadius: BorderRadius.circular(999)),
-                        child: Text(
-                            grid == null
-                                ? 'Loading the map…'
-                                : grid.points.isEmpty
-                                    ? 'Live field needs the backend (offline)'
-                                    : '$_layer at ${grid.time} · ${grid.points.length} points (model)',
-                            style: OgText.chip.copyWith(color: c.text, fontWeight: FontWeight.w600)),
+                  ],
+                ),
+                const SimpleAttributionWidget(source: Text('OpenStreetMap contributors · Open-Meteo')),
+              ],
+            ),
+          // Top: back, title, layers, legend.
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      _RoundButton(icon: Icons.arrow_back, label: 'Back', onTap: () => context.pop()),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: _Glass(
+                          child: Text(
+                            _fc == null
+                                ? (_error ?? 'Loading the forecast…')
+                                : _fc!.isEmpty
+                                ? 'Forecast map needs the backend (offline)'
+                                : '${_layer.label} · ${_timeLabel(_fc!.times[_t], _t)}',
+                            style: OgText.chip.copyWith(color: c.text, fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: _Glass(
+                      padding: const EdgeInsets.symmetric(horizontal: 6),
+                      child: OgChipGroup(
+                        options: [for (final l in FieldLayer.values) l.label],
+                        selected: _layer.label,
+                        onSelect: (o) => setState(() => _layer = FieldLayer.values.firstWhere((l) => l.label == o)),
                       ),
                     ),
-                  ]),
-                  const SizedBox(height: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6),
-                    decoration: BoxDecoration(color: c.bg.withValues(alpha: 0.88), borderRadius: BorderRadius.circular(999)),
-                    child: OgChipGroup(
-                        options: const ['Wind', 'Temp', 'Rain', 'Rating'],
-                        selected: _layer,
-                        onSelect: (o) => setState(() => _layer = o)),
                   ),
-                ]),
+                  const SizedBox(height: 8),
+                  _Legend(layer: _layer),
+                ],
               ),
             ),
-            Positioned(left: 12, bottom: 24, child: SafeArea(child: _Legend(layer: _layer))),
-            Positioned(
-              right: 16,
-              bottom: 28,
-              child: SafeArea(child: _RoundButton(icon: Icons.my_location, label: 'My location', onTap: _locate)),
+          ),
+          // Bottom: probe card + timeline.
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: SafeArea(
+              top: false,
+              child: Padding(
+                // Leaves room for the map attribution underneath.
+                padding: const EdgeInsets.fromLTRB(12, 0, 12, 26),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    _RoundButton(icon: Icons.my_location, label: 'My location', onTap: _locate),
+                    const SizedBox(height: 10),
+                    AnimatedSwitcher(
+                      duration: motion(context, 200),
+                      child: (_probe != null && s != null)
+                          ? _ProbeCard(
+                              key: ValueKey(_probe),
+                              sampler: s,
+                              at: _probe!,
+                              onClose: () => setState(() => _probe = null),
+                            )
+                          : const SizedBox.shrink(),
+                    ),
+                    if (_fc != null && !_fc!.isEmpty) ...[
+                      const SizedBox(height: 8),
+                      _Timeline(
+                        fc: _fc!,
+                        t: _t,
+                        playing: _playing,
+                        onPlay: _togglePlay,
+                        onChanged: (v) {
+                          if (v != _t) HapticFeedback.selectionClick();
+                          setState(() => _t = v);
+                        },
+                      ),
+                    ],
+                  ],
+                ),
+              ),
             ),
-          ]);
-        },
+          ),
+        ],
       ),
     );
+  }
+
+  // Forecast times are local to Catalonia and step 0 is the current hour, so label by step, not device clock.
+  static String _timeLabel(DateTime t, int step) {
+    final when = step == 0 ? 'now' : 'in $step h';
+    return '${_wd[t.weekday - 1]} ${t.hour.toString().padLeft(2, '0')}:00 · $when';
   }
 
   void _spotSheet(BuildContext context, MapPin p) {
     final c = context.og;
     showOgSheet(
       context,
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(p.name, style: OgText.verdictBest.copyWith(color: c.text)),
-        Text(sportNames[p.sport] ?? '', style: OgText.day.copyWith(color: c.text2)),
-        const SizedBox(height: 12),
-        Row(children: [
-          OgRatingDots(value: p.rating, large: true, showWord: true),
-          const Spacer(),
-          if (p.window != null) Text(p.window!, style: OgText.actWindow.copyWith(color: c.text)),
-        ]),
-        const SizedBox(height: 14),
-        OgFactGrid(columns: 2, children: [
-          OgFactTile(label: 'Wind', value: '${p.wind.round()} kn', sub: 'from ${compassName(p.windFrom.toDouble())}', accent: OgAccent.wind),
-          OgFactTile(label: 'Gusts', value: p.gust == null ? '—' : '${p.gust!.round()} kn', accent: OgAccent.wind),
-        ]),
-        const SizedBox(height: 16),
-        Row(children: [
-          if (p.sport != null)
-            Expanded(
-              child: FilledButton(
-                style: FilledButton.styleFrom(backgroundColor: c.text, foregroundColor: c.bg, minimumSize: const Size.fromHeight(48)),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  context.go('/activities/${p.sport}');
-                },
-                child: const Text('Open planner'),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(p.name, style: OgText.verdictBest.copyWith(color: c.text)),
+          Text(sportNames[p.sport] ?? '', style: OgText.day.copyWith(color: c.text2)),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              OgRatingDots(value: p.rating, large: true, showWord: true),
+              const Spacer(),
+              if (p.window != null) Text(p.window!, style: OgText.actWindow.copyWith(color: c.text)),
+            ],
+          ),
+          const SizedBox(height: 14),
+          OgFactGrid(
+            columns: 2,
+            children: [
+              OgFactTile(
+                label: 'Wind',
+                value: '${p.wind.round()} kn',
+                sub: 'from ${compassName(p.windFrom.toDouble())}',
+                accent: OgAccent.wind,
               ),
-            ),
-          if (p.id != null) ...[
-            const SizedBox(width: 10),
-            Expanded(
-              child: OutlinedButton(
-                style: OutlinedButton.styleFrom(
-                    minimumSize: const Size.fromHeight(48), side: BorderSide(color: c.line), foregroundColor: c.text),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  context.go('/spots/${p.id}');
-                },
-                child: const Text('Spot details'),
-              ),
-            ),
-          ],
-        ]),
-      ]),
+              OgFactTile(label: 'Gusts', value: p.gust == null ? '—' : '${p.gust!.round()} kn', accent: OgAccent.wind),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              if (p.sport != null)
+                Expanded(
+                  child: FilledButton(
+                    style: FilledButton.styleFrom(
+                      backgroundColor: c.text,
+                      foregroundColor: c.bg,
+                      minimumSize: const Size.fromHeight(48),
+                    ),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      context.go('/activities/${p.sport}');
+                    },
+                    child: const Text('Open planner'),
+                  ),
+                ),
+              if (p.id != null) ...[
+                const SizedBox(width: 10),
+                Expanded(
+                  child: OutlinedButton(
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size.fromHeight(48),
+                      side: BorderSide(color: c.line),
+                      foregroundColor: c.text,
+                    ),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      context.go('/spots/${p.id}');
+                    },
+                    child: const Text('Spot details'),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
 
-/// Grid of current conditions; values are shown once zoomed in enough to read them.
-class _FieldLayer extends StatelessWidget {
-  const _FieldLayer({required this.points, required this.layer});
-  final List<GridPoint> points;
-  final String layer;
+/// Values at a tapped point for the selected hour.
+class _ProbeCard extends StatelessWidget {
+  const _ProbeCard({super.key, required this.sampler, required this.at, required this.onClose});
+  final FieldSampler sampler;
+  final LatLng at;
+  final VoidCallback onClose;
 
   @override
   Widget build(BuildContext context) {
-    if (layer == 'Rating') return const SizedBox.shrink();
     final c = context.og;
-    final zoom = MapCamera.of(context).zoom;
-    final showValues = zoom >= 7.9;
-    return MarkerLayer(markers: [
-      for (final p in points)
-        if (layer != 'Rain' || p.precip > 0)
-          Marker(
-            point: LatLng(p.lat, p.lon),
-            width: 40,
-            height: 44,
-            child: IgnorePointer(
-              child: Column(children: [
-                if (layer == 'Wind')
-                  CustomPaint(size: const Size(26, 26), painter: _ArrowPainter(c, p))
-                else
-                  Container(
-                    width: 22,
-                    height: 22,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: layer == 'Temp'
-                          ? Color.lerp(c.snow, c.heat, ((p.temp - 0) / 30).clamp(0, 1))!.withValues(alpha: 0.85)
-                          : c.water.withValues(alpha: (0.25 + p.precip / 4).clamp(0.25, 0.95)),
+    final s = sampler;
+    final inside =
+        at.latitude <= s.nw.latitude &&
+        at.latitude >= s.se.latitude &&
+        at.longitude >= s.nw.longitude &&
+        at.longitude <= s.se.longitude;
+    final (u, v) = s.wind(at.latitude, at.longitude);
+    final speed = math.sqrt(u * u + v * v);
+    final from = (math.atan2(-u, -v) * 180 / math.pi + 360) % 360;
+    Widget item(String label, String value, Color col) => Padding(
+      padding: const EdgeInsets.only(right: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label.toUpperCase(), style: OgText.label.copyWith(color: c.text2)),
+          Text(value, style: OgText.actWindow.copyWith(color: col, fontSize: 17)),
+        ],
+      ),
+    );
+    return _Glass(
+      padding: const EdgeInsets.fromLTRB(14, 10, 4, 10),
+      child: Row(
+        children: [
+          Expanded(
+            child: !inside
+                ? Text('Outside the forecast area', style: OgText.day.copyWith(color: c.text2))
+                // One uniform scale for all values: narrow phones shrink the row instead of clipping it.
+                : FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Row(
+                      children: [
+                        item('Wind', '${compassName(from)} ${speed.round()} kn', c.wind),
+                        item('Gusts', '${s.sample('gust', at.latitude, at.longitude).round()} kn', c.wind),
+                        item('Temp', '${s.sample('temp', at.latitude, at.longitude).round()}°', c.heat),
+                        item('Rain', '${s.sample('precip', at.latitude, at.longitude).toStringAsFixed(1)} mm', c.water),
+                        item('Chance', '${s.sample('pprob', at.latitude, at.longitude).round()}%', c.water),
+                      ],
                     ),
                   ),
-                if (showValues)
-                  Text(
-                    layer == 'Wind'
-                        ? '${p.wind.round()}'
-                        : layer == 'Temp'
-                            ? '${p.temp.round()}°'
-                            : p.precip.toStringAsFixed(1),
-                    style: OgText.chip.copyWith(color: c.text, fontWeight: FontWeight.w700, shadows: [Shadow(color: c.bg, blurRadius: 4)]),
-                  ),
-              ]),
-            ),
           ),
-    ]);
+          IconButton(
+            tooltip: 'Close',
+            onPressed: onClose,
+            icon: Icon(Icons.close, color: c.text2),
+          ),
+        ],
+      ),
+    );
   }
 }
 
-class _ArrowPainter extends CustomPainter {
-  _ArrowPainter(this.c, this.p);
+/// 48-hour forecast timeline: scrub or play; rain bars show when and how hard it rains across the area.
+class _Timeline extends StatelessWidget {
+  const _Timeline({required this.fc, required this.t, required this.playing, required this.onPlay, required this.onChanged});
+  final MapForecast fc;
+  final int t;
+  final bool playing;
+  final VoidCallback onPlay;
+  final ValueChanged<int> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.og;
+    final n = fc.times.length;
+    final rain = [for (final row in fc.fields['precip']!) row.reduce(math.max)];
+    final cur = fc.times[t];
+    return _Glass(
+      padding: const EdgeInsets.fromLTRB(6, 6, 14, 8),
+      child: Row(
+        children: [
+          Semantics(
+            button: true,
+            label: playing ? 'Pause' : 'Play forecast',
+            child: IconButton(
+              iconSize: 30,
+              onPressed: onPlay,
+              icon: AnimatedSwitcher(
+                duration: motion(context, 150),
+                child: Icon(playing ? Icons.pause_circle_filled : Icons.play_circle_fill, key: ValueKey(playing), color: c.text),
+              ),
+            ),
+          ),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      '${_wd[cur.weekday - 1]} ${cur.hour.toString().padLeft(2, '0')}:00',
+                      style: OgText.actWindow.copyWith(color: c.text),
+                    ),
+                    const Spacer(),
+                    Text(t == 0 ? 'now' : '+$t h', style: OgText.chip.copyWith(color: c.text2)),
+                  ],
+                ),
+                SizedBox(
+                  height: 40,
+                  child: LayoutBuilder(
+                    builder: (context, box) {
+                      return Stack(
+                        children: [
+                          Positioned.fill(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 12),
+                              child: CustomPaint(painter: _TrackPainter(fc.times, rain, c)),
+                            ),
+                          ),
+                          SliderTheme(
+                            data: SliderTheme.of(context).copyWith(
+                              trackHeight: 2,
+                              activeTrackColor: c.text,
+                              inactiveTrackColor: c.line,
+                              thumbColor: c.text,
+                              overlayColor: c.text.withValues(alpha: 0.12),
+                              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
+                              tickMarkShape: SliderTickMarkShape.noTickMark,
+                            ),
+                            child: Semantics(
+                              label: 'Forecast hour',
+                              value: '${_wd[cur.weekday - 1]} ${cur.hour}:00',
+                              child: Slider(
+                                value: t.toDouble(),
+                                min: 0,
+                                max: (n - 1).toDouble(),
+                                divisions: n - 1,
+                                onChanged: (v) => onChanged(v.round()),
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TrackPainter extends CustomPainter {
+  _TrackPainter(this.times, this.rain, this.c);
+  final List<DateTime> times;
+  final List<double> rain;
   final OratgeColors c;
-  final GridPoint p;
   @override
-  void paint(Canvas canvas, Size size) =>
-      windArrow(canvas, Offset(size.width / 2, size.height / 2), p.wdir, c.windColor(p.wind), len: 10, width: 2.6);
+  void paint(Canvas canvas, Size size) {
+    final n = times.length;
+    final w = size.width / n;
+    for (var i = 0; i < n; i++) {
+      // Day boundary + label.
+      if (times[i].hour == 0 && i > 0) {
+        canvas.drawLine(Offset(i * w, 0), Offset(i * w, size.height), Paint()..color = c.line);
+        ogText(canvas, _wd[times[i].weekday - 1], i * w + 3, 11, color: c.text2);
+      }
+      // Area-max rain as small bars below the track.
+      final r = rain[i];
+      if (r >= 0.1) {
+        final h = (math.min(r, 8) / 8) * 12 + 2;
+        canvas.drawRRect(
+          RRect.fromRectAndRadius(Rect.fromLTWH(i * w + 0.5, size.height - h, math.max(1, w - 1), h), const Radius.circular(1)),
+          Paint()..color = c.water.withValues(alpha: 0.8),
+        );
+      }
+    }
+  }
+
   @override
-  bool shouldRepaint(_ArrowPainter o) => o.p != p || o.c != c;
+  bool shouldRepaint(_TrackPainter o) => o.times != times || o.c != c;
 }
 
 class _Legend extends StatelessWidget {
   const _Legend({required this.layer});
-  final String layer;
+  final FieldLayer layer;
   @override
   Widget build(BuildContext context) {
     final c = context.og;
-    Widget sw(Color col, String t) => Padding(
-          padding: const EdgeInsets.only(right: 8),
-          child: Row(mainAxisSize: MainAxisSize.min, children: [
-            Container(width: 12, height: 12, decoration: BoxDecoration(color: col, borderRadius: BorderRadius.circular(3))),
-            const SizedBox(width: 4),
-            Text(t, style: OgText.chip.copyWith(color: c.text)),
-          ]),
-        );
-    final items = switch (layer) {
-      'Wind' => [sw(c.wind1, '<8'), sw(c.wind2, '8'), sw(c.wind3, '11'), sw(c.wind4, '14'), sw(c.wind5, '17+ kn')],
-      'Temp' => [sw(c.snow, '0°'), sw(Color.lerp(c.snow, c.heat, 0.5)!, '15°'), sw(c.heat, '30°')],
-      'Rain' => [sw(c.water.withValues(alpha: 0.3), 'light'), sw(c.water, '4+ mm/h')],
-      _ => [for (var r = 1; r <= 5; r++) sw(c.ratingColor(r), '$r')],
-    };
+    final colors = FieldColors(c);
+    final stops = colors.legend(layer);
     return AnimatedSwitcher(
       duration: motion(context, 200),
-      child: Container(
+      child: _Glass(
         key: ValueKey(layer),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(color: c.bg.withValues(alpha: 0.88), borderRadius: BorderRadius.circular(14)),
-        child: Row(mainAxisSize: MainAxisSize.min, children: items),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 190,
+              height: 8,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(4),
+                gradient: LinearGradient(colors: [for (final s in stops) s.$2]),
+              ),
+            ),
+            const SizedBox(height: 4),
+            SizedBox(
+              width: 190,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [for (final s in stops) Text(s.$1, style: OgText.chip.copyWith(color: c.text, fontSize: 12))],
+              ),
+            ),
+            if (colors.unit(layer).isNotEmpty) Text(colors.unit(layer), style: OgText.chip.copyWith(color: c.text2)),
+          ],
+        ),
       ),
+    );
+  }
+}
+
+class _Glass extends StatelessWidget {
+  const _Glass({super.key, required this.child, this.padding = const EdgeInsets.symmetric(horizontal: 14, vertical: 9)});
+  final Widget child;
+  final EdgeInsets padding;
+  @override
+  Widget build(BuildContext context) {
+    final c = context.og;
+    return Container(
+      padding: padding,
+      decoration: BoxDecoration(
+        color: c.bg.withValues(alpha: 0.9),
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.15), blurRadius: 10)],
+      ),
+      child: child,
     );
   }
 }

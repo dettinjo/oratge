@@ -809,6 +809,30 @@ def grid(src) -> dict:
     return {'time': t[11:16], 'points': pts, 'source': 'Open-Meteo current conditions (model)'}
 
 
+GRID_LATS = [round(40.5 + 0.25 * i, 2) for i in range(10)]   # south → north
+GRID_LONS = [round(0.15 + 0.25 * j, 2) for j in range(14)]   # west → east
+
+
+def grid_forecast(src, hours: int = 48) -> dict:
+    """Hourly forecast on a regular 0.25° grid over Catalonia for the map timeline.
+
+    fields[name][t][r * len(lons) + c] for time t, grid row r (lat) and column c (lon).
+    """
+    la = [a for a in GRID_LATS for _ in GRID_LONS]
+    lo = [b for _ in GRID_LATS for b in GRID_LONS]
+    data = src.grid_forecast(la, lo, hours)
+    pts = data if isinstance(data, list) else [data]
+    times = pts[0]['hourly']['time']
+    keys = {'wind': 'wind_speed_10m', 'wdir': 'wind_direction_10m', 'gust': 'wind_gusts_10m', 'temp': 'temperature_2m',
+            'precip': 'precipitation', 'pprob': 'precipitation_probability', 'code': 'weather_code'}
+    fields = {}
+    for name, k in keys.items():
+        fields[name] = [[(round(v, 1) if isinstance(v, float) else (v if v is not None else 0))
+                         for v in (p['hourly'][k][t] for p in pts)] for t in range(len(times))]
+    return {'lats': GRID_LATS, 'lons': GRID_LONS, 'times': times, 'fields': fields,
+            'source': 'Open-Meteo hourly forecast (best-match models), 0.25° grid'}
+
+
 SUMMARY = {'sun': 'Sunny', 'partly': 'Partly cloudy', 'cloud': 'Cloudy', 'rain': 'Rain', 'storm': 'Thunderstorms',
            'snow': 'Snow', 'fog': 'Fog', 'night': 'Clear'}
 CHIPS = {'bike': {'label': 'Ride length', 'options': ['1 h', '2 h', '3 h', '4 h', '5 h'], 'selected': '3 h'},

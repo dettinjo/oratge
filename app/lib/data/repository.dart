@@ -16,6 +16,9 @@ abstract class ForecastRepository {
   Future<List<Place>> places(String query);
   Future<Place> reverse(double lat, double lon);
   Future<GridData> grid();
+
+  /// 48-hour hourly forecast on the map grid (empty offline).
+  Future<MapForecast> mapForecast();
   Future<ActivitiesData> activities();
   Future<PlannerData> planner(String sport, {int day = 0});
   Future<MapData> map();
@@ -60,6 +63,8 @@ class SampleRepository implements ForecastRepository {
 
   @override
   Future<GridData> grid() async => GridData.fromJson({'time': '', 'points': [], 'source': 'offline'});
+  @override
+  Future<MapForecast> mapForecast() async => MapForecast.fromJson(const {});
   @override
   Future<ActivitiesData> activities() async => ActivitiesData.fromJson(await _load('activities'));
   @override
@@ -250,6 +255,8 @@ class ApiRepository implements ForecastRepository {
 
   @override
   Future<GridData> grid() => _load('map/grid', GridData.fromJson, (f) => f.grid());
+  @override
+  Future<MapForecast> mapForecast() => _load('map/forecast', MapForecast.fromJson, (f) => f.mapForecast());
   @override
   Future<ActivitiesData> activities() => _load('activities', ActivitiesData.fromJson, (f) => f.activities());
   @override

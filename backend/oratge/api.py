@@ -7,6 +7,7 @@ import logging
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 
 import os
 
@@ -21,6 +22,7 @@ from .store import Store
 logging.basicConfig(level=logging.INFO)
 app = FastAPI(title='Oratge', version='0.1.0')
 # Read-only API protected by a bearer token; the web build may run on another origin.
+app.add_middleware(GZipMiddleware, minimum_size=2000)
 app.add_middleware(CORSMiddleware, allow_origins=['*'], allow_methods=['GET'], allow_headers=['Authorization'])
 _store = Store(settings.db_path)
 _sources = Sources(_store)
@@ -81,6 +83,11 @@ def places(q: str = ''):
 @app.get('/v1/reverse', dependencies=[Depends(auth)])
 def reverse(lat: float, lon: float):
     return build_mod.reverse(_sources, lat, lon)
+
+
+@app.get('/v1/map/forecast', dependencies=[Depends(auth)])
+def map_forecast(hours: int = 48):
+    return build_mod.grid_forecast(_sources, max(6, min(hours, 72)))
 
 
 @app.get('/v1/map/grid', dependencies=[Depends(auth)])

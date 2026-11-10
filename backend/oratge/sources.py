@@ -94,6 +94,13 @@ class Sources:
         p = dict(lat=f'{lat:.3f}', lon=f'{lon:.3f}', format='jsonv2', zoom=12)
         return self._get(f'osm:rev:{lat:.3f},{lon:.3f}', 'https://nominatim.openstreetmap.org/reverse', p, 30 * 86400)
 
+    def grid_forecast(self, lats: list[float], lons: list[float], hours: int = 48):
+        p = dict(latitude=','.join(f'{x:.2f}' for x in lats), longitude=','.join(f'{x:.2f}' for x in lons),
+                 hourly='wind_speed_10m,wind_direction_10m,wind_gusts_10m,temperature_2m,precipitation,'
+                        'precipitation_probability,weather_code',
+                 forecast_hours=hours, wind_speed_unit='kn', timezone=settings.tz)
+        return self._get(f'om:gridfc:{len(lats)}:{hours}', OM_FORECAST, p, 3600)
+
     def reverse_nearest(self, lat: float, lon: float):
         """Photon (OSM data): nearest named features, works for points just offshore."""
         p = dict(lat=f'{lat:.3f}', lon=f'{lon:.3f}', limit=5)

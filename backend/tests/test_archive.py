@@ -23,3 +23,21 @@ def test_station_check_needs_seven_days_then_reports_bias():
     assert chk and chk['tiles'][0]['value'] == '+2.0 kn'
     assert chk['tiles'][2]['value'] == '100 %'
     assert len(chk['trend']['values']) == len(chk['trend']['compare'])
+
+
+def test_store_is_thread_safe(tmp_path):
+    """Concurrent reads and writes on the shared connection (FastAPI thread pool) must not error."""
+    from concurrent.futures import ThreadPoolExecutor
+    from oratge.store import Store
+    st = Store(str(tmp_path / 'c.db'))
+
+    def work(i):
+        for j in range(200):
+            st.put(f'k{i}:{j % 5}', {'v': j})
+            st.get(f'k{(i + 1) % 8}:{j % 5}', 60)
+            st.stale(f'k{i}:{j % 5}')
+            st.used('pred')
+        return True
+
+    with ThreadPoolExecutor(8) as ex:
+        assert all(ex.map(work, range(8)))
