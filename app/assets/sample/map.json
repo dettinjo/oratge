@@ -1,0 +1,74 @@
+{
+ "title": "Map",
+ "date": "Mon 9 Nov · Barcelona",
+ "layers": {
+  "options": [
+   "Wind",
+   "Temp",
+   "Rain 1 h",
+   "Lightning 60 min",
+   "Warnings"
+  ],
+  "selected": "Wind"
+ },
+ "pins": [
+  {
+   "name": "Castelldefels",
+   "rating": 4,
+   "x": 0.56,
+   "y": 0.74,
+   "wind": 14,
+   "windFrom": 225
+  },
+  {
+   "name": "Ocata",
+   "rating": 3,
+   "x": 0.7,
+   "y": 0.62,
+   "wind": 6,
+   "windFrom": 330
+  },
+  {
+   "name": "Collserola loop",
+   "rating": 5,
+   "x": 0.62,
+   "y": 0.66,
+   "wind": 7,
+   "windFrom": 240
+  },
+  {
+   "name": "Montseny · Turó de l'Home",
+   "rating": 2,
+   "x": 0.68,
+   "y": 0.48,
+   "wind": 22,
+   "windFrom": 300
+  },
+  {
+   "name": "Pedraforca",
+   "rating": 2,
+   "x": 0.48,
+   "y": 0.24,
+   "wind": 22,
+   "windFrom": 310
+  }
+ ],
+ "warnings": [
+  {
+   "level": "yellow",
+   "title": "Yellow warning · Wind",
+   "detail": "Barcelona coast · Tue 14–22 h · gusts above 70 km/h"
+  },
+  {
+   "level": "orange",
+   "title": "Orange warning · Rain",
+   "detail": "Garrotxa · Thu 06–18 h · 40 mm in 1 h"
+  },
+  {
+   "level": "red",
+   "title": "Red warning · Snow",
+   "detail": "Val d'Aran · Fri · 60 cm above 1000 m"
+  }
+ ],
+ "sources": "Meteocat warnings and XEMA stations; ratings from your saved spots"
+}

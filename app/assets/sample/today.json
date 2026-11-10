@@ -1,0 +1,283 @@
+{
+ "title": "Today",
+ "date": "Mon 9 Nov · Barcelona",
+ "best": {
+  "sport": "bike",
+  "window": "09–12 h",
+  "rating": 5,
+  "reason": "Dry window before the 13 h showers, tailwind on the climb.",
+  "note": "Dry for the next 2 hours (forecast)"
+ },
+ "warnings": [
+  {
+   "level": "yellow",
+   "kind": "pre",
+   "title": "Pre-warning · Wed",
+   "detail": "Yellow wind warning likely for the Barcelona coast",
+   "pre": true
+  }
+ ],
+ "current": {
+  "place": "Barcelona",
+  "source": "Meteocat · el Raval station · 8 min ago",
+  "sky": "partly",
+  "temp": 18,
+  "summary": "Mostly sunny",
+  "feels": 17,
+  "min": 11,
+  "max": 21,
+  "wind": "SW 14 kn · gusts 21"
+ },
+ "sources": "Meteocat: XEMA station el Raval (live), municipal hourly forecast, 7-day forecast, warnings; sea temperature buoy; confidence from the ECMWF ensemble (Open-Meteo)",
+ "rightNow": [
+  {
+   "label": "Wind",
+   "value": "14 kn",
+   "sub": "SW · gusts 21",
+   "accent": "wind",
+   "size": "lg"
+  },
+  {
+   "label": "Rain",
+   "value": "0 %",
+   "sub": "likely from 00 h",
+   "accent": "water",
+   "size": "lg"
+  },
+  {
+   "label": "UV",
+   "value": "2",
+   "sub": "low · max at 13 h",
+   "accent": "sun",
+   "size": "lg"
+  },
+  {
+   "label": "Water",
+   "value": "18.6°",
+   "sub": "3/2 suit",
+   "accent": "water",
+   "size": "lg"
+  }
+ ],
+ "next24": {
+  "startHour": 10,
+  "temps": [
+   17,
+   16,
+   15,
+   14,
+   14,
+   13,
+   13,
+   14,
+   16,
+   18,
+   19,
+   20,
+   21,
+   21,
+   20,
+   19,
+   18,
+   17,
+   16,
+   15,
+   15,
+   14,
+   14,
+   13
+  ],
+  "rain": [
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   5,
+   10,
+   20,
+   45,
+   60,
+   40,
+   20,
+   10,
+   5,
+   0,
+   0,
+   0,
+   0
+  ],
+  "sky": [
+   "partly",
+   "partly",
+   "cloud",
+   "cloud",
+   "night",
+   "night",
+   "night",
+   "night",
+   "night",
+   "night",
+   "night",
+   "night",
+   "partly",
+   "cloud",
+   "storm",
+   "rain",
+   "rain",
+   "cloud",
+   "cloud",
+   "sun",
+   "sun",
+   "sun",
+   "partly",
+   "partly"
+  ]
+ },
+ "sports": [
+  {
+   "sport": "wing",
+   "rating": 4,
+   "window": "13–17 h",
+   "reason": "side-on SW 16–19 kn"
+  },
+  {
+   "sport": "surf",
+   "rating": 3,
+   "window": "08–11 h",
+   "reason": "E swell 1.1 m, offshore until 10 h"
+  },
+  {
+   "sport": "bike",
+   "rating": 5,
+   "window": "09–12 h",
+   "reason": "dry before the 13 h showers"
+  },
+  {
+   "sport": "run",
+   "rating": 5,
+   "window": "07:30–09:30",
+   "reason": "cool and dry, 11–14°"
+  },
+  {
+   "sport": "hike",
+   "rating": 2,
+   "window": "07:30–12 h",
+   "reason": "45 % storm risk from 14 h"
+  }
+ ],
+ "days": [
+  {
+   "day": "Today",
+   "sky": "partly",
+   "rainChance": 0,
+   "min": 11,
+   "max": 21
+  },
+  {
+   "day": "Tue",
+   "sky": "storm",
+   "rainChance": 60,
+   "min": 13,
+   "max": 19
+  },
+  {
+   "day": "Wed",
+   "sky": "rain",
+   "rainChance": 80,
+   "min": 12,
+   "max": 16
+  },
+  {
+   "day": "Thu",
+   "sky": "partly",
+   "rainChance": 20,
+   "min": 10,
+   "max": 17
+  },
+  {
+   "day": "Fri",
+   "sky": "sun",
+   "rainChance": 0,
+   "min": 9,
+   "max": 18
+  },
+  {
+   "day": "Sat",
+   "sky": "sun",
+   "rainChance": 0,
+   "min": 10,
+   "max": 19
+  },
+  {
+   "day": "Sun",
+   "sky": "cloud",
+   "rainChance": 10,
+   "min": 11,
+   "max": 18
+  }
+ ],
+ "scale": [
+  8,
+  22
+ ],
+ "confidence": {
+  "intro": "Share of 51 ensemble members (ECMWF ENS) that agree with the blend within your thresholds.",
+  "rows": [
+   {
+    "day": "Today",
+    "label": "models agree within 2 kn / 1°",
+    "pct": 92
+   },
+   {
+    "day": "Tue",
+    "label": "storm timing ±2 h",
+    "pct": 84
+   },
+   {
+    "day": "Wed",
+    "label": "rain total 8–22 mm",
+    "pct": 71
+   },
+   {
+    "day": "Thu",
+    "label": "front position uncertain",
+    "pct": 63
+   },
+   {
+    "day": "Fri",
+    "label": "ensemble splits in two",
+    "pct": 55
+   },
+   {
+    "day": "Sat",
+    "label": "climatology weight 30 %",
+    "pct": 48
+   },
+   {
+    "day": "Sun",
+    "label": "climatology weight 45 %",
+    "pct": 41
+   }
+  ]
+ },
+ "daylight": [
+  {
+   "label": "Sunrise",
+   "value": "07:47",
+   "accent": "sun"
+  },
+  {
+   "label": "Sunset",
+   "value": "17:35",
+   "sub": "last light 18:03",
+   "accent": "sun"
+  }
+ ]
+}

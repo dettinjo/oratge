@@ -1,0 +1,367 @@
+{
+ "title": "Activities",
+ "date": "Mon 9 Nov · Barcelona",
+ "sports": [
+  {
+   "sport": "wing",
+   "rating": 4,
+   "window": "13–17 h",
+   "reason": "side-on SW 16–19 kn"
+  },
+  {
+   "sport": "surf",
+   "rating": 3,
+   "window": "08–11 h",
+   "reason": "E swell 1.1 m, offshore until 10 h"
+  },
+  {
+   "sport": "bike",
+   "rating": 5,
+   "window": "09–12 h",
+   "reason": "dry before the 13 h showers"
+  },
+  {
+   "sport": "run",
+   "rating": 5,
+   "window": "07:30–09:30",
+   "reason": "cool and dry, 11–14°"
+  },
+  {
+   "sport": "hike",
+   "rating": 2,
+   "window": "07:30–12 h",
+   "reason": "45 % storm risk from 14 h"
+  }
+ ],
+ "chip": {
+  "label": "Planner shows",
+  "options": [
+   "Today",
+   "Tomorrow",
+   "Week"
+  ],
+  "selected": "Today"
+ },
+ "days": [
+  {
+   "weekday": "Mon",
+   "date": 9,
+   "rating": 4,
+   "outlook": false
+  },
+  {
+   "weekday": "Tue",
+   "date": 10,
+   "rating": 4,
+   "outlook": false
+  },
+  {
+   "weekday": "Wed",
+   "date": 11,
+   "rating": 2,
+   "outlook": false
+  },
+  {
+   "weekday": "Thu",
+   "date": 12,
+   "rating": 1,
+   "outlook": true
+  },
+  {
+   "weekday": "Fri",
+   "date": 13,
+   "rating": 1,
+   "outlook": true
+  },
+  {
+   "weekday": "Sat",
+   "date": 14,
+   "rating": 3,
+   "outlook": true
+  },
+  {
+   "weekday": "Sun",
+   "date": 15,
+   "rating": 4,
+   "outlook": true
+  },
+  {
+   "weekday": "Mon",
+   "date": 16,
+   "rating": 2,
+   "outlook": true
+  }
+ ],
+ "heatmap": {
+  "weeks": [
+   [
+    0,
+    1,
+    0,
+    0,
+    1,
+    0,
+    0
+   ],
+   [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    0
+   ],
+   [
+    0,
+    1,
+    1,
+    0,
+    1,
+    1,
+    2
+   ],
+   [
+    2,
+    0,
+    1,
+    2,
+    2,
+    1,
+    1
+   ],
+   [
+    3,
+    3,
+    1,
+    0,
+    2,
+    0,
+    0
+   ],
+   [
+    0,
+    1,
+    0,
+    3,
+    2,
+    2,
+    3
+   ],
+   [
+    0,
+    0,
+    2,
+    2,
+    1,
+    0,
+    3
+   ],
+   [
+    0,
+    1,
+    1,
+    3,
+    4,
+    2,
+    0
+   ],
+   [
+    1,
+    1,
+    1,
+    1,
+    1,
+    2,
+    2
+   ],
+   [
+    0,
+    4,
+    2,
+    4,
+    3,
+    3,
+    2
+   ],
+   [
+    2,
+    3,
+    5,
+    1,
+    3,
+    1,
+    3
+   ],
+   [
+    1,
+    1,
+    2,
+    4,
+    5,
+    0,
+    4
+   ],
+   [
+    0,
+    2,
+    0,
+    0,
+    5,
+    0,
+    3
+   ],
+   [
+    0,
+    2,
+    3,
+    0,
+    5,
+    5,
+    5
+   ],
+   [
+    5,
+    5,
+    4,
+    1,
+    0,
+    1,
+    0
+   ],
+   [
+    0,
+    3,
+    1,
+    4,
+    2,
+    3,
+    1
+   ],
+   [
+    5,
+    1,
+    1,
+    5,
+    0,
+    2,
+    0
+   ],
+   [
+    5,
+    3,
+    5,
+    0,
+    5,
+    0,
+    5
+   ],
+   [
+    2,
+    3,
+    1,
+    0,
+    0,
+    2,
+    0
+   ],
+   [
+    3,
+    3,
+    3,
+    2,
+    0,
+    0,
+    4
+   ],
+   [
+    0,
+    3,
+    4,
+    0,
+    4,
+    4,
+    4
+   ],
+   [
+    4,
+    3,
+    1,
+    0,
+    3,
+    4,
+    1
+   ],
+   [
+    0,
+    1,
+    3,
+    2,
+    1,
+    2,
+    3
+   ],
+   [
+    1,
+    2,
+    1,
+    0,
+    0,
+    3,
+    3
+   ],
+   [
+    2,
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   [
+    1,
+    2,
+    2,
+    1,
+    0,
+    1,
+    0
+   ]
+  ],
+  "months": [
+   "May",
+   "Jun",
+   "Jul",
+   "Aug",
+   "Sep",
+   "Oct",
+   "Nov"
+  ],
+  "legend": [
+   "0 h",
+   "6+ h"
+  ],
+  "cell": 10
+ },
+ "months": {
+  "values": [
+   6.1,
+   7.8,
+   10.2,
+   12.4,
+   10.9,
+   8.3,
+   7.1,
+   6.4,
+   7.0,
+   8.8,
+   8.1,
+   6.6
+  ],
+  "highlight": 3,
+  "current": 10,
+  "width": 318
+ },
+ "sources": "Ratings from Meteocat hourly forecasts and your saved ranges; history from XEMA stations"
+}

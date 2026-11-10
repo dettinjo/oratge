@@ -1,0 +1,606 @@
+{
+ "sport": "run",
+ "title": "Run · Passeig Marítim",
+ "date": "Mon 9 Nov · Barcelona",
+ "keyFacts": [
+  {
+   "label": "Temp",
+   "value": "12°",
+   "sub": "feels 11°",
+   "accent": "heat",
+   "size": "lg"
+  },
+  {
+   "label": "Wind",
+   "value": "4 kn",
+   "sub": "calm",
+   "accent": "wind",
+   "size": "lg"
+  },
+  {
+   "label": "Rain",
+   "value": "0 %",
+   "sub": "dry all morning",
+   "accent": "water",
+   "size": "lg"
+  },
+  {
+   "label": "UV",
+   "value": "1",
+   "sub": "low until 10 h",
+   "accent": "sun",
+   "size": "lg"
+  }
+ ],
+ "tuned": [
+  {
+   "from": "Comfortable 5–22°",
+   "effect": "07:30–09:30 sits at 12–14°"
+  },
+  {
+   "from": "5:15 /km · 10 km",
+   "effect": "53 min, back by 08:25"
+  },
+  {
+   "from": "Feels the cold",
+   "effect": "long sleeve until 09 h"
+  },
+  {
+   "from": "Light rain is fine",
+   "effect": "no rain this morning anyway"
+  }
+ ],
+ "visuals": [],
+ "plan": {
+  "label": "What to wear",
+  "facts": [
+   {
+    "label": "Layer",
+    "value": "long sleeve",
+    "sub": "and shorts"
+   },
+   {
+    "label": "Hottest",
+    "value": "21°",
+    "sub": "14–15 h",
+    "accent": "heat"
+   },
+   {
+    "label": "UV max",
+    "value": "3",
+    "sub": "at 13 h",
+    "accent": "sun"
+   },
+   {
+    "label": "Sunrise",
+    "value": "07:47",
+    "accent": "sun"
+   }
+  ]
+ },
+ "outlook": null,
+ "chip": {
+  "label": "Run length",
+  "options": [
+   "5 km",
+   "10 km",
+   "15 km",
+   "21 km"
+  ],
+  "selected": "10 km"
+ },
+ "days": [
+  {
+   "weekday": "Mon",
+   "date": 9,
+   "rating": 5,
+   "outlook": false
+  },
+  {
+   "weekday": "Tue",
+   "date": 10,
+   "rating": 4,
+   "outlook": false
+  },
+  {
+   "weekday": "Wed",
+   "date": 11,
+   "rating": 2,
+   "outlook": false
+  },
+  {
+   "weekday": "Thu",
+   "date": 12,
+   "rating": 3,
+   "outlook": true
+  },
+  {
+   "weekday": "Fri",
+   "date": 13,
+   "rating": 4,
+   "outlook": true
+  },
+  {
+   "weekday": "Sat",
+   "date": 14,
+   "rating": 5,
+   "outlook": true
+  },
+  {
+   "weekday": "Sun",
+   "date": 15,
+   "rating": 4,
+   "outlook": true
+  },
+  {
+   "weekday": "Mon",
+   "date": 16,
+   "rating": 4,
+   "outlook": true
+  }
+ ],
+ "selected": 0,
+ "verdict": {
+  "rating": 5,
+  "best": "Go 07:30–09:30",
+  "confidence": "High confidence",
+  "summary": "Cool and dry early, 11–14°. Warmest at 14–15 h, 21° feeling like 22° with UV 3."
+ },
+ "takeaway": "Coolest and calmest before 09:30; warmest at 14–15 h with UV 3.",
+ "hourChart": {
+  "hours": [
+   7,
+   8,
+   9,
+   10,
+   11,
+   12,
+   13,
+   14,
+   15,
+   16,
+   17,
+   18,
+   19,
+   20
+  ],
+  "rows": [
+   {
+    "type": "icons",
+    "label": "Sky",
+    "values": [
+     "partly",
+     "sun",
+     "sun",
+     "sun",
+     "sun",
+     "sun",
+     "sun",
+     "partly",
+     "partly",
+     "partly",
+     "cloud",
+     "night",
+     "night",
+     "night"
+    ]
+   },
+   {
+    "type": "rating",
+    "label": "Rating",
+    "values": [
+     5,
+     5,
+     4,
+     4,
+     3,
+     3,
+     2,
+     2,
+     3,
+     3,
+     4,
+     4,
+     3,
+     0
+    ]
+   },
+   {
+    "type": "line",
+    "label": "Temp",
+    "unit": "°C",
+    "accent": "heat",
+    "min": 6,
+    "max": 24,
+    "values": [
+     11,
+     12,
+     14,
+     16,
+     18,
+     19,
+     20,
+     21,
+     21,
+     20,
+     18,
+     16,
+     15,
+     14
+    ],
+    "companion": [
+     10,
+     11,
+     13,
+     16,
+     18,
+     20,
+     21,
+     22,
+     22,
+     20,
+     17,
+     15,
+     14,
+     13
+    ],
+    "labelAt": [
+     0,
+     7
+    ],
+    "height": 80
+   },
+   {
+    "type": "bars",
+    "label": "UV",
+    "accent": "sun",
+    "max": 6,
+    "labelEvery": 1,
+    "values": [
+     0,
+     0,
+     1,
+     2,
+     3,
+     3,
+     3,
+     2,
+     1,
+     1,
+     0,
+     0,
+     0,
+     0
+    ],
+    "height": 30
+   },
+   {
+    "type": "numbers",
+    "label": "Wind",
+    "unit": "kn",
+    "values": [
+     4,
+     4,
+     5,
+     6,
+     8,
+     10,
+     12,
+     13,
+     13,
+     12,
+     10,
+     8,
+     6,
+     5
+    ],
+    "emphasizeAbove": 12
+   },
+   {
+    "type": "bars",
+    "label": "Rain",
+    "unit": "%",
+    "accent": "water",
+    "max": 100,
+    "labelEvery": 2,
+    "values": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     5,
+     5,
+     10,
+     10,
+     10,
+     5,
+     5
+    ]
+   }
+  ],
+  "best": [
+   7.5,
+   9.5
+  ],
+  "width": 318
+ },
+ "analysis": {
+  "summary": [
+   "Models agree · spread 2°",
+   "Score 4.9 / 5",
+   "91 % hit rate"
+  ],
+  "model": {
+   "title": "Model agreement · temperature at 08 h",
+   "unit": "°",
+   "scale": [
+    6.0,
+    18.0
+   ],
+   "blend": 12,
+   "spread": "2°",
+   "verdict": "Very high agreement on a calm, clear morning.",
+   "rows": [
+    {
+     "name": "Meteocat",
+     "detail": "municipal + beach forecast",
+     "value": 12,
+     "weight": 30
+    },
+    {
+     "name": "AROME",
+     "detail": "1.3 km · Météo-France",
+     "value": 11,
+     "weight": 25
+    },
+    {
+     "name": "ARPEGE",
+     "detail": "10 km · Météo-France",
+     "value": 12,
+     "weight": 20
+    },
+    {
+     "name": "ICON-EU",
+     "detail": "7 km · DWD",
+     "value": 13,
+     "weight": 10
+    },
+    {
+     "name": "ECMWF IFS",
+     "detail": "9 km",
+     "value": 12,
+     "weight": 10
+    },
+    {
+     "name": "GFS",
+     "detail": "13 km · NOAA",
+     "value": 13,
+     "weight": 5
+    }
+   ]
+  },
+  "factors": [
+   {
+    "factor": "Temperature",
+    "observed": "12° at go time",
+    "weight": 35,
+    "score": 1.0,
+    "accent": "heat"
+   },
+   {
+    "factor": "Feels like",
+    "observed": "11°",
+    "weight": 15,
+    "score": 0.9,
+    "accent": "heat"
+   },
+   {
+    "factor": "Wind",
+    "observed": "4 kn",
+    "weight": 20,
+    "score": 1.0,
+    "accent": "wind"
+   },
+   {
+    "factor": "Rain",
+    "observed": "0 %",
+    "weight": 20,
+    "score": 1.0,
+    "accent": "water"
+   },
+   {
+    "factor": "UV",
+    "observed": "1",
+    "weight": 10,
+    "score": 1.0,
+    "accent": "sun"
+   }
+  ],
+  "total": "4.9",
+  "rating": 5,
+  "ensemble": {
+   "label": "Ensemble · temperature and rain",
+   "intro": "Solid line: ensemble median. Shading up to the 90th percentile, dashed line at the 10th, from 51 members (ECMWF ENS). Bars: chance the condition holds.",
+   "chart": {
+    "hours": [
+     7,
+     8,
+     9,
+     10,
+     11,
+     12,
+     13,
+     14,
+     15,
+     16,
+     17,
+     18,
+     19,
+     20
+    ],
+    "rows": [
+     {
+      "type": "line",
+      "label": "Temp P50",
+      "unit": "°C",
+      "accent": "heat",
+      "min": 6,
+      "max": 24,
+      "values": [
+       11,
+       12,
+       14,
+       16,
+       18,
+       19,
+       20,
+       21,
+       21,
+       20,
+       18,
+       16,
+       15,
+       14
+      ],
+      "band": [
+       12,
+       13,
+       15,
+       17,
+       19,
+       20,
+       21,
+       22,
+       22,
+       21,
+       19,
+       17,
+       16,
+       15
+      ],
+      "labelAt": [
+       0,
+       7
+      ],
+      "height": 80,
+      "companion": [
+       10,
+       11,
+       13,
+       15,
+       17,
+       18,
+       19,
+       20,
+       20,
+       19,
+       17,
+       15,
+       14,
+       13
+      ]
+     },
+     {
+      "type": "bars",
+      "label": "Rain chance",
+      "unit": "%",
+      "accent": "water",
+      "max": 100,
+      "labelEvery": 2,
+      "values": [
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       5,
+       5,
+       10,
+       10,
+       10,
+       5,
+       5
+      ],
+      "height": 36
+     }
+    ],
+    "best": [
+     7.5,
+     9.5
+    ],
+    "width": 318
+   }
+  },
+  "station": {
+   "title": "Station check · el Raval",
+   "trend": {
+    "accent": "heat",
+    "values": [
+     11,
+     11,
+     12,
+     14,
+     16,
+     17,
+     18,
+     19,
+     20,
+     18,
+     16,
+     14
+    ],
+    "compare": [
+     11,
+     11,
+     12,
+     13,
+     15,
+     17,
+     18,
+     19,
+     19,
+     18,
+     16,
+     14
+    ],
+    "nowIndex": 11,
+    "nowLabel": "now 14",
+    "caption": [
+     "−24 h",
+     "now"
+    ],
+    "min": 0,
+    "max": 24,
+    "height": 90,
+    "width": 318
+   },
+   "legend": "solid: measured at the station dashed: yesterday’s forecast",
+   "note": "Yesterday’s blend against the XEMA station Barcelona – el Raval.",
+   "tiles": [
+    {
+     "label": "Bias",
+     "value": "+0.4°",
+     "sub": "models slightly cool",
+     "accent": "heat"
+    },
+    {
+     "label": "Error",
+     "value": "0.8°",
+     "sub": "mean, 30 days"
+    },
+    {
+     "label": "Hit rate",
+     "value": "91 %",
+     "sub": "rating ±1, 30 days"
+    }
+   ]
+  }
+ },
+ "keyLabel": "At go time",
+ "sources": "municipal hourly forecast Barcelona, XEMA station el Raval, UV, warnings"
+}
