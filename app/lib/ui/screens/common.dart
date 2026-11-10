@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../data/profile.dart';
+import '../../data/repository.dart';
 import '../../theme/oratge_tokens.dart';
 
 /// Breakpoints from the handoff: < 600 phone, 600–1023 tablet, ≥ 1024 desktop.
@@ -59,6 +60,7 @@ class OgPage extends StatelessWidget {
                         padding: const EdgeInsets.only(top: 2),
                         child: Text(subtitle!, style: OgText.day.copyWith(color: c.text2)),
                       ),
+                    const _DataBanner(),
                   ]),
                 ),
                 if (showProfile && ff == FormFactor.phone) const _ProfileButton(),
@@ -112,6 +114,34 @@ class AsyncView<T> extends StatefulWidget {
 
 class _AsyncViewState<T> extends State<AsyncView<T>> {
   late Future<T> _f = widget.load();
+  T? _last;
+  DataStatus? _status;
+  int _seen = 0;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final st = AppScope.of(context).status;
+    if (!identical(st, _status)) {
+      _status?.removeListener(_onStatus);
+      _status = st..addListener(_onStatus);
+      _seen = st.version;
+    }
+  }
+
+  void _onStatus() {
+    // A background refresh landed: reload from the (now fresh) cache, keeping the old data on screen meanwhile.
+    if (_status!.version != _seen && mounted) {
+      _seen = _status!.version;
+      setState(() => _f = widget.load());
+    }
+  }
+
+  @override
+  void dispose() {
+    _status?.removeListener(_onStatus);
+    super.dispose();
+  }
 
   @override
   void didUpdateWidget(covariant AsyncView<T> old) {
@@ -125,7 +155,8 @@ class _AsyncViewState<T> extends State<AsyncView<T>> {
     return FutureBuilder<T>(
       future: _f,
       builder: (context, snap) {
-        if (snap.hasError) {
+        if (snap.hasData) _last = snap.data;
+        if (snap.hasError && _last == null) {
           return Center(
             child: Padding(
               padding: const EdgeInsets.all(24),
@@ -139,8 +170,37 @@ class _AsyncViewState<T> extends State<AsyncView<T>> {
             ),
           );
         }
-        if (!snap.hasData) return Center(child: CircularProgressIndicator(color: c.text2));
-        return widget.builder(context, snap.data as T);
+        final data = snap.data ?? _last;
+        if (data == null) return Center(child: CircularProgressIndicator(color: c.text2));
+        return widget.builder(context, data);
+      },
+    );
+  }
+}
+
+/// Small line under the page title when the data isn't live.
+class _DataBanner extends StatelessWidget {
+  const _DataBanner();
+  @override
+  Widget build(BuildContext context) {
+    final st = AppScope.of(context).status;
+    final c = context.og;
+    return ListenableBuilder(
+      listenable: st,
+      builder: (context, _) {
+        if (st.source == DataSource.live) return const SizedBox.shrink();
+        final at = st.savedAt;
+        final text = st.source == DataSource.sample
+            ? 'Offline · showing sample data (is Tailscale on?)'
+            : 'Offline · showing saved forecast from ${at == null ? 'earlier' : '${at.hour.toString().padLeft(2, '0')}:${at.minute.toString().padLeft(2, '0')}'}';
+        return Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: Row(children: [
+            Icon(Icons.cloud_off_outlined, size: 16, color: c.text2),
+            const SizedBox(width: 6),
+            Expanded(child: Text(text, style: OgText.chip.copyWith(color: c.text2))),
+          ]),
+        );
       },
     );
   }

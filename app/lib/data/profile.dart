@@ -160,7 +160,11 @@ class AppState extends ChangeNotifier {
   }
 
   final SharedPreferences? _prefs;
+  SharedPreferences? get prefs => _prefs;
   ForecastRepository repository;
+
+  /// Live / saved / sample, plus a version bumped by background refreshes.
+  final DataStatus status = DataStatus();
   late Map<String, dynamic> profile;
   late ThemeMode themeMode;
   late Set<String> doneSteps;

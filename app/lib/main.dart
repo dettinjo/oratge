@@ -12,8 +12,14 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final state = await AppState.load();
   if (_api.isNotEmpty) {
-    state.repository = ApiRepository(_api,
-        token: _token.isEmpty ? null : _token, fallback: SampleRepository(), profile: () => state.profile);
+    final api = ApiRepository(_api,
+        token: _token.isEmpty ? null : _token,
+        fallback: SampleRepository(),
+        profile: () => state.profile,
+        prefs: state.prefs,
+        status: state.status);
+    state.repository = api;
+    api.prefetch(); // warm every screen in parallel; navigation then reads from the cache
   }
   runApp(OratgeApp(state: state));
 }

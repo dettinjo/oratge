@@ -1,7 +1,9 @@
 import 'dart:convert';
 
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'models.dart';
 
@@ -40,16 +42,59 @@ class SampleRepository implements ForecastRepository {
   Future<SpotDetail> spot(String id) async => SpotDetail.fromJson(await _load('spot-castelldefels'));
 }
 
+/// Where the data on screen came from (shown as a small banner when not live).
+enum DataSource { live, saved, sample }
+
+class DataStatus extends ChangeNotifier {
+  DataSource source = DataSource.live;
+  DateTime? savedAt;
+
+  /// Bumped when a background refresh brings newer data, so screens reload from the cache.
+  int version = 0;
+
+  void set(DataSource s, [DateTime? at]) {
+    if (s == source && at == savedAt) return;
+    source = s;
+    savedAt = at;
+    notifyListeners();
+  }
+
+  void bump() {
+    version++;
+    notifyListeners();
+  }
+}
+
 /// The Oratge backend (FastAPI). Same JSON shapes as the sample data, under /v1.
+///
+/// Stale-while-revalidate: every response is cached on the device (memory + shared preferences).
+/// A screen gets cached data instantly; data older than [fresh] is refreshed in the background.
+/// After a network failure the backend isn't tried again for [backoff], so screens never wait
+/// on repeated timeouts; with no cache at all the bundled sample data is shown.
 class ApiRepository implements ForecastRepository {
-  ApiRepository(this.baseUrl, {this.token, http.Client? client, this.fallback, this.profile})
-      : _client = client ?? http.Client();
+  ApiRepository(this.baseUrl,
+      {this.token, http.Client? client, this.fallback, this.profile, this.prefs, DataStatus? status})
+      : _client = client ?? http.Client(),
+        status = status ?? DataStatus();
   final String baseUrl;
   final String? token;
   final http.Client _client;
+  final SharedPreferences? prefs;
+  final DataStatus status;
 
   /// Returns the user's ranges (sent with each request, never stored server-side).
   final Map<String, dynamic> Function()? profile;
+
+  /// Used when the backend is unreachable and nothing is cached yet.
+  final ForecastRepository? fallback;
+
+  static const fresh = Duration(minutes: 10);
+  static const backoff = Duration(seconds: 45);
+  static const timeout = Duration(seconds: 6);
+
+  final Map<String, (DateTime, Json)> _mem = {};
+  final Map<String, Future<Json>> _inflight = {};
+  DateTime? _offlineUntil;
 
   static const _keys = ['windFrom', 'windTo', 'gustLimit', 'waveFrom', 'waveTo', 'minPeriod', 'maxWindBike',
       'comfortFrom', 'comfortTo', 'maxStorm', 'maxSummitWind', 'weight', 'climbPace', 'daylightMargin', 'runDistance',
@@ -65,41 +110,96 @@ class ApiRepository implements ForecastRepository {
     return '$path${path.contains('?') ? '&' : '?'}${Uri(queryParameters: q).query}';
   }
 
-  /// Used when the backend is unreachable, so the app still opens offline.
-  final ForecastRepository? fallback;
-
-  Future<Json> _get(String path) async {
-    final res = await _client
-        .get(Uri.parse('$baseUrl/v1/${_query(path)}'), headers: {if (token != null) 'Authorization': 'Bearer $token'})
-        .timeout(const Duration(seconds: 12));
-    if (res.statusCode != 200) throw http.ClientException('HTTP ${res.statusCode} for $path');
-    return jsonDecode(utf8.decode(res.bodyBytes)) as Json;
+  (DateTime, Json)? _cached(String key) {
+    final m = _mem[key];
+    if (m != null) return m;
+    final raw = prefs?.getString('cache:$key');
+    if (raw == null) return null;
+    try {
+      final j = jsonDecode(raw) as Json;
+      final entry = (DateTime.parse(j['at'] as String), j['body'] as Json);
+      _mem[key] = entry;
+      return entry;
+    } catch (_) {
+      return null;
+    }
   }
 
-  Future<T> _try<T>(Future<T> Function() remote, Future<T> Function(ForecastRepository) local) async {
+  void _store(String key, Json body) {
+    final now = DateTime.now();
+    _mem[key] = (now, body);
+    prefs?.setString('cache:$key', jsonEncode({'at': now.toIso8601String(), 'body': body}));
+  }
+
+  /// One network fetch per path at a time; fails fast while in back-off.
+  Future<Json> _fetch(String path) {
+    final key = _query(path);
+    return _inflight[key] ??= () async {
+      try {
+        if (_offlineUntil != null && DateTime.now().isBefore(_offlineUntil!)) {
+          throw http.ClientException('offline (backing off)');
+        }
+        final res = await _client
+            .get(Uri.parse('$baseUrl/v1/$key'), headers: {if (token != null) 'Authorization': 'Bearer $token'})
+            .timeout(timeout);
+        if (res.statusCode != 200) throw http.ClientException('HTTP ${res.statusCode} for $path');
+        final body = jsonDecode(utf8.decode(res.bodyBytes)) as Json;
+        _offlineUntil = null;
+        _store(key, body);
+        status.set(DataSource.live);
+        return body;
+      } catch (e) {
+        if (e is! http.ClientException || !e.message.startsWith('offline')) {
+          _offlineUntil = DateTime.now().add(backoff);
+        }
+        rethrow;
+      } finally {
+        _inflight.remove(key);
+      }
+    }();
+  }
+
+  Future<T> _load<T>(String path, T Function(Json) parse, Future<T> Function(ForecastRepository) local) async {
+    final key = _query(path);
+    final hit = _cached(key);
+    if (hit != null) {
+      final (at, body) = hit;
+      if (DateTime.now().difference(at) > fresh) {
+        status.set(DataSource.saved, at);
+        // Refresh quietly; screens reload from the cache when it lands.
+        _fetch(path).then((_) => status.bump(), onError: (_) {});
+      }
+      return parse(body);
+    }
     try {
-      return await remote();
+      return parse(await _fetch(path));
     } catch (_) {
       if (fallback == null) rethrow;
+      status.set(DataSource.sample);
       return local(fallback!);
     }
   }
 
+  /// Loads every screen in parallel (call at startup) so navigation is instant.
+  Future<void> prefetch() async {
+    await Future.wait([
+      today(), activities(), map(), spots(), spot('castelldefels'),
+      for (final s in sports) planner(s),
+    ].map((f) => f.then((_) {}, onError: (_) {})));
+  }
+
   @override
-  Future<TodayData> today() => _try(() async => TodayData.fromJson(await _get('today')), (f) => f.today());
+  Future<TodayData> today() => _load('today', TodayData.fromJson, (f) => f.today());
   @override
-  Future<ActivitiesData> activities() =>
-      _try(() async => ActivitiesData.fromJson(await _get('activities')), (f) => f.activities());
+  Future<ActivitiesData> activities() => _load('activities', ActivitiesData.fromJson, (f) => f.activities());
   @override
-  Future<PlannerData> planner(String sport, {int day = 0}) => _try(
-      () async => PlannerData.fromJson(await _get('planner/$sport?day=$day')), (f) => f.planner(sport, day: day));
+  Future<PlannerData> planner(String sport, {int day = 0}) =>
+      _load('planner/$sport?day=$day', PlannerData.fromJson, (f) => f.planner(sport, day: day));
   @override
-  Future<MapData> map() => _try(() async => MapData.fromJson(await _get('map')), (f) => f.map());
+  Future<MapData> map() => _load('map', MapData.fromJson, (f) => f.map());
   @override
-  Future<List<SpotSummary>> spots() => _try(
-      () async => [for (final s in (await _get('spots'))['spots'] as List) SpotSummary.fromJson(s as Json)],
-      (f) => f.spots());
+  Future<List<SpotSummary>> spots() => _load(
+      'spots', (j) => [for (final s in j['spots'] as List) SpotSummary.fromJson(s as Json)], (f) => f.spots());
   @override
-  Future<SpotDetail> spot(String id) =>
-      _try(() async => SpotDetail.fromJson(await _get('spots/$id')), (f) => f.spot(id));
+  Future<SpotDetail> spot(String id) => _load('spots/$id', SpotDetail.fromJson, (f) => f.spot(id));
 }
