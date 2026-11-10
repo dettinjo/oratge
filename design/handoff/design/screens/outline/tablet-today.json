@@ -87,7 +87,7 @@
              }
             },
             "Dry window before the 13 h showers, tailwind on the climb.",
-            "No rain for the next 2 hours"
+            "Dry for the next 2 hours (forecast)"
            ]
           }
          ]
@@ -166,7 +166,7 @@
          "component": "CurrentConditions",
          "props": {
           "place": "Barcelona",
-          "source": "Meteocat · Zoo station · 8 min ago",
+          "source": "Meteocat · el Raval station · 8 min ago",
           "sky": "partly",
           "temp": 18,
           "summary": "Mostly sunny",
@@ -502,7 +502,7 @@
         {
          "component": "Card",
          "children": [
-          "Share of 67 ensemble members (ECMWF ENS 51 + AROME-EPS 16) that agree with the blend within your thresholds.",
+          "Share of 51 ensemble members (ECMWF ENS) that agree with the blend within your thresholds.",
           "Today models agree within 2 kn / 1° 92 %",
           "Tue storm timing ±2 h 84 %",
           "Wed rain total 8–22 mm 71 %",
@@ -548,7 +548,7 @@
         {
          "component": "DataSources",
          "children": [
-          "Meteocat: XEMA station Zoo (live), municipal hourly forecast, 7-day forecast, warnings; sea temperature buoy"
+          "Meteocat: XEMA station el Raval (live), municipal hourly forecast, 7-day forecast, warnings; sea temperature buoy; confidence from the ECMWF ensemble (Open-Meteo)"
          ]
         }
        ]

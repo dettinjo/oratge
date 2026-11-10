@@ -160,7 +160,7 @@
         {
          "component": "Card",
          "children": [
-          "400 m/h · 8 kg pack 1290 m of ascent: summit at 10:45",
+          "400 m/h · 8 kg pack · GPX route 1290 m of ascent: summit at 10:45",
           "Max storm risk 20 % passes 20 % at 13 h: turn back by 12:00",
           "Max summit wind 30 kn 22 kn, gusts 34: gusts are over",
           "Crampons and ice axe snow above 2300 m is fine for you",
@@ -598,9 +598,9 @@
            "component": "Card",
            "children": [
             "model blend scale 10–40 kn",
-            "Meteocat WRF 3 km · 4×/day · weight 30 % 22",
+            "Meteocat municipal + beach forecast · weight 30 % 22",
             "AROME 1.3 km · Météo-France · weight 25 % 26",
-            "HARMONIE-AROME 2.5 km · AEMET · weight 20 % 24",
+            "ARPEGE 10 km · Météo-France · weight 20 % 24",
             "ICON-EU 7 km · DWD · weight 10 % 19",
             "ECMWF IFS 9 km · weight 10 % 21",
             "GFS 13 km · NOAA · weight 5 % 18",
@@ -641,7 +641,7 @@
           {
            "component": "Card",
            "children": [
-            "Solid line: ensemble median. Shading up to the 90th percentile, dashed line at the 10th, from 67 members (ECMWF ENS 51 + AROME-EPS 16). Bars: chance the condition holds.",
+            "Solid line: ensemble median. Shading up to the 90th percentile, dashed line at the 10th, from 51 members (ECMWF ENS). Bars: chance the condition holds.",
             {
              "component": "HourChart",
              "props": {
@@ -761,7 +761,7 @@
           {
            "component": "SectionLabel",
            "children": [
-            "Station check · Gósol"
+            "Station check · Gisclareny"
            ]
           },
           {
@@ -812,7 +812,7 @@
              }
             },
             "solid: measured at the station dashed: yesterday’s forecast",
-            "Yesterday’s blend against the XEMA station at Gósol, below the north face. Ridge wind is underforecast; today’s blend is corrected +2.6 kn.",
+            "Yesterday’s blend against the XEMA station at Gisclareny, west of the massif. Ridge wind is underforecast; today’s blend is corrected +2.6 kn.",
             {
              "component": "FactTile",
              "props": {
@@ -850,7 +850,7 @@
         {
          "component": "DataSources",
          "children": [
-          "mountain forecast Berguedà, XEMA stations Gósol and Saldes, lightning, snow level, warnings"
+          "Meteocat summit forecast Pedraforca and refugi forecast, XEMA stations Gisclareny and Guardiola de Berguedà, lightning, warnings; storm risk and snow level from Open-Meteo"
          ]
         }
        ]

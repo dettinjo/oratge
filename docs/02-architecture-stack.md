@@ -32,6 +32,21 @@
 | warnings (`smp/episodis-oberts`) | every 2nd day + on demand | 15 |
 | on-demand pool (2nd town, summit, daily 8-day) | user-triggered, cached 24 h | 25 |
 
+**Forecast source strategy (decided 2026-11-10, after the Claude Design handoff).**
+The free plan includes forecasts, but the designed planners need about 14 forecast calls a
+day (≈ 420/month): home hourly + daily, UV, warnings, two beaches × 3 dates, one summit ×
+3 dates, a second town. So:
+1. **Meteocat first, within the 100 calls:** home hourly + daily, warnings, and *today's*
+   beach and summit forecasts for the user's favourite spots. Shown as the "Meteocat" entry
+   in model agreement and preferred in the blend for today.
+2. **Open-Meteo for everything Meteocat doesn't publish or the quota can't cover:** gusts,
+   wave period / swell, hourly storm risk, freezing level, days 2–3 at secondary spots,
+   hourly beyond day 3, other models and the ECMWF ensemble (51 members).
+3. If Meteocat should cover every planner on its own: the paid professional plan, or a
+   second free key.
+Field-by-field mapping: `design/handoff/design/HANDOFF.md` → "Data sources per screen
+element", and `docs/04-design-data-fit.md`.
+
 **XEMA — 750 / month**
 | Job | Frequency | Calls/month |
 |---|---|---|
@@ -40,10 +55,16 @@
 That's over budget, so instead:
 - **Daytime:** `variables/mesurades/{30|50}/ultimes` (wind + gust, all stations at once)
   every 2 h 08–20 → 7×2 = 14/day → **420**.
-- **Night:** one `estacions/mesurades/{st}/{yesterday}` per key station → 2/day → **60**,
-  which back-fills the full 30-min record.
-- Temperature/RH (32/33) 2×/day → **120**. Buoys (92/93/96) 1×/day → **90**.
-- Total ≈ 690.
+- **Night:** one `estacions/mesurades/{st}/{yesterday}` per *station-check* station (the
+  design uses 5: el Raval, Viladecans, Sant Cugat, Gisclareny + the buoy) → 5/day →
+  **150**. This back-fills the full 30-min record that the station check and history need.
+- Temperature/RH (32/33) 1×/day → **60**. Buoys come with the `ultimes` calls for 92/93/96
+  only when a surf spot is saved → ≤ **90**.
+- Total ≈ 720.
+- **History backfill** (rideable-hours heatmap) only from leftover quota:
+  `variables/mesurades/{30|50}/{date}` covers all stations per day, so 2 calls per past
+  day. 6 months ≈ 360 calls, spread over a few months. The UI says "since <first archived
+  day>" until it's done.
 
 **XDDE — 250:** only when warnings or sky symbols indicate storms: hourly fetch for the
 current hour, capped at 8/day.

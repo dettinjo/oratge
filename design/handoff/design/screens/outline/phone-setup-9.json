@@ -80,7 +80,7 @@
     },
     {
      "el": "p",
-     "text": "Your details stay on this device. Every field is optional.",
+     "text": "Your details stay on this device. If you turn on alerts, only your alert thresholds are sent to the Oratge server. Every field is optional.",
      "children": null
     },
     {

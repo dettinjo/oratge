@@ -146,3 +146,17 @@ Options:
 8. Drop "Avoid crowds" or label it as a plain weekday rule.
 9. Station names must be placeholders filled from station metadata.
 10. Privacy line vs alerts: pick on-device alerts or say "alert thresholds are stored on the server".
+
+## 6. Applied (2026-11-10)
+All ten changes from §5 were applied to `design/handoff/` (outlines, artboards, planner-logic, READMEs):
+model rows → Meteocat finished forecast + Open-Meteo models (ARPEGE replaces HARMONIE, MFWAM and DWD EWAM
+replace Copernicus MED and Puertos del Estado); ensemble 67 → 51 ECMWF members; "Dry for the next 2 hours
+(forecast)"; gusts "last 30 min"; radar removed; history "archived since setup"; climb/ascent marked
+"GPX route"; "Avoid crowds" → the wave range from setup; stations → el Raval, Viladecans, Gisclareny,
+Guardiola de Berguedà; privacy line mentions server-side alert thresholds. HANDOFF.md now has a
+"Data sources per screen element" table. Source strategy: docs/02 §2.
+
+Still unverified until there's an API key: which buoys exist, whether municipal hourly has rain
+probability and feels-like, whether the summit forecast has snow level, and Open-Meteo availability of
+DWD EWAM and AROME for all of Catalonia. The `react-source/` bundle in the handoff still has the old
+sample text; it's reference code, not shown to users.

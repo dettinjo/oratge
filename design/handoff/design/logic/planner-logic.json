@@ -70,7 +70,7 @@
   "ratingTotal": "4.4",
   "rating": 4,
   "stationCheck": {
-   "title": "Station check · Castelldefels",
+   "title": "Station check · Viladecans",
    "note": "Yesterday’s blend against the XEMA station. The SW sea breeze runs 1.8 kn stronger than modelled here, so today’s blend is corrected by that amount.",
    "tiles": [
     {
@@ -209,8 +209,8 @@
     "effect": "window ends when it drops below 8 s at 16 h"
    },
    {
-    "fromProfile": "Avoid crowds",
-    "effect": "weekday morning: quieter than Sat"
+    "fromProfile": "Waves 0.6–1.8 m",
+    "effect": "1.1 m sits mid-range"
    },
    {
     "fromProfile": "Feels the cold",
@@ -315,7 +315,7 @@
     "effect": "damp roads before 09 h lower the rating"
    },
    {
-    "fromProfile": "FTP 240 W · 11.5 kg",
+    "fromProfile": "FTP 240 W · 11.5 kg · GPX route",
     "effect": "Tibidabo climb in about 34 min"
    },
    {
@@ -398,8 +398,8 @@
   "ratingTotal": "4.9",
   "rating": 5,
   "stationCheck": {
-   "title": "Station check · Zoo",
-   "note": "Yesterday’s blend against the XEMA Zoo station on the seafront.",
+   "title": "Station check · el Raval",
+   "note": "Yesterday’s blend against the XEMA station Barcelona – el Raval.",
    "tiles": [
     {
      "label": "Bias",
@@ -508,8 +508,8 @@
   "ratingTotal": "2.4",
   "rating": 2,
   "stationCheck": {
-   "title": "Station check · Gósol",
-   "note": "Yesterday’s blend against the XEMA station at Gósol, below the north face. Ridge wind is underforecast; today’s blend is corrected +2.6 kn.",
+   "title": "Station check · Gisclareny",
+   "note": "Yesterday’s blend against the XEMA station at Gisclareny, west of the massif. Ridge wind is underforecast; today’s blend is corrected +2.6 kn.",
    "tiles": [
     {
      "label": "Bias",
@@ -531,7 +531,7 @@
   },
   "tunedToYou": [
    {
-    "fromProfile": "400 m/h · 8 kg pack",
+    "fromProfile": "400 m/h · 8 kg pack · GPX route",
     "effect": "1290 m of ascent: summit at 10:45"
    },
    {

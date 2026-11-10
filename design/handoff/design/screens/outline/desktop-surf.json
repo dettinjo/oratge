@@ -243,7 +243,7 @@
          "children": [
           "48 l mid-length 1.1 m at 9 s is in your sweet spot",
           "Minimum period 8 s window ends when it drops below 8 s at 16 h",
-          "Avoid crowds weekday morning: quieter than Sat",
+          "Waves 0.6–1.8 m 1.1 m sits mid-range",
           "Feels the cold 3/2 fine; 4/3 if you stay past 11 h",
           {
            "link": "desktop-setup-5.dc.html",
@@ -687,9 +687,9 @@
            "component": "Card",
            "children": [
             "model blend scale 0.4–1.8 m",
-            "Meteocat SWAN coastal 1 km · weight 35 % 1.1",
-            "Copernicus MED 4 km waves · weight 25 % 1.2",
-            "Puertos del Estado buoy-assimilated · weight 20 % 1.0",
+            "Meteocat beach forecast · weight 35 % 1.1",
+            "MFWAM Météo-France waves · weight 25 % 1.2",
+            "DWD EWAM 5 km · DWD · weight 20 % 1.0",
             "ECMWF WAM 9 km · weight 15 % 0.9",
             "GFS WaveWatch III 25 km · weight 5 % 0.8",
             "Oratge blend 1.1 m Model spread 0.4 m Coastal models agree; global models miss the short-fetch E swell."
@@ -729,7 +729,7 @@
           {
            "component": "Card",
            "children": [
-            "Solid line: ensemble median. Shading up to the 90th percentile, dashed line at the 10th, from 67 members (ECMWF ENS 51 + AROME-EPS 16). Bars: chance the condition holds.",
+            "Solid line: ensemble median. Shading up to the 90th percentile, dashed line at the 10th, from 51 members (ECMWF ENS). Bars: chance the condition holds.",
             {
              "component": "HourChart",
              "props": {
@@ -937,7 +937,7 @@
         {
          "component": "DataSources",
          "children": [
-          "beach forecast Ocata (waves, period, water), XEMA wind, buoy Barcelona coast, municipal hourly, warnings"
+          "beach forecast Ocata (waves, direction, water), XEMA wind, buoy Barcelona coast, municipal hourly, warnings; swell period from Open-Meteo Marine"
          ]
         }
        ]

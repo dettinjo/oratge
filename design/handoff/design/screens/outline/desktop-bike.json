@@ -261,7 +261,7 @@
          "component": "Card",
          "children": [
           "Gravel · 40 mm, no mudguards damp roads before 09 h lower the rating",
-          "FTP 240 W · 11.5 kg Tibidabo climb in about 34 min",
+          "FTP 240 W · 11.5 kg · GPX route Tibidabo climb in about 34 min",
           "Max wind 20 kn gusts stay at 14 kn",
           "Lights fitted an evening window after 17 h would count",
           {
@@ -609,9 +609,9 @@
            "component": "Card",
            "children": [
             "model blend scale 0–4 mm",
-            "Meteocat WRF 3 km · 4×/day · weight 30 % 1.8",
+            "Meteocat municipal + beach forecast · weight 30 % 1.8",
             "AROME 1.3 km · Météo-France · weight 25 % 2.4",
-            "HARMONIE-AROME 2.5 km · AEMET · weight 20 % 2.1",
+            "ARPEGE 10 km · Météo-France · weight 20 % 2.1",
             "ICON-EU 7 km · DWD · weight 10 % 1.2",
             "ECMWF IFS 9 km · weight 10 % 1.5",
             "GFS 13 km · NOAA · weight 5 % 0.6",
@@ -652,7 +652,7 @@
           {
            "component": "Card",
            "children": [
-            "Solid line: ensemble median. Shading up to the 90th percentile, dashed line at the 10th, from 67 members (ECMWF ENS 51 + AROME-EPS 16). Bars: chance the condition holds.",
+            "Solid line: ensemble median. Shading up to the 90th percentile, dashed line at the 10th, from 51 members (ECMWF ENS). Bars: chance the condition holds.",
             {
              "component": "HourChart",
              "props": {
@@ -986,7 +986,7 @@
         {
          "component": "DataSources",
          "children": [
-          "municipal hourly forecast Barcelona and Sant Cugat, XEMA wind and rain, radar, UV, warnings"
+          "municipal hourly forecast Barcelona and Sant Cugat, XEMA wind and rain, UV, warnings; gusts and models from Open-Meteo"
          ]
         }
        ]

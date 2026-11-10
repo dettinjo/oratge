@@ -41,7 +41,27 @@ Tablet and desktop use the same blocks re-flowed into two columns; compare `tabl
 - **Responsive breakpoints:** < 600 phone layout, 600–1023 tablet, ≥ 1024 desktop. Use `LayoutBuilder`; the outlines show which blocks sit side by side.
 - **Widgets:** one Flutter widget per design-system component, same name prefixed `Og` (`OgFactTile`, `OgHourChart`, …), props from the `.d.ts`. Charts (`HourChart`, `WindBand`, `WaveBars`, `TrendLine`, `MonthBars`, `CalendarHeatmap`, `AltitudeProfile`, `RouteWind`, `SwellWindow`, `WindCompass`, `NextHours`) are `CustomPainter`s ported from `react-source/` — their geometry is in the JSX. Weather glyphs (`WeatherIcon`) are SVG paths in the bundle; port to `CustomPainter` or export them as SVGs for `flutter_svg`.
 - **State:** a profile/settings model (setup flow fields, see `screens/outline/phone-setup-*.json` inputs) persisted locally; forecasts behind a repository interface with a sample-data implementation first (all values in the outlines are sample data).
-- **Data:** Meteocat API (XEMA stations, municipal and beach forecasts, warnings) plus model data for the analysis sections. Start with the sample data; wire the API after the UI is done.
+- **Data:** the app talks only to the Oratge backend, never to Meteocat or Open-Meteo directly (API key secrecy and the Meteocat quota). Start with the sample data; wire the API after the UI is done. Which source feeds which field is in the next section.
+
+## Data sources per screen element
+
+Meteocat stays the primary, attributed source. Open-Meteo (free for non-commercial use) fills only the fields Meteocat does not publish, plus the analysis sections. Full analysis: `docs/04-design-data-fit.md` in the repo.
+
+| Element | Source |
+|---|---|
+| Live readings, gusts (last 30 min), pressure, rain observed, sea temperature, buoys | Meteocat XEMA stations (30-min resolution) |
+| Today, 7 days, hourly temp/feels/rain/wind/sky, UV | Meteocat municipal hourly + daily forecast, UV forecast |
+| Wing/surf hourly wind, wave height + direction, water temperature | Meteocat beach forecast |
+| Summit/hut forecast (hike) | Meteocat Pyrenees summit + refugi forecast |
+| Warnings, pre-warnings, lightning | Meteocat warnings (SMP), XDDE |
+| **Gust forecast**, **wave period / swell**, **hourly storm risk**, **snow level**, hourly beyond day 3 | Open-Meteo (forecast, marine) |
+| Model agreement | "Meteocat" = Meteocat's finished forecast (no raw WRF/SWAN in the API); other rows = Open-Meteo models (AROME, ARPEGE, ICON-EU, ECMWF IFS, GFS; waves: MFWAM, DWD EWAM, ECMWF WAM, GFS wave) |
+| Ensemble, forecast confidence | Open-Meteo ensemble, ECMWF ENS 51 members |
+| Station check, rideable-hours history | Oratge backend archive (forecasts + XEMA observations, built up from setup day) |
+| Climb time, ascent | the spot's GPX route (elevation), not weather data |
+| Sunrise, sunset, last light | computed astronomically |
+
+Station names are never hard-coded: they come from XEMA station metadata (sample data uses el Raval, Viladecans, Gisclareny, Guardiola de Berguedà, which exist). Alerts are evaluated on the server, so only alert thresholds leave the device.
 
 ## Rules that must survive implementation
 

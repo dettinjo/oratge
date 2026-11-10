@@ -7,7 +7,7 @@ Today-screen hero: place, source and age, big temperature, sky, feels-like, rang
 ```ts
 interface CurrentConditionsProps {
   place: string;
-  /** Source line, e.g. "Meteocat · Zoo station · 8 min ago". */
+  /** Source line, e.g. "Meteocat · el Raval station · 8 min ago". */
   source: string;
   sky: "sun" | "partly" | "cloud" | "rain" | "storm" | "bolt" | "wind" | "wave" | "heat" | "snow" | "uv" | "night" | "fog";
   /** Current temperature °C. */
@@ -27,7 +27,7 @@ interface CurrentConditionsProps {
 ### Barcelona
 
 ```jsx
-() => <div style={{ width: 350 }}><CurrentConditions place="Barcelona" source="Meteocat · Zoo station · 8 min ago" sky="partly" temp={18} summary="Mostly sunny" feels={17} min={11} max={21} wind="SW 14 kn · gusts 21" /></div>
+() => <div style={{ width: 350 }}><CurrentConditions place="Barcelona" source="Meteocat · el Raval station · 8 min ago" sky="partly" temp={18} summary="Mostly sunny" feels={17} min={11} max={21} wind="SW 14 kn · gusts 21" /></div>
 ```
 
 ### RainyMountain

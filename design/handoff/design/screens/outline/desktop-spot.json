@@ -128,7 +128,7 @@
           "size": "lg",
           "label": "Gusts",
           "value": "21 kn",
-          "sub": "last 10 min",
+          "sub": "last 30 min",
           "accent": "wind"
          }
         },
@@ -589,7 +589,7 @@
         {
          "component": "DataSources",
          "children": [
-          "XEMA station Castelldefels (live wind), beach forecast, 6 years of station history"
+          "XEMA station Viladecans (live wind), beach forecast, station history archived since setup"
          ]
         }
        ]

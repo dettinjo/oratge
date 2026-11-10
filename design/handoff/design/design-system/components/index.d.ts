@@ -261,7 +261,7 @@ export declare const ChipGroup: React.ComponentType<ChipGroupProps>;
  */
 export interface CurrentConditionsProps {
   place: string;
-  /** Source line, e.g. "Meteocat · Zoo station · 8 min ago". */
+  /** Source line, e.g. "Meteocat · el Raval station · 8 min ago". */
   source: string;
   sky: "sun" | "partly" | "cloud" | "rain" | "storm" | "bolt" | "wind" | "wave" | "heat" | "snow" | "uv" | "night" | "fog";
   /** Current temperature °C. */

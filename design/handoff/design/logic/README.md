@@ -9,4 +9,4 @@
 - `takeaway` — the sentence shown above the hour chart and used as its accessibility label.
 - `analysisSummary` — the chips shown on the collapsed "How this forecast was made" section.
 
-The ensemble chart shows median (line), 90th percentile (shading) and 10th percentile (dashed) from 67 members (ECMWF ENS 51 + AROME-EPS 16), plus bars for the chance the user's condition holds.
+The ensemble chart shows median (line), 90th percentile (shading) and 10th percentile (dashed) from 51 members (ECMWF ENS), plus bars for the chance the user's condition holds.

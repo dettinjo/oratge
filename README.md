@@ -7,6 +7,8 @@ foiling, surfing, biking, running and hiking.
 - [02 — Architecture and stack](docs/02-architecture-stack.md): backend cache + quota
   governor on the homelab, Flutter app
 - [03 — Design](docs/03-design.md): principles, screens, components, activity scoring
+- [04 — Design vs data](docs/04-design-data-fit.md): Claude Design handoff checked against Meteocat
+- Claude Design handoff (adapted): `design/handoff/design/HANDOFF.md`
 
 ## Roadmap
 | Phase | Deliverable | Done when |
@@ -20,7 +22,7 @@ foiling, surfing, biking, running and hiking.
 | 6 | Polish: i18n (ca/es/en), accessibility, Play Store internal track; TestFlight once an Apple developer account exists | |
 
 ## Open decisions
-1. Allow Open-Meteo to fill Meteocat's gaps (wave period/swell, gust forecast, >3 days)?
+1. ~~Open-Meteo for gaps?~~ Decided 2026-11-10: Meteocat first within its quota; Open-Meteo for gusts, swell period, storm risk, freezing level, models/ensemble, and planners the quota can't cover (docs/02 §2).
 2. Host the backend on the homelab (Coolify), public over HTTPS?
 3. Home location and first spots (e.g. Barcelona, a flatwater wing spot, a surf beach)?
 4. Personal use only, or Play Store later? Commercial use needs permission from Meteocat.

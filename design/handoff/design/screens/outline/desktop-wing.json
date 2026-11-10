@@ -947,9 +947,9 @@
            "component": "Card",
            "children": [
             "model blend scale 8–26 kn",
-            "Meteocat WRF 3 km · 4×/day · weight 30 % 17",
+            "Meteocat municipal + beach forecast · weight 30 % 17",
             "AROME 1.3 km · Météo-France · weight 25 % 19",
-            "HARMONIE-AROME 2.5 km · AEMET · weight 20 % 18",
+            "ARPEGE 10 km · Météo-France · weight 20 % 18",
             "ICON-EU 7 km · DWD · weight 10 % 16",
             "ECMWF IFS 9 km · weight 10 % 15",
             "GFS 13 km · NOAA · weight 5 % 13",
@@ -991,7 +991,7 @@
           {
            "component": "Card",
            "children": [
-            "Solid line: ensemble median. Shading up to the 90th percentile, dashed line at the 10th, from 67 members (ECMWF ENS 51 + AROME-EPS 16). Bars: chance the condition holds.",
+            "Solid line: ensemble median. Shading up to the 90th percentile, dashed line at the 10th, from 51 members (ECMWF ENS). Bars: chance the condition holds.",
             {
              "component": "HourChart",
              "props": {
@@ -1114,7 +1114,7 @@
           {
            "component": "SectionLabel",
            "children": [
-            "Station check · Castelldefels"
+            "Station check · Viladecans"
            ]
           },
           {
