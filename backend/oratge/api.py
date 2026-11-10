@@ -8,6 +8,9 @@ import logging
 from fastapi import Depends, FastAPI, Header, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 
+import os
+
+from .archive import start_scheduler
 from .build import Builder
 from .config import settings
 from .sources import Sources
@@ -46,6 +49,12 @@ def builder(request: Request) -> Builder:
     if 'cold' in q:
         p['cold'] = q['cold']
     return Builder(_sources, p)
+
+
+@app.on_event('startup')
+def _archive():
+    if os.environ.get('ORATGE_ARCHIVE', '1') == '1':
+        start_scheduler(lambda: Builder(_sources))
 
 
 @app.get('/health')

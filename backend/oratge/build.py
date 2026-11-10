@@ -579,8 +579,28 @@ class Builder:
                'model': {'title': f'Model agreement · {var.split("_")[0]} at {hh(hour.t.hour)}', 'unit': unit, 'scale': [round(lo, 1), round(hi, 1)],
                          'blend': blend, 'spread': f'{spread:.1f} {unit}', 'verdict': agree, 'rows': rows},
                'factors': [{'factor': f.name, 'observed': f.observed, 'weight': f.weight, 'score': f.score, 'accent': f.accent} for f in peak.factors],
-               'total': f'{peak.total}', 'rating': peak.rating, 'ensemble': ens, 'station': None}
+               'total': f'{peak.total}', 'rating': peak.rating, 'ensemble': ens,
+               'station': self.station(sport, spot)}
+        if out['station']:
+            out['summary'][2] = out['station']['tiles'][0]['value'] + ' station bias'
         return conf, out
+
+    def station(self, sport, spot) -> dict | None:
+        from .archive import station_check
+        sid = SPORT_SPOT[sport]
+
+        def rate_obs(ts, value):
+            # Re-rate the archived forecast hour with the measured value swapped in.
+            fc = dict(self.src.store.archived('fc', sid, ts))[ts]
+            h = E.Hour(t=datetime.fromisoformat(ts), temp=value if sport in ('bike', 'run') else fc['temp'], feels=fc['temp'],
+                       rh=60, precip=0, pprob=0, code=1, wind=value if sport not in ('bike', 'run') else fc['wind'],
+                       wdir=fc['wdir'], gust=fc['gust'], uv=2, cape=0, freezing=3000, pressure=1015, cloud=30, daylight=True)
+            return E.rate(sport, h, spot, self.p).rating
+        try:
+            return station_check(self.src.store, sport, sid, today_local(), rate_obs)
+        except Exception as e:
+            log.info('station check unavailable: %s', e)
+            return None
 
     def ensemble_chart(self, sport, spot, rated) -> dict | None:
         var = {'wing': 'wind_speed_10m', 'hike': 'wind_speed_10m', 'surf': 'wind_speed_10m', 'bike': 'temperature_2m', 'run': 'temperature_2m'}[sport]
