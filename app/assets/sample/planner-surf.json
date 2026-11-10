@@ -394,7 +394,8 @@
      "side-on",
      "side",
      "off"
-    ]
+    ],
+    "offshoreGood": true
    },
    {
     "type": "numbers",

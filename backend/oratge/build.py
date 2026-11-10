@@ -385,7 +385,7 @@ class Builder:
             rows += [{'type': 'bars', 'label': 'Waves', 'unit': 'm', 'accent': 'water', 'max': 2, 'labelEvery': 2, 'decimals': 1, 'values': [round(h.swell or h.wave or 0, 1) for h in hs], 'height': 60},
                      {'type': 'numbers', 'label': 'Period', 'unit': 's', 'values': [round(h.swell_period or h.period or 0) for h in hs], 'emphasizeAbove': float(self.p['minPeriod']) - 0.5},
                      {'type': 'arrows', 'label': 'Wind', 'unit': 'vs shore', 'accent': 'wind', 'directions': [round(h.wdir) for h in hs],
-                      'shore': [E.shore_relation(h.wdir, spot['shore_facing']) for h in hs]},
+                      'shore': [E.shore_relation(h.wdir, spot['shore_facing']) for h in hs], 'offshoreGood': True},
                      {'type': 'numbers', 'label': 'Speed', 'unit': 'kn', 'values': [round(h.wind) for h in hs]},
                      {'type': 'numbers', 'label': 'Air', 'unit': '°C', 'suffix': '°', 'values': [round(h.temp) for h in hs]}]
         elif sport == 'bike':

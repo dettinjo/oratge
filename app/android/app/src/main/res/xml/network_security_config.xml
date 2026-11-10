@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Cleartext only for the Oratge backend on the home server's Tailscale address (WireGuard-encrypted link). -->
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">100.96.0.121</domain>
+    </domain-config>
+</network-security-config>

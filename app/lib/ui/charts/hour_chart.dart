@@ -27,6 +27,7 @@ class HourRow {
     this.decimals = 0,
     this.highlight,
     this.shore,
+    this.offshoreGood = false,
     this.every,
     this.suffix = '',
     this.emphasizeAbove,
@@ -53,6 +54,9 @@ class HourRow {
   final int decimals;
   final List<int>? highlight;
   final List<String>? shore;
+
+  /// Surf: offshore wind is what you want, so don't flag it as a warning.
+  final bool offshoreGood;
   final int? every;
   final String suffix;
   final num? emphasizeAbove;
@@ -83,6 +87,7 @@ class HourRow {
       decimals: (j['decimals'] as num?)?.toInt() ?? 0,
       highlight: (j['highlight'] as List?)?.map((e) => (e as num).toInt()).toList(),
       shore: (j['shore'] as List?)?.map((e) => e as String).toList(),
+      offshoreGood: j['offshoreGood'] == true,
       every: (j['every'] as num?)?.toInt(),
       suffix: j['suffix'] as String? ?? '',
       emphasizeAbove: j['emphasizeAbove'] as num?,
@@ -291,7 +296,9 @@ class _HourChartPainter extends CustomPainter {
           if (r.shore != null && i < r.shore!.length && i % 2 == 0) {
             final t = r.shore![i];
             ogText(canvas, t == 'side-on' ? 'S-on' : t, cx(i), y + h - 3,
-                color: t == 'off' ? c.warnRed : c.text2, weight: t == 'off' ? FontWeight.w700 : FontWeight.w400, align: 0.5);
+                color: t == 'off' && !r.offshoreGood ? c.warnRed : (t == 'off' ? c.text : c.text2),
+                weight: t == 'off' ? FontWeight.w700 : FontWeight.w400,
+                align: 0.5);
           }
         }
       case 'numbers':

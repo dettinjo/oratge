@@ -1,0 +1,14 @@
+services:
+  oratge-api:
+    image: oratge-backend:1
+    pull_policy: never
+    restart: unless-stopped
+    environment:
+      - ORATGE_TOKEN=${ORATGE_TOKEN}
+      - METEOCAT_API_KEY=${METEOCAT_API_KEY:-}
+    volumes:
+      - oratge-data:/data
+    ports:
+      - "100.96.0.121:8199:8000"
+volumes:
+  oratge-data:

@@ -103,6 +103,10 @@ def planner(sport, name):
         if lab == 'Hour by hour':
             hc = comps(s, 'HourChart')[0]['props']
             res['takeaway'] = [c['text'] for c in s['children'] if isinstance(c, dict) and c.get('el') == 'p'][0]
+            if sport == 'surf':
+                for r in hc['rows']:
+                    if r.get('type') == 'arrows' and r.get('shore'):
+                        r['offshoreGood'] = True
             res['hourChart'] = hc
             continue
         if lab == 'Tuned to you':
