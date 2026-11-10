@@ -559,8 +559,9 @@ class _AltitudePainter extends CustomPainter {
       canvas.drawCircle(pts[i], 3.5, fillPaint(c.heat));
       final p = w.points[i];
       if (p.label != null) {
-        final neg = p.temp < 0;
-        ogText(canvas, '${p.label} ${p.temp}°', pts[i].dx + (neg ? -8 : 8), pts[i].dy + 4, color: c.text, align: neg ? 1 : 0);
+        // Labels sit right of the point; the top (summit) label goes above it to clear the altitude axis.
+        final top = i == w.points.length - 1;
+        ogText(canvas, '${p.label} ${p.temp}°', pts[i].dx + (top ? 6 : 8), pts[i].dy + (top ? -9 : 4), color: c.text);
       }
     }
   }

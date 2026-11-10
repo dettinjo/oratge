@@ -155,28 +155,36 @@ class _AnalysisSection extends StatelessWidget {
               _ModelAgreement(a),
               OgSectionLabel('Why ${a.rating} of 5'),
               _Factors(a),
-              OgSectionLabel(a.ensembleLabel),
-              OgCard(
-                raised: true,
-                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text(a.ensembleIntro, style: OgText.src.copyWith(color: c.text2)),
-                  const SizedBox(height: 10),
-                  hourChartFromJson(a.ensembleChart, semanticLabel: a.ensembleLabel),
-                ]),
-              ),
-              OgSectionLabel(a.stationTitle),
-              OgCard(
-                raised: true,
-                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  trendFromJson(a.stationTrend, semanticLabel: a.stationNote),
-                  const SizedBox(height: 6),
-                  Text(a.stationLegend, style: OgText.src.copyWith(color: c.text2)),
-                  const SizedBox(height: 6),
-                  Text(a.stationNote, style: OgText.chip.copyWith(color: c.text, fontSize: 13)),
-                  const SizedBox(height: 10),
-                  factsGrid(a.stationTiles, columns: 3),
-                ]),
-              ),
+              if (a.ensembleChart != null) ...[
+                OgSectionLabel(a.ensembleLabel ?? 'Ensemble'),
+                OgCard(
+                  raised: true,
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text(a.ensembleIntro ?? '', style: OgText.src.copyWith(color: c.text2)),
+                    const SizedBox(height: 10),
+                    hourChartFromJson(a.ensembleChart!, semanticLabel: a.ensembleLabel),
+                  ]),
+                ),
+              ],
+              if (a.stationTrend != null) ...[
+                OgSectionLabel(a.stationTitle ?? 'Station check'),
+                OgCard(
+                  raised: true,
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    trendFromJson(a.stationTrend!, semanticLabel: a.stationNote),
+                    const SizedBox(height: 6),
+                    Text(a.stationLegend ?? '', style: OgText.src.copyWith(color: c.text2)),
+                    const SizedBox(height: 6),
+                    Text(a.stationNote ?? '', style: OgText.chip.copyWith(color: c.text, fontSize: 13)),
+                    const SizedBox(height: 10),
+                    factsGrid(a.stationTiles, columns: 3),
+                  ]),
+                ),
+              ] else ...[
+                const OgSectionLabel('Station check'),
+                Text('Starts once Oratge has archived 7 days of forecasts and station readings for this spot.',
+                    style: OgText.chip.copyWith(color: c.text2, fontSize: 13)),
+              ],
             ],
           ),
         ),

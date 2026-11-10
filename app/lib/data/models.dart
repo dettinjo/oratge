@@ -130,23 +130,23 @@ class Analysis {
         factors = _list(j['factors'], RatingFactor.fromJson),
         total = '${j['total']}',
         rating = (j['rating'] as num).toInt(),
-        ensembleLabel = (j['ensemble'] as Json)['label'] as String,
-        ensembleIntro = (j['ensemble'] as Json)['intro'] as String,
-        ensembleChart = (j['ensemble'] as Json)['chart'] as Json,
-        stationTitle = (j['station'] as Json)['title'] as String,
-        stationTrend = (j['station'] as Json)['trend'] as Json,
-        stationLegend = (j['station'] as Json)['legend'] as String,
-        stationNote = (j['station'] as Json)['note'] as String,
-        stationTiles = _list((j['station'] as Json)['tiles'], Fact.fromJson);
+        ensembleLabel = (j['ensemble'] as Json?)?['label'] as String?,
+        ensembleIntro = (j['ensemble'] as Json?)?['intro'] as String?,
+        ensembleChart = (j['ensemble'] as Json?)?['chart'] as Json?,
+        stationTitle = (j['station'] as Json?)?['title'] as String?,
+        stationTrend = (j['station'] as Json?)?['trend'] as Json?,
+        stationLegend = (j['station'] as Json?)?['legend'] as String?,
+        stationNote = (j['station'] as Json?)?['note'] as String?,
+        stationTiles = _list((j['station'] as Json?)?['tiles'], Fact.fromJson);
   final List<String> summary;
-  final String modelTitle, unit, spread, verdict, total, ensembleLabel, ensembleIntro;
-  final String stationTitle, stationLegend, stationNote;
+  final String modelTitle, unit, spread, verdict, total;
+  final String? ensembleLabel, ensembleIntro, stationTitle, stationLegend, stationNote;
   final List<num> scale;
   final num blend;
   final List<ModelRow> models;
   final List<RatingFactor> factors;
   final int rating;
-  final Json ensembleChart, stationTrend;
+  final Json? ensembleChart, stationTrend;
   final List<Fact> stationTiles;
 }
 

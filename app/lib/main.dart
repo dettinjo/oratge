@@ -12,7 +12,8 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final state = await AppState.load();
   if (_api.isNotEmpty) {
-    state.repository = ApiRepository(_api, token: _token.isEmpty ? null : _token, fallback: SampleRepository());
+    state.repository = ApiRepository(_api,
+        token: _token.isEmpty ? null : _token, fallback: SampleRepository(), profile: () => state.profile);
   }
   runApp(OratgeApp(state: state));
 }

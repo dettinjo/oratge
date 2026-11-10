@@ -42,18 +42,35 @@ class SampleRepository implements ForecastRepository {
 
 /// The Oratge backend (FastAPI). Same JSON shapes as the sample data, under /v1.
 class ApiRepository implements ForecastRepository {
-  ApiRepository(this.baseUrl, {this.token, http.Client? client, this.fallback})
+  ApiRepository(this.baseUrl, {this.token, http.Client? client, this.fallback, this.profile})
       : _client = client ?? http.Client();
   final String baseUrl;
   final String? token;
   final http.Client _client;
+
+  /// Returns the user's ranges (sent with each request, never stored server-side).
+  final Map<String, dynamic> Function()? profile;
+
+  static const _keys = ['windFrom', 'windTo', 'gustLimit', 'waveFrom', 'waveTo', 'minPeriod', 'maxWindBike',
+      'comfortFrom', 'comfortTo', 'maxStorm', 'maxSummitWind', 'weight', 'climbPace', 'daylightMargin', 'runDistance',
+      'mudguards', 'lights', 'lightRainOk', 'crampons', 'cold', 'directions'];
+
+  String _query(String path) {
+    final p = profile?.call() ?? const {};
+    final q = <String, String>{
+      for (final k in _keys)
+        if (p[k] != null) k: p[k] is List ? (p[k] as List).join(',') : '${p[k]}',
+    };
+    if (q.isEmpty) return path;
+    return '$path${path.contains('?') ? '&' : '?'}${Uri(queryParameters: q).query}';
+  }
 
   /// Used when the backend is unreachable, so the app still opens offline.
   final ForecastRepository? fallback;
 
   Future<Json> _get(String path) async {
     final res = await _client
-        .get(Uri.parse('$baseUrl/v1/$path'), headers: {if (token != null) 'Authorization': 'Bearer $token'})
+        .get(Uri.parse('$baseUrl/v1/${_query(path)}'), headers: {if (token != null) 'Authorization': 'Bearer $token'})
         .timeout(const Duration(seconds: 12));
     if (res.statusCode != 200) throw http.ClientException('HTTP ${res.statusCode} for $path');
     return jsonDecode(utf8.decode(res.bodyBytes)) as Json;

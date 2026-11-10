@@ -132,7 +132,7 @@ const setupSteps = <SetupStep>[
     ]),
     FieldGroup('Privacy', [FieldDef('sync', 'Sync between my devices', kind: FieldKind.toggle, hint: 'End-to-end encrypted')]),
   ], changes:
-      'Your details stay on this device. If you turn on alerts, only your alert thresholds are sent to the Oratge server. Every field is optional.'),
+      'Your details stay on this device. Forecast requests include your sport ranges so ratings fit you; the Oratge server uses them for that answer and doesn’t store them. Every field is optional.'),
 ];
 
 /// Defaults = the sample profile from the design (Alex in Barcelona).
