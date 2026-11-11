@@ -19,7 +19,7 @@ foiling, surfing, biking, running and hiking.
 | **Install** | `oratge-0.2-arm64.apk` in Google Drive → `Oratge/`. Phone must be on Tailscale to reach the backend; otherwise the app falls back to bundled sample data. |
 
 ## Build and deploy
-- App: `app/tool/build_apk.sh` (token from Infisical) · web: `flutter build web --dart-define=ORATGE_API=…`
+- App: `app/tool/build_apk.sh` (token from Infisical) · Mac: `app/tool/build_macos.sh` on a Mac with Xcode, or the `macOS app` GitHub Actions workflow (needs the repo on GitHub and an `ORATGE_TOKEN` secret) · web: `flutter build web --dart-define=ORATGE_API=…`
 - Sample data from the design: `python3 app/tool/gen_sample.py` (same JSON contract the backend serves)
 - Backend: `backend/deploy.sh <tag>` (tests → local image → Coolify PATCH + deploy → health check)
 
