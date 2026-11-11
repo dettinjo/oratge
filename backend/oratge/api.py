@@ -18,7 +18,7 @@ from . import build as build_mod
 from .build import Builder
 from .config import settings
 from .sources import Sources
-from .spots import SPORT_SPOT, SPOTS
+from .spots import HOME, SPORT_SPOT, SPOTS
 from .store import Store
 
 logging.basicConfig(level=logging.INFO)
@@ -76,6 +76,14 @@ def today(lat: float | None = None, lon: float | None = None, place: str | None 
             raise HTTPException(400, 'Oratge covers Catalonia')
         return b.today({'name': place or f'{lat:.2f}, {lon:.2f}', 'lat': lat, 'lon': lon})
     return b.today()
+
+
+@app.get('/v1/hourly', dependencies=[Depends(auth)])
+def hourly(lat: float | None = None, lon: float | None = None, place: str | None = None, b: Builder = Depends(builder)):
+    if lat is not None and lon is not None and not (40.0 <= lat <= 43.5 and -0.5 <= lon <= 3.6):
+        raise HTTPException(422, 'Oratge covers Catalonia only')
+    p = HOME if lat is None or lon is None else {'name': place or f'{lat:.2f}, {lon:.2f}', 'lat': lat, 'lon': lon}
+    return build_mod.hourly(b, p)
 
 
 @app.get('/v1/places', dependencies=[Depends(auth)])

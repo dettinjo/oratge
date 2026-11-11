@@ -9,7 +9,8 @@ from zoneinfo import ZoneInfo
 from . import engine as E
 from .config import settings
 from .sources import WAVE_MODELS, WEATHER_MODELS, Sources
-from .spots import COMARCA_NAMES, HOME, SPORT_SPOT, SPOTS, merge_wind
+from .meteocat import Meteocat
+from .spots import COMARCA_NAMES, HOME, SPORT_SPOT, SPOTS
 
 log = logging.getLogger('oratge')
 TZ = ZoneInfo(settings.tz)
@@ -163,8 +164,8 @@ class Builder:
         best = max(sports, key=lambda s: (s['rating'], s['window'] != '—'))
         nxt = hours[idx:idx + 24]
         dry = all(h.precip < 0.1 for h in hours[idx:idx + 2])
-        live = self.live(place) if place is HOME else None
-        src_line = (f'Meteocat · {HOME["station_name"]} station · {live["age"]}' if live
+        live = self.live(place)
+        src_line = (f'Meteocat · {live["station_name"]} station · {live["age"]}' if live
                     else 'Open-Meteo model · this hour')
         temp = live['temp'] if live and live.get('temp') is not None else cur.temp
         wind = live['wind'] if live and live.get('wind') is not None else cur.wind
@@ -191,7 +192,8 @@ class Builder:
             'best': {'sport': best['sport'], 'window': best['window'], 'rating': best['rating'],
                      'reason': best['reason'][:1].upper() + best['reason'][1:] + '.',
                      'note': 'Dry for the next 2 hours (forecast)' if dry else 'Rain likely within 2 hours (forecast)'},
-            'warnings': self.warnings(),
+            'warnings': self.warnings(place),
+            'observed': self.observed(place, live),
             'current': {'place': place['name'], 'source': src_line, 'sky': cur.sky, 'temp': round(temp),
                         'summary': SUMMARY.get(cur.sky, 'Variable'), 'feels': round(cur.feels),
                         'min': round(d0['temperature_2m_min'][1]), 'max': round(d0['temperature_2m_max'][1]),
@@ -212,7 +214,7 @@ class Builder:
             'confidence': self.confidence(),
             'daylight': [{'label': 'Sunrise', 'value': d0['sunrise'][1][11:16]},
                          {'label': 'Sunset', 'value': d0['sunset'][1][11:16], 'sub': f'last light {last_light(d0["sunset"][1][11:16])}'}],
-            'sources': ('Meteocat: XEMA station, warnings; ' if self.src.meteocat_available() else '')
+            'sources': ('Meteocat (SMC): XEMA station readings, lightning (XDDE), warnings; ' if self.src.meteocat_available() else '')
                        + 'Open-Meteo forecast (hourly, 7 days), marine (sea temperature), ECMWF ensemble (confidence)',
         }
 
@@ -238,7 +240,7 @@ class Builder:
                 'rows': rows}
 
     # ── Meteocat pieces (only with a key) ──
-    def warnings(self) -> list[dict]:
+    def warnings(self, place: dict | None = None) -> list[dict]:
         """Open Meteocat warnings that touch the comarques of your spots or home, worst first.
 
         Structure (checked live 2026-11-11): episode → avisos → evolucions (per day) → periodes (6 h) → afectacions,
@@ -246,11 +248,16 @@ class Builder:
         if not self.src.meteocat_available():
             return []
         d = today_local()
-        data = self.src.try_meteocat('prediccio', f'/pronostic/v2/smp/episodis-oberts?data={d:%Y-%m-%d}Z', 6 * 3600)
+        data = self.src.try_meteocat('prediccio', f'/pronostic/v2/smp/episodis-oberts?data={d:%Y-%m-%d}Z', 12 * 3600)  # 2/day ≈ 60 of the 100
         mine: dict[int, list[str]] = {}
         for sp in [*SPOTS.values(), HOME]:
             for c in sp.get('comarques', []):
                 mine.setdefault(c, []).append(sp['name'])
+        if place and place is not HOME and 'comarques' not in place:
+            com = self.mc.comarca(place['lat'], place['lon'])  # a searched place or the current location
+            if com:
+                mine.setdefault(com[0], []).insert(0, place['name'])
+                COMARCA_NAMES.setdefault(com[0], com[1])
         found: dict[tuple, dict] = {}
         for ep in data or []:
             try:
@@ -297,31 +304,34 @@ class Builder:
                         'areas': sorted(set(g['comarques']))})
         return out[:4]
 
+    @property
+    def mc(self) -> Meteocat:
+        return Meteocat(self.src)
+
     def live(self, place: dict) -> dict | None:
-        """Latest XEMA readings for a place's station, wind from its wind station if it has none (key needed)."""
-        if not self.src.meteocat_available() or not place.get('station'):
-            return None
-        d = today_local()
-
-        def read(st):
-            data = self.src.try_meteocat('xema', f'/xema/v1/estacions/mesurades/{st}/{d:%Y/%m/%d}', 1800)
-            return {v['codi']: v['lectures'] for v in data[0]['variables']} if data else {}
-
+        """Latest XEMA readings for a place: its own station if it has one, else the closest (≤ 30 km);
+        wind from the closest anemometer when that station has none. Key needed."""
         try:
-            vars_ = read(place['station'])
-            if 30 not in vars_ and place.get('wind_station'):
-                vars_ = merge_wind(vars_, read(place['wind_station']))
-            if not vars_:
-                return None
-            last = lambda c: float(vars_[c][-1]['valor']) if vars_.get(c) else None  # noqa: E731
-            ts = (vars_.get(32) or vars_.get(30))[-1]['data']
-            age = max(0, int((datetime.now(TZ) - datetime.fromisoformat(ts.replace('Z', '+00:00'))).total_seconds() // 60))
-            kn = lambda v: None if v is None else v * 1.94384  # noqa: E731  m/s → kn
-            return {'temp': last(32), 'wind': kn(last(30)), 'gust': kn(last(50)), 'wdir': last(31),
-                    'age': f'{age} min ago'}
+            return self.mc.live(place['lat'], place['lon'], place.get('station'), place.get('wind_station'))
         except Exception as e:
-            log.info('live parse failed: %s', e)
+            log.info('live failed: %s', e)
             return None
+
+    def observed(self, place: dict, live: dict | None) -> dict | None:
+        """Station extras and lightning for the Today screen (same response as the live reading)."""
+        if not live:
+            return None
+        trend = live.get('pressure_trend')
+        return {
+            'station': live['station_name'], 'km': live.get('station_km'), 'at': live['at'],
+            'windStation': live.get('wind_station_name'),
+            'humidity': live.get('humidity'), 'pressure': live.get('pressure'), 'pressureTrend': trend,
+            'pressureWord': None if trend is None else ('falling fast' if trend <= -2 else 'falling' if trend <= -0.8
+                                                       else 'rising' if trend >= 0.8 else 'steady'),
+            'rain3h': live.get('rain_3h'), 'rainToday': live.get('rain_today'), 'uv': live.get('uv'),
+            'solar': live.get('solar'), 'snow': live.get('snow'),
+            'lightning': self.mc.lightning(place['lat'], place['lon']),
+        }
 
     # ── Planner ──
     def planner(self, sport: str, day: int = 0) -> dict:
@@ -349,7 +359,7 @@ class Builder:
             'takeaway': self.takeaway(sport, rated, w),
             'hourChart': chart,
             'tuned': self.tuned(sport, rated, w),
-            'visuals': self.visuals(sport, spot, hours, rated, w),
+            'visuals': self.visuals(sport, spot, hours, rated, w) + (self.meteocat_sections(sport, spot, rated) if day == 0 else []),
             'plan': self.plan(sport, rated, w, sunrise, sunset, hours),
             'outlook': self.outlook(sport, spot, hours),
             'analysis': analysis,
@@ -573,6 +583,66 @@ class Builder:
                         'endLabels': [f'{pres[0].pressure:.0f}', f'{pres[-1].pressure:.0f} hPa'], 'caption': ['−12 h', '+12 h'], 'height': 70}}]}] if pres else []
         return []
 
+    def meteocat_value(self, sport, spot, hour) -> float | None:
+        """Meteocat's forecast for the same quantity and hour (cached; no call unless already fetched today)."""
+        if hour.t.date() != today_local() or not self.src.meteocat_available():
+            return None
+        try:
+            if sport in ('wing', 'surf') and spot.get('beach'):
+                b = next((x for x in self.mc.beach(spot['beach']) if x['hour'] == hour.t.hour), None)
+                return None if b is None else (b['wind'] if sport == 'wing' else b['wave'])
+            if sport == 'hike' and spot.get('peak_slug'):
+                sf = self.mc.summit(spot['peak_slug'])
+                x = min(sf, key=lambda r: abs(r['hour'] - hour.t.hour), default=None)
+                band = x and (2500 if 2500 in x['levels'] else max(x['levels']))
+                return x['levels'][band]['wind'] if x else None
+        except Exception:
+            return None
+        return None
+
+    def meteocat_sections(self, sport, spot, rated) -> list[dict]:
+        """Meteocat's own forecast for the spot (beach or summit), next to the model the plan uses.
+        Today only: each spot-day costs one of the 100 monthly forecast calls."""
+        out = []
+        try:
+            if sport in ('wing', 'surf') and spot.get('beach'):
+                bf = [b for b in self.mc.beach(spot['beach']) if b['hour'] in E.HOURS]
+                if bf:
+                    model = {r.hour.t.hour: r.hour for r in rated}
+                    if sport == 'wing':
+                        xs = [b for b in bf if b['wind'] is not None and b['hour'] in model]
+                        out.append({'label': 'Meteocat beach forecast', 'blocks': [{'type': 'TrendLine', 'props': {
+                            'accent': 'wind', 'values': [b['wind'] for b in xs], 'compare': [round(model[b['hour']].wind, 1) for b in xs],
+                            'unit': 'kn', 'caption': [hh(xs[0]['hour']), hh(xs[-1]['hour'])], 'min': 0,
+                            'max': max(20, max(max(b['wind'] for b in xs), max(model[b['hour']].wind for b in xs)) + 2), 'height': 64,
+                            'legend': ['Meteocat', 'model used for the plan']}}]})
+                    rows = [[hh(b['hour']), f'{E.compass(b["wdir"] or 0)} {b["wind"]:.0f} kn' if b['wind'] is not None else '—',
+                             f'{b["wave"]:.1f} m' if b['wave'] is not None else '—',
+                             f'{b["sst"]:.1f}°' if b['sst'] is not None else '—', f'{b["temp"]:.0f}°' if b['temp'] is not None else '—']
+                            for b in bf[::2]]
+                    out.append({'label': 'Meteocat beach forecast · by hour' if sport == 'wing' else 'Meteocat beach forecast',
+                                'blocks': [{'type': 'Table', 'props': {'columns': ['', 'Wind', 'Waves', 'Water', 'Air'], 'rows': rows,
+                                                                        'caption': 'Servei Meteorològic de Catalunya'}}]})
+            if sport == 'hike' and spot.get('peak_slug'):
+                sf = [x for x in self.mc.summit(spot['peak_slug']) if 6 <= x['hour'] <= 21]
+                if sf:
+                    band = 2500 if all(2500 in x['levels'] for x in sf) else max(sf[0]['levels'])
+                    rows = [[hh(x['hour']), f'{x["levels"][band]["temp"]:.0f}°',
+                             f'{E.compass(x["levels"][band]["wdir"] or 0)} {x["levels"][band]["wind"]:.0f} kn',
+                             f'{x["levels"][band]["humidity"]:.0f} %', f'{x.get("freezing") or 0:.0f} m'] for x in sf]
+                    out.append({'label': f'Meteocat summit forecast · {band} m', 'blocks': [{'type': 'Table', 'props': {
+                        'columns': ['', 'Temp', 'Wind', 'Humidity', 'Freezing'], 'rows': rows,
+                        'caption': 'Servei Meteorològic de Catalunya · El Pedraforca'}}]})
+            if sport in ('hike', 'wing', 'surf'):
+                lt = self.mc.lightning(spot['lat'], spot['lon'])
+                if lt and lt['count']:
+                    out.insert(0, {'label': 'Lightning now', 'blocks': [{'type': 'FactTile', 'props': {
+                        'label': 'Strikes within 30 km', 'value': f'{lt["count"]}', 'accent': 'storm', 'size': 'lg',
+                        'sub': f'nearest {lt["nearest_km"]} km · last {lt["last"]} · last 2 h (Meteocat)'}}]})
+        except Exception as e:
+            log.info('meteocat sections %s failed: %s', sport, e)
+        return out
+
     def plan(self, sport, rated, w, sunrise, sunset, hours) -> dict | None:
         ss = f'{int(sunset):02d}:{int((sunset % 1) * 60):02d}'
         sr = f'{int(sunrise):02d}:{int((sunrise % 1) * 60):02d}'
@@ -589,7 +659,12 @@ class Builder:
                                                {'label': 'Water', 'value': f'{hs[0].sst:.1f}°' if hs[0].sst else '—', 'sub': wetsuit(hs[0].sst)}]}
         if sport == 'bike':
             before = [h for h in hours if h.t <= hs[0].t][-6:]
-            return {'label': 'Plan', 'facts': [{'label': 'Roads', 'value': road(hs[0]), 'sub': f'{sum(h.precip for h in before):.1f} mm in 6 h'},
+            live = self.live(SPOTS['collserola'])
+            measured = live.get('rain_3h') if live else None
+            roads = ({'label': 'Roads', 'value': 'Wet' if measured >= 0.3 else ('Damp' if measured > 0 else road(hs[0])),
+                      'sub': f'{measured:.1f} mm measured in 3 h ({live["station_name"]})'} if measured is not None
+                     else {'label': 'Roads', 'value': road(hs[0]), 'sub': f'{sum(h.precip for h in before):.1f} mm in 6 h'})
+            return {'label': 'Plan', 'facts': [roads,
                                                {'label': 'Gusts', 'value': f'{max(h.gust for h in hs):.0f} kn', 'sub': 'max on the ride'},
                                                {'label': 'Sunset', 'value': ss}, {'label': 'UV max', 'value': f'{max(h.uv for h in hs):.0f}'}]}
         if sport == 'run':
@@ -644,6 +719,9 @@ class Builder:
             log.info('model agreement unavailable: %s', e)
         own = {'wing': hour.wind, 'bike': hour.precip, 'run': hour.temp, 'hike': hour.wind, 'surf': hour.wave or 0}[sport]
         rows.insert(0, {'name': 'Open-Meteo best match', 'detail': 'blended forecast used for the plan', 'value': round(own, 1)})
+        mc = self.meteocat_value(sport, spot, hour)
+        if mc is not None:
+            rows.insert(1, {'name': 'Meteocat', 'detail': 'beach forecast' if sport != 'hike' else 'summit forecast', 'value': round(mc, 1)})
         n = len(rows)
         for r in rows:
             r['weight'] = round(100 / n)
@@ -828,6 +906,68 @@ class Builder:
                 'warnings': self.warnings(),
                 'sources': ('Meteocat warnings; ' if self.src.meteocat_available() else 'Warnings need the Meteocat key; ')
                            + 'ratings from your spots (Open-Meteo)'}
+
+
+def hourly(b: 'Builder', place: dict) -> dict:
+    """Seven days, hour by hour, for the metric detail views (Apple/Google-style), plus daily summaries
+    and what the nearest Meteocat station measured so far today."""
+    fc = b.src.forecast(place['lat'], place['lon'])
+    h, d = fc['hourly'], fc['daily']
+    t0 = today_local()
+    idx = [i for i, t in enumerate(h['time']) if date.fromisoformat(t[:10]) >= t0][:7 * 24]
+    pick = lambda k, nd=1: [None if h.get(k) is None or h[k][i] is None else round(h[k][i], nd) for i in idx]  # noqa: E731
+    sun = {d['time'][i]: (d['sunrise'][i][11:16], d['sunset'][i][11:16]) for i in range(len(d['time']))}
+    series = {
+        'temp': pick('temperature_2m'), 'feels': pick('apparent_temperature'), 'humidity': pick('relative_humidity_2m', 0),
+        'dew': pick('dew_point_2m'), 'precip': pick('precipitation'), 'pprob': pick('precipitation_probability', 0),
+        'wind': pick('wind_speed_10m'), 'gust': pick('wind_gusts_10m'), 'wdir': pick('wind_direction_10m', 0),
+        'uv': pick('uv_index'), 'pressure': pick('pressure_msl'), 'cloud': pick('cloud_cover', 0),
+        'visibility': [None if v is None else round(v / 1000, 1) for v in pick('visibility', 0)],
+    }
+    hours = E.parse_hours(fc)
+    by_t = {x.t.strftime('%Y-%m-%dT%H:%M'): x for x in hours}
+    series['sky'] = [by_t[h['time'][i]].sky if h['time'][i] in by_t else 'cloud' for i in idx]
+    days = []
+    for i, t in enumerate(d['time']):
+        dd = date.fromisoformat(t)
+        if dd < t0 or len(days) >= 7:
+            continue
+        g = lambda k, nd=0: None if d.get(k) is None or d[k][i] is None else round(d[k][i], nd)  # noqa: E731
+        days.append({'date': t, 'day': 'Today' if dd == t0 else WD[dd.weekday()], 'sky': E.sky_kind(int(d['weather_code'][i] or 0), False),
+                     'min': g('temperature_2m_min'), 'max': g('temperature_2m_max'), 'pprob': g('precipitation_probability_max'),
+                     'precip': g('precipitation_sum', 1), 'uvMax': g('uv_index_max', 1), 'windMax': g('wind_speed_10m_max'),
+                     'gustMax': g('wind_gusts_10m_max'), 'windDir': g('wind_direction_10m_dominant'),
+                     'sunrise': sun.get(t, ('', ''))[0], 'sunset': sun.get(t, ('', ''))[1]})
+    return {'place': {'name': place['name'], 'lat': place['lat'], 'lon': place['lon']},
+            'times': [h['time'][i] for i in idx], 'series': series, 'days': days,
+            'observed': observed_today(b, place),
+            'sources': 'Open-Meteo forecast' + (' · Meteocat XEMA (measured today)' if b.src.meteocat_available() else '')}
+
+
+def observed_today(b: 'Builder', place: dict) -> dict | None:
+    """Hourly values measured today by the nearest XEMA station (same cached call as the live reading)."""
+    if not b.src.meteocat_available():
+        return None
+    try:
+        st = {'code': place['station']} if place.get('station') else b.mc.nearest(place['lat'], place['lon'])
+        if not st:
+            return None
+        v = b.mc.readings(st['code'])
+        out: dict[str, dict] = {}
+        for code, name, scale in ((32, 'temp', 1), (30, 'wind', 1.94384), (50, 'gust', 1.94384), (33, 'humidity', 1),
+                                  (34, 'pressure', 1), (35, 'precip', 1), (39, 'uv', 1)):
+            per_hour: dict[str, float] = {}
+            for x in v.get(code) or []:
+                t = datetime.fromisoformat(x['data'].replace('Z', '+00:00')).astimezone(TZ)
+                k = t.strftime('%Y-%m-%dT%H:00')
+                val = float(x['valor']) * scale
+                per_hour[k] = per_hour.get(k, 0) + val if name == 'precip' else val  # rain adds up, others keep the latest
+            if per_hour:
+                out[name] = {k: round(val, 1) for k, val in per_hour.items() if k[:10] == str(today_local())}
+        return {'station': next((s['name'] for s in b.mc.stations() if s['code'] == st['code']), st['code']), 'series': out}
+    except Exception as e:
+        log.info('observed today failed: %s', e)
+        return None
 
 
 def places(src, q: str) -> list[dict]:

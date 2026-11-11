@@ -22,8 +22,9 @@ METEOCAT = 'https://api.meteo.cat'
 
 HOURLY = ('temperature_2m,apparent_temperature,relative_humidity_2m,precipitation,precipitation_probability,'
           'weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m,uv_index,cape,freezing_level_height,'
-          'pressure_msl,cloud_cover')
-DAILY = 'sunrise,sunset,temperature_2m_max,temperature_2m_min,precipitation_probability_max,weather_code'
+          'pressure_msl,cloud_cover,visibility,dew_point_2m')
+DAILY = ('sunrise,sunset,temperature_2m_max,temperature_2m_min,precipitation_probability_max,weather_code,'
+         'precipitation_sum,uv_index_max,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant')
 WEATHER_MODELS = {'meteofrance_arome_france_hd': ('AROME', '1.3 km · Météo-France'),
                   'meteofrance_arpege_europe': ('ARPEGE', '10 km · Météo-France'),
                   'icon_eu': ('ICON-EU', '7 km · DWD'), 'ecmwf_ifs025': ('ECMWF IFS', '9 km'),
@@ -62,7 +63,7 @@ class Sources:
     def forecast(self, lat: float, lon: float, days: int = 8):
         p = dict(latitude=lat, longitude=lon, hourly=HOURLY, daily=DAILY, forecast_days=days, past_days=1,
                  wind_speed_unit='kn', timezone=settings.tz)
-        return self._get(f'om:fc:{lat:.3f},{lon:.3f}:{days}', OM_FORECAST, p, 3600)
+        return self._get(f'om:fc2:{lat:.3f},{lon:.3f}:{days}', OM_FORECAST, p, 3600)  # fc2: + visibility, dew point, daily totals
 
     def models(self, lat: float, lon: float, variable: str):
         p = dict(latitude=lat, longitude=lon, hourly=variable, forecast_days=3, wind_speed_unit='kn',

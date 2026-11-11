@@ -10,11 +10,13 @@ SPOTS = {
         # Viladecans has no anemometer: wind comes from the nearest coastal station.
         'wind_station': 'XL', 'wind_station_name': 'el Prat de Llobregat',
         'shore_facing': 170, 'exposure': [90, 250],
+        'beach': 'castelldefels-de-castelldefels-2-lluminetes',  # Meteocat beach forecast slug
     },
     'ocata': {
         'name': 'Ocata', 'sport': 'surf', 'kind': 'Surf · beach', 'lat': 41.477, 'lon': 2.338,
         'comarques': [21], 'municipi': '081181', 'beach': 'ocata', 'station': 'YV', 'station_name': 'Mataró',
         'shore_facing': 120, 'exposure': [40, 180],
+        'beach': 'el-masnou-d-ocata-1',
     },
     'collserola': {
         'name': 'Collserola loop', 'sport': 'bike', 'kind': 'Bike · 42 km', 'lat': 41.418, 'lon': 2.118,
@@ -29,7 +31,7 @@ SPOTS = {
     },
     'pedraforca': {
         'name': 'Pedraforca', 'sport': 'hike', 'kind': 'Hike · 2506 m', 'lat': 42.239, 'lon': 1.703,
-        'summit_alt': 2506, 'base_alt': 1215, 'hut_alt': 1640, 'peak_slug': 'el-pedraforca',
+        'summit_alt': 2506, 'base_alt': 1215, 'hut_alt': 1640, 'peak_slug': 'el-pedraforca',  # Meteocat summit forecast
         'comarques': [14], 'municipi': '251943', 'station': 'UI', 'station_name': 'Gisclareny',
         # Gisclareny has no anemometer; Cadí Nord (2145 m, 6 km) is close to summit height.
         'wind_station': 'Z9', 'wind_station_name': 'Cadí Nord (2145 m)',

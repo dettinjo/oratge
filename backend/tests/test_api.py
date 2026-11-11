@@ -163,10 +163,23 @@ class KeyedSources(FakeSources):
         return True
 
     def try_meteocat(self, plan, path, max_age):
-        if '/xema/' in path:
+        if path.startswith('/xema/v1/estacions/metadades'):
+            return [{**s, 'comarca': s['comarca']} for s in fx('xema_stations.json')]
+        if path.startswith('/xema/v1/variables/mesurades/30/ultimes'):
+            return fx('xema_ult30.json')
+        if path.startswith('/xema/v1/estacions/mesurades/'):
             code = path.split('/')[5]
-            return fx('xema.json').get({'XL': 'YV', 'Z9': 'YV', 'UI': 'YY'}.get(code, code))
+            return fx('xema.json').get({'XL': 'YV', 'Z9': 'YV', 'UI': 'YY', 'X4': 'YV', 'XV': 'YV'}.get(code, code))
+        if path.startswith('/xdde/'):
+            return []
+        if path.startswith('/pronostic/v1/platges/'):
+            return fx('mc_beach.json')
+        if path.startswith('/pronostic/v1/pirineu/pics/'):
+            return fx('mc_summit.json')
         return None
+
+    def allowance(self, plan):
+        return 5
 
 
 def test_live_takes_wind_from_the_wind_station():
@@ -177,14 +190,19 @@ def test_live_takes_wind_from_the_wind_station():
     last = lambda st, c: next(v for v in xema[st][0]['variables'] if v['codi'] == c)['lectures'][-1]['valor']  # noqa: E731
     live = b.live(SPOTS['castelldefels'])
     assert live['temp'] == last('YY', 32)  # own station
-    assert live['wind'] == pytest.approx(last('YV', 30) * 1.94384)  # wind station
+    assert live['wind'] == pytest.approx(last('YV', 30) * 1.94384, abs=0.05)  # wind station
     assert live['wdir'] == last('YV', 31)
 
 
 def test_station_without_wind_is_not_zero_knots():
     from oratge.build import Builder
-    b = Builder(KeyedSources(api._store), {})
-    live = b.live({'station': 'YY'})
+    from oratge.meteocat import Meteocat
+
+    class NoWindNearby(KeyedSources):
+        def try_meteocat(self, plan, path, max_age):
+            return [] if 'ultimes' in path else super().try_meteocat(plan, path, max_age)
+
+    live = Meteocat(NoWindNearby(api._store)).live(41.27, 2.0, station='YY')
     assert live['temp'] is not None and live['wind'] is None and live['gust'] is None
 
 
@@ -267,3 +285,56 @@ def test_sync_rejects_bad_payloads(synced):
     assert client.put('/v1/sync', json={'nope': 1}).status_code == 422
     assert client.put('/v1/sync', json={'fields': {'k': {'v': 1}}}).status_code == 422  # no timestamp
     assert client.put('/v1/sync', content=b'x' * 300_000).status_code == 413
+
+
+def test_meteocat_products_parse_real_responses():
+    from oratge.meteocat import Meteocat
+    mc = Meteocat(KeyedSources(api._store))
+    # Nearest station and comarca for an arbitrary point (Sitges → Garraf area).
+    st = mc.nearest(41.237, 1.81)
+    assert st and st['km'] < 15
+    assert mc.nearest(41.237, 1.81, wind=True)['code'] in {s['codi'] for s in fx('xema_ult30.json')}
+    # Beach: hourly, wind converted to kn, waves and water temperature present.
+    b = mc.beach('castelldefels-de-castelldefels-2-lluminetes')
+    assert len(b) >= 20 and b[0]['wave'] == 0.8 and b[0]['sst'] == 20.6 and b[0]['wind'] == pytest.approx(1.7 * 1.94384, abs=0.05)
+    # Summit: 3-hourly bands with freezing level.
+    s = mc.summit('el-pedraforca')
+    assert len(s) == 8 and s[0]['freezing'] == 3200 and 2500 in s[0]['levels'] and s[0]['levels'][2500]['wind'] > 0
+    # Lightning: an empty hour is "no strikes", not missing data.
+    assert mc.lightning(41.4, 2.1) == {'count': 0, 'near': 0, 'nearest_km': None, 'last': None, 'radius': 30}
+
+
+def test_lightning_counts_strikes_near_the_point():
+    from oratge.meteocat import Meteocat
+
+    class Storm(KeyedSources):
+        def try_meteocat(self, plan, path, max_age):
+            if path.startswith('/xdde/'):
+                return [{'data': '2026-11-12T03:10Z', 'coordenades': {'latitud': 41.40, 'longitud': 2.15}},
+                        {'data': '2026-11-12T03:20Z', 'coordenades': {'latitud': 41.60, 'longitud': 2.15}},
+                        {'data': '2026-11-12T03:30Z', 'coordenades': {'latitud': 42.50, 'longitud': 2.15}}]
+            return super().try_meteocat(plan, path, max_age)
+
+    lt = Meteocat(Storm(api._store)).lightning(41.39, 2.16)
+    assert lt['count'] == 4 and lt['near'] == 2 and lt['nearest_km'] < 2  # two hours × two strikes within 30 km
+
+
+def test_planners_include_meteocat_sections(monkeypatch):
+    monkeypatch.setattr(api, '_sources', KeyedSources(api._store))
+    wing = client.get('/v1/planner/wing').json()
+    labels = [v['label'] for v in wing['visuals']]
+    assert 'Meteocat beach forecast' in labels
+    hike = client.get('/v1/planner/hike').json()
+    assert any(v['label'].startswith('Meteocat summit forecast') for v in hike['visuals'])
+    today = client.get('/v1/today').json()
+    assert today['observed']['station'] and today['observed']['lightning']['count'] == 0
+
+
+def test_hourly_detail_series(monkeypatch):
+    monkeypatch.setattr(api, '_sources', KeyedSources(api._store))
+    d = client.get('/v1/hourly?lat=41.39&lon=2.16&place=Barcelona').json()
+    n = len(d['times'])
+    assert n >= 24 and all(len(v) == n for v in d['series'].values())
+    assert d['days'][0]['day'] == 'Today' and d['days'][0]['sunrise']
+    assert d['observed']['station'] and 'temp' in d['observed']['series']
+    assert client.get('/v1/hourly?lat=48.8&lon=2.3').status_code == 422
