@@ -15,7 +15,7 @@ foiling, surfing, biking, running and hiking.
 |---|---|
 | **App** (`app/`, Flutter) | All screens from the Claude Design handoff: Today, Activities, 5 planners, Map (OSM, theme-toned), Spots, Spot detail, Profile, 10-step setup; light/dark/system; phone/tablet/desktop. 128 widget tests. Android APK verified on an Android 15 emulator against the live backend. |
 | **Detailed map** (0.5) | Wind / Temp / Rain / Rain chance fields from a 10×14 Open-Meteo grid (0.25°, 48 h, `/v1/map/forecast`), animated wind particles and rain streaks, 48 h timeline with play and area rain bars, tap-anywhere probe (wind, gusts, temp, rain, chance), value labels when zoomed in, spot pins. |
-| **Backend** (`backend/`, FastAPI) | Live on the home server via Coolify (`oratge-backend`, Tailscale only: `http://100.96.0.121:8199`, bearer token `ORATGE_API_TOKEN` in Infisical). Open-Meteo forecast/marine/models/ECMWF ensemble + archived high-res forecasts for history; Meteocat client with quota governor (idle until a key exists); rating engine; forecast/observation archive for the station check. 20 tests. |
+| **Backend** (`backend/`, FastAPI) | Live on the home server via Coolify (`oratge-backend`, Tailscale only: `http://100.96.0.121:8199`, bearer token `ORATGE_API_TOKEN` in Infisical). Open-Meteo forecast/marine/models/ECMWF ensemble + archived high-res forecasts for history; Meteocat live since 2026-11-11 (key `METEOCAT_API_KEY` in Infisical + Coolify, valid to 14-11-2027): XEMA live readings (wind from el Prat / Cadí Nord where the spot's station has no anemometer) and official warnings per comarca; quota governor enforces a daily share of 100 forecast / 750 XEMA / 250 XDDE calls and syncs nightly with `consum-actual` (`/health` shows today's allowance); rating engine; forecast/observation archive for the station check. 32 tests. |
 | **Install** | `oratge-0.2-arm64.apk` in Google Drive → `Oratge/`. Phone must be on Tailscale to reach the backend; otherwise the app falls back to bundled sample data. |
 
 ## Build and deploy
@@ -24,7 +24,7 @@ foiling, surfing, biking, running and hiking.
 - Backend: `backend/deploy.sh <tag>` (tests → local image → Coolify PATCH + deploy → health check)
 
 ## Still open
-1. **Meteocat API key** (registration site was unreachable on 2026-11-09/10). Then set `METEOCAT_API_KEY` on the Coolify service, verify response formats (warnings, XEMA) and station codes, and the station check fills in after 7 days.
+1. **Station check** fills in once 7 days of XEMA observations are archived (from ~2026-11-17). Meteocat's terms: credit SMC as the data source and inform SMC if the app is ever published; don't pass raw data to third parties.
 2. **Push alerts** need a Firebase project (FCM) on your account; thresholds are already in the profile.
 3. **Add a spot / GPX import**: spots are fixed in `backend/oratge/spots.py` for now.
 4. iOS build needs a Mac and an Apple developer account.
