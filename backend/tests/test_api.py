@@ -207,7 +207,8 @@ def test_warnings_from_real_episode():
     ws = Builder(S(api._store)).warnings()
     assert ws and len(ws) <= 4
     assert all(w['level'] in ('yellow', 'orange', 'red') for w in ws)
-    w = next(w for w in ws if 'Baix Llobregat' in w['detail'])
+    assert len(ws) == 1  # same hazard, level and threshold in four comarques → one card
+    w = ws[0]
     assert w['title'] == 'Yellow warning · Wind'
-    assert 'Castelldefels' in w['detail'] and 'gusts above 72 km/h' in w['detail'] and 'Thu 07–19 h' in w['detail']
-    assert not any('Pallars' in w['detail'] for w in ws)
+    assert w['detail'] == 'Castelldefels, Collserola loop, Passeig Marítim, Barcelona, Ocata · Thu 07–19 h · gusts above 72 km/h'
+    assert w['areas'] == ['Baix Llobregat', 'Barcelonès', 'Maresme', 'Vallès Occidental']

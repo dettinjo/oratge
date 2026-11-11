@@ -264,18 +264,27 @@ class Builder:
                                 rec['slots'].append((t0, t0 + timedelta(hours=6)))
             except Exception as e:
                 log.info('warning parse failed: %s', e)
-        out = []
-        for (meteor, c), rec in sorted(found.items(), key=lambda kv: (-kv[1]['perill'], min(kv[1]['slots']))):
+        # One card per hazard, level and threshold: the affected spots listed together, times merged.
+        groups: dict[tuple, dict] = {}
+        for (meteor, c), rec in found.items():
             level = 'red' if rec['perill'] >= 5 else ('orange' if rec['perill'] >= 3 else 'yellow')
-            slots = sorted(rec['slots'])
-            a, b = slots[0][0], slots[-1][1]
+            g = groups.setdefault((meteor, level, threshold_en(rec['llindar']), rec['pre']),
+                                  {'perill': 0, 'slots': [], 'names': [], 'comarques': []})
+            g['perill'] = max(g['perill'], rec['perill'])
+            g['slots'] += rec['slots']
+            g['names'] += mine[c]
+            g['comarques'].append(COMARCA_NAMES.get(c, f'comarca {c}'))
+        out = []
+        for (meteor, level, thr, pre), g in sorted(groups.items(), key=lambda kv: (-kv[1]['perill'], min(kv[1]['slots']))):
+            slots = sorted(g['slots'])
+            a, b = slots[0][0], max(sl[1] for sl in slots)
             same = a.date() == (b - timedelta(minutes=1)).date()
             when = (f'{WD[a.weekday()]} {a.hour:02d}–{b.hour or 24:02d} h' if same
                     else f'{WD[a.weekday()]} {a.hour:02d} h – {WD[b.weekday()]} {b.hour:02d} h')
-            where = f'{COMARCA_NAMES.get(c, "comarca " + str(c))} ({", ".join(dict.fromkeys(mine[c]))})'
-            out.append({'level': level, 'pre': rec['pre'],
-                        'title': f'{level.capitalize()} {"heads-up" if rec["pre"] else "warning"} · {METEOR_EN.get(meteor, meteor)}',
-                        'detail': ' · '.join(x for x in (where, when, threshold_en(rec['llindar'])) if x)})
+            out.append({'level': level, 'pre': pre,
+                        'title': f'{level.capitalize()} {"heads-up" if pre else "warning"} · {METEOR_EN.get(meteor, meteor)}',
+                        'detail': ' · '.join(x for x in (', '.join(dict.fromkeys(g['names'])), when, thr) if x),
+                        'areas': sorted(set(g['comarques']))})
         return out[:4]
 
     def live(self, place: dict) -> dict | None:
