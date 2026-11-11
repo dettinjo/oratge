@@ -85,8 +85,12 @@ class TodayData {
         confidence = j['confidence'] as Json?,
         daylight = _list(j['daylight'], Fact.fromJson),
         sources = j['sources'] as String,
+        observed = j['observed'] as Json?,
         place = j['place'] == null ? null : Place.fromJson(j['place'] as Json);
   final String title, date, sources;
+
+  /// What the nearest Meteocat station measures now (humidity, pressure trend, rain, lightning…).
+  final Json? observed;
   final Place? place;
   final Json best, current, next24;
   final Json? confidence;
@@ -325,4 +329,44 @@ class MapForecast {
   final Map<String, List<List<double>>> fields;
   final String source;
   bool get isEmpty => times.isEmpty;
+}
+
+
+/// Seven days, hour by hour, for one place: the source for metric detail views.
+class HourlyData {
+  HourlyData.fromJson(Json j)
+      : place = Place.fromJson(j['place'] as Json),
+        times = [for (final t in j['times'] as List) DateTime.parse(t as String)],
+        series = {
+          for (final e in (j['series'] as Json).entries)
+            if (e.key != 'sky') e.key: [for (final v in e.value as List) (v as num?)?.toDouble()],
+        },
+        sky = [for (final s in (j['series'] as Json)['sky'] as List? ?? const []) '$s'],
+        days = List<Json>.from(j['days'] as List),
+        observedStation = (j['observed'] as Json?)?['station'] as String?,
+        observed = {
+          for (final e in (((j['observed'] as Json?)?['series'] as Json?) ?? const {}).entries)
+            e.key: {for (final o in (e.value as Json).entries) DateTime.parse(o.key): (o.value as num).toDouble()},
+        },
+        sources = j['sources'] as String? ?? '';
+  final Place place;
+  final List<DateTime> times;
+  final Map<String, List<double?>> series;
+  final List<String> sky;
+  final List<Json> days;
+  final String? observedStation;
+
+  /// Measured today by the nearest station, per hour.
+  final Map<String, Map<DateTime, double>> observed;
+  final String sources;
+
+  /// Index range of a calendar day in [times].
+  (int, int) dayRange(int day) {
+    if (times.isEmpty) return (0, 0);
+    final d0 = DateTime(times.first.year, times.first.month, times.first.day).add(Duration(days: day));
+    final d1 = d0.add(const Duration(days: 1));
+    final a = times.indexWhere((t) => !t.isBefore(d0));
+    final b = times.indexWhere((t) => !t.isBefore(d1));
+    return (a < 0 ? times.length : a, b < 0 ? times.length : b);
+  }
 }

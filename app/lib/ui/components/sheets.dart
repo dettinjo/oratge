@@ -2,6 +2,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../motion.dart';
+
 import '../../data/models.dart';
 import '../../theme/og_helpers.dart';
 import '../../theme/oratge_tokens.dart';
@@ -50,8 +52,53 @@ String _explain(String label) {
   return '';
 }
 
-Future<void> showOgSheet(BuildContext context, {required Widget child}) {
+Future<void> showOgSheet(BuildContext context, {required Widget child, double maxWidth = 640, double initialSize = 0.62}) {
   final c = context.og;
+  // Wide windows (Mac, desktop, tablets in landscape): a centred panel that fades in, like a macOS
+  // sheet, instead of a card sliding up from the bottom edge. Esc or a click outside closes it.
+  if (MediaQuery.sizeOf(context).width >= 840) {
+    return showGeneralDialog(
+      context: context,
+      useRootNavigator: true,
+      barrierDismissible: true,
+      barrierLabel: 'Close',
+      barrierColor: Colors.black.withValues(alpha: 0.45),
+      transitionDuration: motion(context, 180),
+      pageBuilder: (context, _, _) => SafeArea(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: maxWidth, maxHeight: MediaQuery.sizeOf(context).height * 0.86),
+            child: Material(
+              color: c.bg,
+              elevation: 12,
+              shadowColor: Colors.black,
+              borderRadius: BorderRadius.circular(22),
+              clipBehavior: Clip.antiAlias,
+              child: Stack(children: [
+                ListView(shrinkWrap: true, padding: const EdgeInsets.fromLTRB(28, 26, 28, 28), children: [child]),
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: IconButton(
+                    tooltip: 'Close',
+                    onPressed: () => Navigator.of(context).pop(),
+                    icon: Icon(Icons.close, color: c.text2),
+                  ),
+                ),
+              ]),
+            ),
+          ),
+        ),
+      ),
+      transitionBuilder: (context, a, _, child) {
+        final t = CurvedAnimation(parent: a, curve: Curves.easeOutCubic, reverseCurve: Curves.easeInCubic);
+        return FadeTransition(
+          opacity: t,
+          child: ScaleTransition(scale: Tween(begin: 0.96, end: 1.0).animate(t), child: child),
+        );
+      },
+    );
+  }
   return showModalBottomSheet(
     context: context,
     isScrollControlled: true,
@@ -62,7 +109,7 @@ Future<void> showOgSheet(BuildContext context, {required Widget child}) {
     constraints: const BoxConstraints(maxWidth: 640),
     builder: (_) => DraggableScrollableSheet(
       expand: false,
-      initialChildSize: 0.62,
+      initialChildSize: initialSize,
       maxChildSize: 0.95,
       minChildSize: 0.3,
       builder: (context, scroll) => ListView(

@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'models.dart';
 import 'repository.dart';
 import 'sync.dart';
+import 'units.dart';
 
 /// Field kinds used by the setup flow.
 enum FieldKind { text, number, choice, multi, toggle, range }
@@ -164,6 +165,7 @@ class AppState extends ChangeNotifier implements Syncable {
   AppState(this._prefs, {ForecastRepository? repository}) : repository = repository ?? SampleRepository() {
     final raw = _prefs?.getString('profile');
     profile = {...defaultProfile, if (raw != null) ...(jsonDecode(raw) as Map<String, dynamic>)};
+    currentUnits = Units.of(profile);
     themeMode = ThemeMode.values.firstWhere((m) => m.name == _prefs?.getString('themeMode'), orElse: () => ThemeMode.dark);
     final rawPlace = _prefs?.getString('place');
     place = rawPlace == null ? null : Place.fromJson(jsonDecode(rawPlace) as Map<String, dynamic>);
@@ -263,8 +265,14 @@ class AppState extends ChangeNotifier implements Syncable {
     sync?.changed();
   }
 
+  Units get units => currentUnits;
+
   void setField(String key, dynamic value) {
     profile[key] = value;
+    if (key == 'windUnit' || key == 'tempUnit') {
+      currentUnits = Units.of(profile);
+      status.bump(); // screens reload and convert in the new units
+    }
     _prefs?.setString('profile', jsonEncode(profile));
     if (key == 'sync') {
       // The switch itself is per device; turning it on starts syncing right away.
@@ -330,6 +338,7 @@ class AppState extends ChangeNotifier implements Syncable {
       n++;
     }
     if (n > 0) {
+      currentUnits = Units.of(profile);
       _prefs?.setString('profile', jsonEncode(profile));
       _prefs?.setStringList('doneSteps', doneSteps.toList());
       _prefs?.setString('favorites', jsonEncode([for (final f in favorites) f.toJson()]));

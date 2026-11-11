@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'models.dart';
+import 'units.dart';
 
 const sports = ['wing', 'surf', 'bike', 'run', 'hike'];
 
@@ -19,6 +20,9 @@ abstract class ForecastRepository {
 
   /// 48-hour hourly forecast on the map grid (empty offline).
   Future<MapForecast> mapForecast();
+
+  /// Seven days hour by hour for one place (metric detail views).
+  Future<HourlyData> hourly([Place? place]);
   Future<ActivitiesData> activities();
   Future<PlannerData> planner(String sport, {int day = 0});
   Future<MapData> map();
@@ -32,7 +36,7 @@ class SampleRepository implements ForecastRepository {
   final AssetBundle _bundle;
 
   Future<Json> _load(String name) async =>
-      jsonDecode(await _bundle.loadString('assets/sample/$name.json', cache: false)) as Json;
+      currentUnits.convertJson(jsonDecode(await _bundle.loadString('assets/sample/$name.json', cache: false))) as Json;
 
   /// A few Catalan places so search works offline too.
   static const _towns = [
@@ -65,6 +69,8 @@ class SampleRepository implements ForecastRepository {
   Future<GridData> grid() async => GridData.fromJson({'time': '', 'points': [], 'source': 'offline'});
   @override
   Future<MapForecast> mapForecast() async => MapForecast.fromJson(const {});
+  @override
+  Future<HourlyData> hourly([Place? place]) async => HourlyData.fromJson(await _load('hourly'));
   @override
   Future<ActivitiesData> activities() async => ActivitiesData.fromJson(await _load('activities'));
   @override
@@ -205,10 +211,10 @@ class ApiRepository implements ForecastRepository {
         // Refresh quietly; screens reload from the cache when it lands.
         _fetch(path).then((_) => status.bump(), onError: (_) {});
       }
-      return parse(body);
+      return parse(currentUnits.convertJson(body) as Json);
     }
     try {
-      return parse(await _fetch(path));
+      return parse(currentUnits.convertJson(await _fetch(path)) as Json);
     } catch (_) {
       if (fallback == null) rethrow;
       status.set(DataSource.sample);
@@ -257,6 +263,13 @@ class ApiRepository implements ForecastRepository {
   Future<GridData> grid() => _load('map/grid', GridData.fromJson, (f) => f.grid());
   @override
   Future<MapForecast> mapForecast() => _load('map/forecast', MapForecast.fromJson, (f) => f.mapForecast());
+  @override
+  Future<HourlyData> hourly([Place? place]) => _load(
+      place == null
+          ? 'hourly'
+          : 'hourly?lat=${place.lat.toStringAsFixed(3)}&lon=${place.lon.toStringAsFixed(3)}&place=${Uri.encodeQueryComponent(place.name)}',
+      HourlyData.fromJson,
+      (f) => f.hourly(place));
   @override
   Future<ActivitiesData> activities() => _load('activities', ActivitiesData.fromJson, (f) => f.activities());
   @override
