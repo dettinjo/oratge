@@ -338,3 +338,11 @@ def test_hourly_detail_series(monkeypatch):
     assert d['days'][0]['day'] == 'Today' and d['days'][0]['sunrise']
     assert d['observed']['station'] and 'temp' in d['observed']['series']
     assert client.get('/v1/hourly?lat=48.8&lon=2.3').status_code == 422
+
+
+def test_alerts_have_stable_ids():
+    a = client.get('/v1/alerts?sports=wing,bike').json()
+    b = client.get('/v1/alerts?sports=wing,bike').json()
+    assert [x['id'] for x in a['alerts']] == [x['id'] for x in b['alerts']]
+    assert all(x['kind'] in ('window', 'warning') and x['title'] and x['route'] for x in a['alerts'])
+    assert {r['sport'] for r in a['ratings'].values()} <= {'wing', 'bike'}

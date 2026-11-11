@@ -86,6 +86,13 @@ def hourly(lat: float | None = None, lon: float | None = None, place: str | None
     return build_mod.hourly(b, p)
 
 
+@app.get('/v1/alerts', dependencies=[Depends(auth)])
+def alerts(sports: str | None = None, lat: float | None = None, lon: float | None = None, place: str | None = None,
+           b: Builder = Depends(builder)):
+    p = None if lat is None or lon is None else {'name': place or f'{lat:.2f}, {lon:.2f}', 'lat': lat, 'lon': lon}
+    return b.alerts(sports.split(',') if sports else None, p)
+
+
 @app.get('/v1/places', dependencies=[Depends(auth)])
 def places(q: str = ''):
     return {'places': build_mod.places(_sources, q.strip())}

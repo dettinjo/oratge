@@ -1,6 +1,7 @@
 """Assembles the app's JSON contract (same shapes as app/assets/sample/*.json) from live data."""
 from __future__ import annotations
 
+import hashlib
 import logging
 import math
 from datetime import date, datetime, timedelta, timezone
@@ -799,6 +800,39 @@ class Builder:
                 'days': self.day_ratings('wing', wing_hours), 'heatmap': heat, 'months': months,
                 'sources': f'Ratings from Open-Meteo hourly forecasts and your ranges; history: {note}'}
 
+    def alerts(self, sports: list[str] | None = None, place: dict | None = None) -> dict:
+        """Everything worth a notification right now. Stable ids let the app notify each item once.
+
+        window:  a 4–5 rated window for one of your sports today or in the next two days
+        warning: an official warning touching your places
+        plan:    the current best rating per sport and day (the app compares with what it saw before)"""
+        sports = [s for s in (sports or list(SPORT_SPOT)) if s in SPORT_SPOT]
+        t0 = today_local()
+        out, ratings = [], {}
+        for sport in sports:
+            spot = SPOTS[SPORT_SPOT[sport]]
+            hours = self.hours(spot, summit=sport == 'hike')
+            for i in range(3):
+                day = t0 + timedelta(days=i)
+                rated = [E.rate(sport, h, spot, self.p) for h in E.day_hours(hours, day)]
+                w = E.best_window(rated, self.length(sport))
+                if not w:
+                    continue
+                ratings[f'{sport}:{day}'] = {'rating': w[2], 'window': win(w), 'sport': sport, 'day': str(day)}
+                ended = i == 0 and w[1] <= datetime.now(TZ).hour
+                if w[2] >= 4 and not ended:
+                    when = 'Today' if i == 0 else ('Tomorrow' if i == 1 else WD[day.weekday()])
+                    out.append({'id': f'window:{sport}:{day}:{w[0]}', 'kind': 'window', 'sport': sport,
+                                'title': f'{SPORT_TITLE[sport]}: {ratingword(w[2])} window '
+                                         + ('today' if i == 0 else 'tomorrow' if i == 1 else f'on {when}'),
+                                'body': f'{spot["name"]} · {when} {win(w)} · {self.reason(sport, rated, w)}',
+                                'route': f'/activities/{sport}'})
+        for w in self.warnings(place):
+            wid = hashlib.md5((w['title'] + w['detail']).encode()).hexdigest()[:12]  # stable across restarts
+            out.append({'id': f'warning:{wid}', 'kind': 'warning',
+                        'title': w['title'], 'body': w['detail'], 'route': '/today', 'level': w['level']})
+        return {'alerts': out, 'ratings': ratings, 'generated': datetime.now(TZ).isoformat(timespec='minutes')}
+
     def history(self) -> tuple[dict, dict, str]:
         """Rideable hours (wing, Castelldefels) from archived high-resolution forecasts (Open-Meteo
         historical forecast API, 2023→) until the XEMA station archive is long enough."""
@@ -968,6 +1002,10 @@ def observed_today(b: 'Builder', place: dict) -> dict | None:
     except Exception as e:
         log.info('observed today failed: %s', e)
         return None
+
+
+def ratingword(r: int) -> str:
+    return ['poor', 'poor', 'marginal', 'fair', 'good', 'epic'][max(0, min(5, r))]
 
 
 def places(src, q: str) -> list[dict]:

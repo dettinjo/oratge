@@ -71,7 +71,8 @@ class _LocationPickerState extends State<_LocationPicker> {
         throw 'Oratge needs location permission for this. You can still search a place.';
       }
       final pos = await Geolocator.getCurrentPosition(
-          locationSettings: const LocationSettings(accuracy: LocationAccuracy.low, timeLimit: Duration(seconds: 12)));
+        locationSettings: const LocationSettings(accuracy: LocationAccuracy.low, timeLimit: Duration(seconds: 12)),
+      );
       if (!mounted) return;
       final app = AppScope.of(context);
       if (pos.latitude < 40 || pos.latitude > 43.5 || pos.longitude < -0.5 || pos.longitude > 3.6) {
@@ -101,7 +102,10 @@ class _LocationPickerState extends State<_LocationPicker> {
         ListTile(
           contentPadding: EdgeInsets.zero,
           minTileHeight: 56,
-          leading: CircleAvatar(backgroundColor: c.surface2, child: Icon(icon, color: c.text, size: 20)),
+          leading: CircleAvatar(
+            backgroundColor: c.surface2,
+            child: Icon(icon, color: c.text, size: 20),
+          ),
           title: Text(title, style: OgText.actName.copyWith(color: c.text)),
           subtitle: sub.isEmpty ? null : Text(sub, style: OgText.chip.copyWith(color: c.text2)),
           trailing: trailing ?? (selected ? Icon(Icons.check, color: c.r4) : null),
@@ -117,42 +121,68 @@ class _LocationPickerState extends State<_LocationPicker> {
       );
     }
 
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text('Location', style: OgText.verdictBest.copyWith(color: c.text)),
-      const SizedBox(height: 12),
-      TextField(
-        controller: _q,
-        autofocus: false,
-        onChanged: _search,
-        style: OgText.body.copyWith(color: c.text),
-        decoration: InputDecoration(
-          hintText: 'Search a town in Catalonia',
-          hintStyle: OgText.body.copyWith(color: c.text3),
-          prefixIcon: Icon(Icons.search, color: c.text2),
-          suffixIcon: _searching ? Padding(padding: const EdgeInsets.all(14), child: SizedBox.square(dimension: 16, child: CircularProgressIndicator(strokeWidth: 2, color: c.text2))) : null,
-          filled: true,
-          fillColor: c.surface,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Location', style: OgText.verdictBest.copyWith(color: c.text)),
+        const SizedBox(height: 12),
+        TextField(
+          controller: _q,
+          autofocus: false,
+          onChanged: _search,
+          style: OgText.body.copyWith(color: c.text),
+          decoration: InputDecoration(
+            hintText: 'Search a town in Catalonia',
+            hintStyle: OgText.body.copyWith(color: c.text3),
+            prefixIcon: Icon(Icons.search, color: c.text2),
+            suffixIcon: _searching
+                ? Padding(
+                    padding: const EdgeInsets.all(14),
+                    child: SizedBox.square(dimension: 16, child: CircularProgressIndicator(strokeWidth: 2, color: c.text2)),
+                  )
+                : null,
+            filled: true,
+            fillColor: c.surface,
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+          ),
         ),
-      ),
-      const SizedBox(height: 8),
-      for (final p in _results)
-        tile(Icons.place_outlined, p.name, p.region, () => _pick(p),
-            selected: cur?.name == p.name && cur?.current == false, trailing: star(p)),
-      if (_results.isEmpty) ...[
-        tile(Icons.my_location, 'Current location', _locError ?? (cur?.current == true ? cur!.name : 'Uses your approximate position'),
+        const SizedBox(height: 8),
+        for (final p in _results)
+          tile(
+            Icons.place_outlined,
+            p.name,
+            p.region,
+            () => _pick(p),
+            selected: cur?.name == p.name && cur?.current == false,
+            trailing: star(p),
+          ),
+        if (_results.isEmpty) ...[
+          tile(
+            Icons.my_location,
+            'Current location',
+            _locError ?? (cur?.current == true ? cur!.name : 'Uses your approximate position'),
             _locating ? () {} : _useCurrent,
             selected: cur?.current == true,
-            trailing: _locating ? SizedBox.square(dimension: 18, child: CircularProgressIndicator(strokeWidth: 2, color: c.text2)) : null),
-        tile(Icons.home_outlined, 'Home · ${app.profile['home']}', 'From your profile', () => _pick(null), selected: cur == null),
-        if (app.favorites.isNotEmpty) ...[
-          const OgSectionLabel('Favourites'),
-          for (final p in app.favorites)
-            tile(Icons.star_outline, p.name, p.region, () => _pick(p), selected: cur?.name == p.name, trailing: star(p)),
+            trailing: _locating
+                ? SizedBox.square(dimension: 18, child: CircularProgressIndicator(strokeWidth: 2, color: c.text2))
+                : (cur?.current == true ? star(cur!) : null),
+          ),
+          tile(
+            Icons.home_outlined,
+            'Home · ${app.profile['home']}',
+            'From your profile',
+            () => _pick(null),
+            selected: cur == null,
+          ),
+          if (app.favorites.isNotEmpty) ...[
+            const OgSectionLabel('Favourites'),
+            for (final p in app.favorites)
+              tile(Icons.star_outline, p.name, p.region, () => _pick(p), selected: cur?.name == p.name, trailing: star(p)),
+          ],
+          const OgSectionLabel('Your spots'),
+          for (final p in savedPlaces) tile(Icons.flag_outlined, p.name, p.region, () => _pick(p), selected: cur?.name == p.name),
         ],
-        const OgSectionLabel('Your spots'),
-        for (final p in savedPlaces) tile(Icons.flag_outlined, p.name, p.region, () => _pick(p), selected: cur?.name == p.name),
       ],
-    ]);
+    );
   }
 }
