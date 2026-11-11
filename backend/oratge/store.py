@@ -58,6 +58,13 @@ class Store:
                             (self.month(), plan))
             self.db.commit()
 
+    def set_used(self, plan: str, used: int):
+        """Overwrite this month's count (sync with Meteocat's own counter)."""
+        with _lock:
+            self.db.execute('insert into quota values (?,?,?) on conflict(month, plan) do update set used=excluded.used',
+                            (self.month(), plan, used))
+            self.db.commit()
+
     # ── archive (forecast vs observation, history) ──
     def archive(self, kind: str, spot: str, ts: str, payload):
         with _lock:

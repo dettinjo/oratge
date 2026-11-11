@@ -1,7 +1,8 @@
 """Forecast/observation archive behind the planners' "station check".
 
 - Every morning: snapshot the day's hourly forecast per spot (Open-Meteo; no key needed).
-- Every night (Meteocat key only): store yesterday's XEMA readings for each spot's station (1 call/station/day).
+- Every night (Meteocat key only): store yesterday's XEMA readings for each spot's station, plus its wind station
+  where the own one has no anemometer (1 call/station/day).
 - Station check = last 30 days where both exist: bias, mean absolute error, and rating hit rate (±1).
 """
 from __future__ import annotations
@@ -12,7 +13,7 @@ import time
 from datetime import date, datetime, timedelta
 
 from . import engine as E
-from .spots import SPORT_SPOT, SPOTS
+from .spots import SPORT_SPOT, SPOTS, merge_wind
 
 log = logging.getLogger('oratge')
 MS_TO_KN = 1.94384
@@ -47,15 +48,21 @@ def store_observations(builder, day: date) -> int:
         st = spot.get('station')
         if not st:
             continue
-        data = builder.src.try_meteocat('xema', f'/xema/v1/estacions/mesurades/{st}/{day:%Y/%m/%d}', 7 * 86400)
+        def read(code):
+            data = builder.src.try_meteocat('xema', f'/xema/v1/estacions/mesurades/{code}/{day:%Y/%m/%d}', 7 * 86400)
+            return {v['codi']: v.get('lectures', []) for v in data[0]['variables']} if data else {}
+
         try:
+            vars_ = read(st)
+            if 30 not in vars_ and spot.get('wind_station'):
+                vars_ = merge_wind(vars_, read(spot['wind_station']))
             per_hour: dict[str, dict] = {}
-            for var in data[0]['variables']:
-                for lec in var.get('lectures', []):
+            for codi, lectures in vars_.items():
+                for lec in lectures:
                     ts = lec['data'][:13] + ':00'  # 30-min readings → keep the one on the hour
                     if lec['data'][14:16] != '00':
                         continue
-                    per_hour.setdefault(ts, {})[var['codi']] = float(lec['valor'])
+                    per_hour.setdefault(ts, {})[codi] = float(lec['valor'])
             for ts, vals in per_hour.items():
                 builder.src.store.archive('obs', sid, ts, vals)
                 n += 1
@@ -108,6 +115,11 @@ def start_scheduler(make_builder, every_s: int = 3600):
                     log.info('archived %d forecast hours', snapshot_forecasts(b, now.date()))
                     done_fc = now.date()
                 if now.hour >= 2 and done_obs != now.date():
+                    if b.src.meteocat_available():
+                        try:
+                            log.info('meteocat quota synced: %s', b.src.sync_quota())
+                        except Exception as e:
+                            log.warning('quota sync failed: %s', e)
                     log.info('archived %d observations', store_observations(b, now.date() - timedelta(days=1)))
                     done_obs = now.date()
             except Exception as e:

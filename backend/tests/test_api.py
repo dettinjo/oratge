@@ -154,3 +154,60 @@ def test_map_forecast_grid():
     n = len(d['lats']) * len(d['lons'])
     assert len(d['times']) == 12 and len(d['fields']['wind']) == 12 and len(d['fields']['wind'][0]) == n
     assert set(d['fields']) == {'wind', 'wdir', 'gust', 'temp', 'precip', 'pprob', 'code'}
+
+
+class KeyedSources(FakeSources):
+    """As if a Meteocat key were set: XEMA calls answer with recorded readings (Viladecans has no anemometer)."""
+
+    def meteocat_available(self):
+        return True
+
+    def try_meteocat(self, plan, path, max_age):
+        if '/xema/' in path:
+            code = path.split('/')[5]
+            return fx('xema.json').get({'XL': 'YV', 'Z9': 'YV', 'UI': 'YY'}.get(code, code))
+        return None
+
+
+def test_live_takes_wind_from_the_wind_station():
+    from oratge.build import Builder
+    from oratge.spots import SPOTS
+    b = Builder(KeyedSources(api._store), {})
+    xema = fx('xema.json')
+    last = lambda st, c: next(v for v in xema[st][0]['variables'] if v['codi'] == c)['lectures'][-1]['valor']  # noqa: E731
+    live = b.live(SPOTS['castelldefels'])
+    assert live['temp'] == last('YY', 32)  # own station
+    assert live['wind'] == pytest.approx(last('YV', 30) * 1.94384)  # wind station
+    assert live['wdir'] == last('YV', 31)
+
+
+def test_station_without_wind_is_not_zero_knots():
+    from oratge.build import Builder
+    b = Builder(KeyedSources(api._store), {})
+    live = b.live({'station': 'YY'})
+    assert live['temp'] is not None and live['wind'] is None and live['gust'] is None
+
+
+def test_spot_page_with_meteocat_key(monkeypatch):
+    monkeypatch.setattr(api, '_sources', KeyedSources(api._store))
+    for sid in ('castelldefels', 'pedraforca', 'ocata'):
+        r = client.get(f'/v1/spots/{sid}')
+        assert r.status_code == 200, r.text
+        assert 'XEMA station' in r.json()['sources']
+
+
+def test_warnings_from_real_episode():
+    """Recorded episodis-oberts (11 Nov 2026 wind episode): only our comarques, local times, English thresholds."""
+    from oratge.build import Builder
+
+    class S(KeyedSources):
+        def try_meteocat(self, plan, path, max_age):
+            return fx('avisos.json') if 'episodis' in path else super().try_meteocat(plan, path, max_age)
+
+    ws = Builder(S(api._store)).warnings()
+    assert ws and len(ws) <= 4
+    assert all(w['level'] in ('yellow', 'orange', 'red') for w in ws)
+    w = next(w for w in ws if 'Baix Llobregat' in w['detail'])
+    assert w['title'] == 'Yellow warning · Wind'
+    assert 'Castelldefels' in w['detail'] and 'gusts above 72 km/h' in w['detail'] and 'Thu 07–19 h' in w['detail']
+    assert not any('Pallars' in w['detail'] for w in ws)

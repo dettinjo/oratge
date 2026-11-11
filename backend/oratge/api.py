@@ -63,7 +63,8 @@ def _archive():
 @app.get('/health')
 def health():
     return {'ok': True, 'meteocat': bool(settings.meteocat_key),
-            'quota': {plan: {'used': _store.used(plan), 'limit': lim} for plan, lim in settings.quota.items()}}
+            'quota': {plan: {'used': _store.used(plan), 'limit': lim, 'today_left': _sources.allowance(plan)}
+                      for plan, lim in settings.quota.items()}}
 
 
 @app.get('/v1/today', dependencies=[Depends(auth)])

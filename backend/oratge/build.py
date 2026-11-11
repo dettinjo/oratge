@@ -3,13 +3,13 @@ from __future__ import annotations
 
 import logging
 import math
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 
 from . import engine as E
 from .config import settings
 from .sources import WAVE_MODELS, WEATHER_MODELS, Sources
-from .spots import HOME, SPORT_SPOT, SPOTS
+from .spots import COMARCA_NAMES, HOME, SPORT_SPOT, SPOTS, merge_wind
 
 log = logging.getLogger('oratge')
 TZ = ZoneInfo(settings.tz)
@@ -45,6 +45,22 @@ def hh(h: int) -> str:
 
 def win(w) -> str:
     return f'{w[0]:02d}–{w[1]:02d} h'
+
+
+METEOR_EN = {'Vent': 'Wind', 'Pluja': 'Rain', 'Intensitat de pluja': 'Heavy rain', 'Acumulació de pluja': 'Rain total',
+             'Neu': 'Snow', 'Neu acumulada en 24 hores': 'Snow', 'Calor': 'Heat', 'Calor intensa': 'Heat', 'Fred': 'Cold',
+             'Fred intens': 'Cold', 'Estat de la mar': 'Sea state', 'Onada de calor': 'Heatwave'}
+
+
+def threshold_en(s: str) -> str:
+    """'Ratxa màxima > 90 km/h (25 m/s)' → 'gusts above 90 km/h'; other thresholds get a light translation."""
+    import re
+    s = re.sub(r'\s*\([^)]*m/s\)', '', s or '').strip()
+    for ca, en in (('Ratxa màxima', 'gusts'), ('Intensitat de pluja', 'rain'), ('Acumulació', 'total'),
+                   ('en 24 hores', 'in 24 h'), ('en 1 hora', 'in 1 h'), ('en 30 minuts', 'in 30 min'), ('Onada', 'waves'),
+                   ('Temperatura màxima', 'max temperature'), ('Temperatura mínima', 'min temperature'), (' > ', ' above '), (' < ', ' below ')):
+        s = s.replace(ca, en)
+    return s
 
 
 class Builder:
@@ -139,7 +155,7 @@ class Builder:
         dry = all(h.precip < 0.1 for h in hours[idx:idx + 2])
         live = self.live(place) if place is HOME else None
         src_line = (f'Meteocat · {HOME["station_name"]} station · {live["age"]}' if live
-                    else 'Open-Meteo model · this hour (no Meteocat key yet)')
+                    else 'Open-Meteo model · this hour')
         temp = live['temp'] if live and live.get('temp') is not None else cur.temp
         wind = live['wind'] if live and live.get('wind') is not None else cur.wind
         gust = live['gust'] if live and live.get('gust') is not None else cur.gust
@@ -213,36 +229,76 @@ class Builder:
 
     # ── Meteocat pieces (only with a key) ──
     def warnings(self) -> list[dict]:
+        """Open Meteocat warnings that touch the comarques of your spots or home, worst first.
+
+        Structure (checked live 2026-11-11): episode → avisos → evolucions (per day) → periodes (6 h) → afectacions,
+        each with idComarca and perill (SMC danger grade 1–6: 1–2 yellow, 3–4 orange, 5–6 red)."""
         if not self.src.meteocat_available():
             return []
         d = today_local()
         data = self.src.try_meteocat('prediccio', f'/pronostic/v2/smp/episodis-oberts?data={d:%Y-%m-%d}Z', 6 * 3600)
-        out = []
-        for ep in data or []:  # structure verified only against client libraries; defensive parsing
+        mine: dict[int, list[str]] = {}
+        for sp in [*SPOTS.values(), HOME]:
+            for c in sp.get('comarques', []):
+                mine.setdefault(c, []).append(sp['name'])
+        found: dict[tuple, dict] = {}
+        for ep in data or []:
             try:
-                for av in ep.get('estat', {}).get('avisos', []) or ep.get('avisos', []):
-                    lvl = int(av.get('nivell', 1))
-                    level = 'red' if lvl >= 5 else ('orange' if lvl >= 3 else 'yellow')
-                    meteor = ep.get('meteor', {}).get('nom', 'Weather')
-                    out.append({'level': level, 'title': f'{level.capitalize()} warning · {meteor}',
-                                'detail': av.get('comarca', {}).get('nom', '') if isinstance(av.get('comarca'), dict) else ''})
-            except Exception:
-                continue
+                meteor = (ep.get('meteor') or {}).get('nom', '')
+                for av in ep.get('avisos') or []:
+                    pre = not (av.get('tipus') or '').lower().startswith('av')  # 'Avís' = warning; otherwise a heads-up
+                    for ev in av.get('evolucions') or []:
+                        day = date.fromisoformat(ev['dia'][:10])
+                        for per in ev.get('periodes') or []:
+                            for af in per.get('afectacions') or []:
+                                c = af.get('idComarca')
+                                if c not in mine:
+                                    continue
+                                # Periods are UTC 6 h blocks ('18-00'): convert to local time.
+                                start, _ = (int(x) for x in per['nom'].split('-'))
+                                t0 = datetime(day.year, day.month, day.day, start, tzinfo=timezone.utc).astimezone(TZ)
+                                rec = found.setdefault((meteor, c), {'perill': 0, 'slots': [], 'pre': pre, 'llindar': ''})
+                                if int(af.get('perill') or 1) >= rec['perill']:
+                                    rec['llindar'] = af.get('llindar') or ev.get('llindar1') or ''
+                                rec['perill'] = max(rec['perill'], int(af.get('perill') or 1))
+                                rec['slots'].append((t0, t0 + timedelta(hours=6)))
+            except Exception as e:
+                log.info('warning parse failed: %s', e)
+        out = []
+        for (meteor, c), rec in sorted(found.items(), key=lambda kv: (-kv[1]['perill'], min(kv[1]['slots']))):
+            level = 'red' if rec['perill'] >= 5 else ('orange' if rec['perill'] >= 3 else 'yellow')
+            slots = sorted(rec['slots'])
+            a, b = slots[0][0], slots[-1][1]
+            same = a.date() == (b - timedelta(minutes=1)).date()
+            when = (f'{WD[a.weekday()]} {a.hour:02d}–{b.hour or 24:02d} h' if same
+                    else f'{WD[a.weekday()]} {a.hour:02d} h – {WD[b.weekday()]} {b.hour:02d} h')
+            where = f'{COMARCA_NAMES.get(c, "comarca " + str(c))} ({", ".join(dict.fromkeys(mine[c]))})'
+            out.append({'level': level, 'pre': rec['pre'],
+                        'title': f'{level.capitalize()} {"heads-up" if rec["pre"] else "warning"} · {METEOR_EN.get(meteor, meteor)}',
+                        'detail': ' · '.join(x for x in (where, when, threshold_en(rec['llindar'])) if x)})
         return out[:4]
 
     def live(self, place: dict) -> dict | None:
-        """Latest XEMA readings for a station (Meteocat key needed)."""
+        """Latest XEMA readings for a place's station, wind from its wind station if it has none (key needed)."""
         if not self.src.meteocat_available() or not place.get('station'):
             return None
         d = today_local()
-        data = self.src.try_meteocat('xema', f'/xema/v1/estacions/mesurades/{place["station"]}/{d:%Y/%m/%d}', 1800)
+
+        def read(st):
+            data = self.src.try_meteocat('xema', f'/xema/v1/estacions/mesurades/{st}/{d:%Y/%m/%d}', 1800)
+            return {v['codi']: v['lectures'] for v in data[0]['variables']} if data else {}
+
         try:
-            vars_ = {v['codi']: v['lectures'] for v in data[0]['variables']}
-            last = lambda c: float(vars_[c][-1]['valor']) if c in vars_ and vars_[c] else None  # noqa: E731
-            ts = vars_.get(30, vars_.get(32))[-1]['data']
+            vars_ = read(place['station'])
+            if 30 not in vars_ and place.get('wind_station'):
+                vars_ = merge_wind(vars_, read(place['wind_station']))
+            if not vars_:
+                return None
+            last = lambda c: float(vars_[c][-1]['valor']) if vars_.get(c) else None  # noqa: E731
+            ts = (vars_.get(32) or vars_.get(30))[-1]['data']
             age = max(0, int((datetime.now(TZ) - datetime.fromisoformat(ts.replace('Z', '+00:00'))).total_seconds() // 60))
-            ms = 1.94384  # m/s → kn
-            return {'temp': last(32), 'wind': (last(30) or 0) * ms, 'gust': (last(50) or 0) * ms, 'wdir': last(31),
+            kn = lambda v: None if v is None else v * 1.94384  # noqa: E731  m/s → kn
+            return {'temp': last(32), 'wind': kn(last(30)), 'gust': kn(last(50)), 'wdir': last(31),
                     'age': f'{age} min ago'}
         except Exception as e:
             log.info('live parse failed: %s', e)
@@ -466,9 +522,10 @@ class Builder:
         if sport == 'wing':
             cur = past[-1]
             live = self.live(spot)
+            live = live if live and live.get('wind') is not None else None
             wind = live['wind'] if live else cur.wind
             wdir = live['wdir'] if live and live.get('wdir') is not None else cur.wdir
-            label = 'Live at the spot' if live else 'At the spot now (model)'
+            label = f'Live · {spot.get("wind_station_name") or spot.get("station_name")}' if live else 'At the spot now (model)'
             return [{'label': label, 'blocks': [
                 {'type': 'WindCompass', 'props': {'from': round(wdir), 'speed': round(wind), 'shoreFacing': spot['shore_facing'],
                                                   'caption': f'{"live" if live else "model"} · {E.shore_relation(wdir, spot["shore_facing"])}'}},
@@ -567,9 +624,7 @@ class Builder:
         except Exception as e:
             log.info('model agreement unavailable: %s', e)
         own = {'wing': hour.wind, 'bike': hour.precip, 'run': hour.temp, 'hike': hour.wind, 'surf': hour.wave or 0}[sport]
-        rows.insert(0, {'name': 'Open-Meteo best match' if not self.src.meteocat_available() else 'Meteocat',
-                        'detail': 'blended forecast used for the plan' if not self.src.meteocat_available() else 'municipal + beach forecast',
-                        'value': round(own, 1)})
+        rows.insert(0, {'name': 'Open-Meteo best match', 'detail': 'blended forecast used for the plan', 'value': round(own, 1)})
         n = len(rows)
         for r in rows:
             r['weight'] = round(100 / n)
@@ -718,8 +773,11 @@ class Builder:
         past = [h for h in hours if now - timedelta(hours=11) <= h.t <= now] or hours[:12]
         cur = past[-1]
         live = self.live(s)
-        facts = [{'label': 'Wind', 'value': f'{(live or {}).get("wind", cur.wind):.0f} kn', 'sub': E.compass(cur.wdir), 'accent': 'wind', 'size': 'lg'},
-                 {'label': 'Gusts', 'value': f'{(live or {}).get("gust", cur.gust):.0f} kn', 'sub': 'last 30 min' if live else 'model, this hour', 'accent': 'wind', 'size': 'lg'}]
+        lw = live if live and live.get('wind') is not None else None  # live wind only where a station measures it
+        wind, gust = (lw['wind'], lw['gust'] if lw['gust'] is not None else cur.gust) if lw else (cur.wind, cur.gust)
+        wdir = lw['wdir'] if lw and lw.get('wdir') is not None else cur.wdir
+        facts = [{'label': 'Wind', 'value': f'{wind:.0f} kn', 'sub': E.compass(wdir) + (' · live' if lw else ''), 'accent': 'wind', 'size': 'lg'},
+                 {'label': 'Gusts', 'value': f'{gust:.0f} kn', 'sub': 'last 30 min' if lw else 'model, this hour', 'accent': 'wind', 'size': 'lg'}]
         if cur.wave is not None:
             facts += [{'label': 'Waves', 'value': f'{cur.wave:.1f} m', 'sub': f'{cur.period or 0:.0f} s', 'accent': 'water', 'size': 'lg'},
                       {'label': 'Water', 'value': f'{cur.sst:.1f}°' if cur.sst else '—', 'sub': wetsuit(cur.sst), 'accent': 'water', 'size': 'lg'}]
@@ -737,7 +795,7 @@ class Builder:
             sections += [{'label': 'Rideable days per month', 'blocks': [{'type': 'MonthBars', 'props': months}]},
                          {'label': 'Rideable hours · last 6 months', 'blocks': [{'type': 'CalendarHeatmap', 'props': heat}]}]
         return {'id': sid, 'title': s['name'], 'date': date_line(), 'live': facts, 'sections': sections,
-                'sources': (f'XEMA station {s.get("station_name")} (live), ' if live else '') + 'Open-Meteo forecast and marine; ERA5 history'}
+                'sources': (f'XEMA station {s.get("station_name")}' + (f' + {s["wind_station_name"]} (wind)' if s.get('wind_station') else '') + ' (live), ' if live else '') + 'Open-Meteo forecast and marine; ERA5 history'}
 
     def map(self) -> dict:
         pins = {'castelldefels': (0.56, 0.74), 'ocata': (0.70, 0.62), 'collserola': (0.62, 0.66), 'pedraforca': (0.48, 0.24)}
@@ -838,11 +896,11 @@ SUMMARY = {'sun': 'Sunny', 'partly': 'Partly cloudy', 'cloud': 'Cloudy', 'rain':
 CHIPS = {'bike': {'label': 'Ride length', 'options': ['1 h', '2 h', '3 h', '4 h', '5 h'], 'selected': '3 h'},
          'run': {'label': 'Run length', 'options': ['5 km', '10 km', '15 km', '21 km'], 'selected': '10 km'}}
 SOURCES = {
-    'wing': 'Open-Meteo hourly forecast (wind, gusts), marine (chop, water temp), models and ECMWF ensemble; Meteocat beach forecast and XEMA wind',
-    'surf': 'Open-Meteo Marine (waves, swell period and direction, water temp), forecast (wind), wave models; Meteocat beach forecast and buoys',
-    'bike': 'Open-Meteo hourly forecast (rain, wind, temperature, UV), models and ensemble; Meteocat municipal forecast and XEMA rain',
-    'run': 'Open-Meteo hourly forecast (temperature, feels-like, UV, rain), models and ensemble; Meteocat municipal forecast',
-    'hike': 'Open-Meteo forecast scaled to the summit (lapse rate), storm risk estimated from CAPE and showers, freezing level; Meteocat summit forecast and XEMA stations',
+    'wing': 'Open-Meteo hourly forecast (wind, gusts), marine (chop, water temp), models and ECMWF ensemble; Meteocat (SMC): live XEMA wind, official warnings',
+    'surf': 'Open-Meteo Marine (waves, swell period and direction, water temp), forecast (wind), wave models; Meteocat (SMC): live XEMA station, official warnings',
+    'bike': 'Open-Meteo hourly forecast (rain, wind, temperature, UV), models and ensemble; Meteocat (SMC): live XEMA station, official warnings',
+    'run': 'Open-Meteo hourly forecast (temperature, feels-like, UV, rain), models and ensemble; Meteocat (SMC): live XEMA station, official warnings',
+    'hike': 'Open-Meteo forecast scaled to the summit (lapse rate), storm risk estimated from CAPE and showers, freezing level; Meteocat (SMC): live XEMA stations (Cadí Nord wind), official warnings',
 }
 
 

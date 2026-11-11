@@ -4,6 +4,7 @@ Every fetch goes through the store: fresh cache → network → stale cache. Met
 quota governor, which spreads each plan's monthly budget over the remaining days.
 """
 import calendar
+from urllib.parse import parse_qsl
 import logging
 from datetime import datetime, timezone
 
@@ -116,12 +117,30 @@ class Sources:
     def meteocat_available(self) -> bool:
         return bool(settings.meteocat_key)
 
+    @staticmethod
+    def _today_plan(plan: str) -> str:
+        return f'{plan}@{datetime.now(timezone.utc):%Y-%m-%d}'  # daily ledger row next to the monthly one
+
     def allowance(self, plan: str) -> int:
-        """Calls still allowed today so the plan's monthly budget lasts to the end of the month."""
+        """Calls still allowed today: today's fair share of what was left this morning, minus today's calls."""
         now = datetime.now(timezone.utc)
         days_left = calendar.monthrange(now.year, now.month)[1] - now.day + 1
-        left = settings.quota[plan] - self.store.used(plan)
-        return max(0, left // days_left + (1 if left % days_left else 0))
+        today = self.store.used(self._today_plan(plan))
+        left_at_start = settings.quota[plan] - self.store.used(plan) + today
+        share = -(-max(0, left_at_start) // days_left)  # ceil
+        return max(0, min(share - today, settings.quota[plan] - self.store.used(plan)))
+
+    def sync_quota(self) -> dict:
+        """Align the ledger with Meteocat's counter (/quotes/v1/consum-actual), which also sees calls made elsewhere."""
+        names = {'predicci': 'prediccio', 'xema': 'xema', 'xdde': 'xdde', 'refer': 'referencia', 'quota': 'quotes'}
+        data = self.meteocat('quotes', '/quotes/v1/consum-actual', 0)
+        out = {}
+        for p in data.get('plans', []):
+            plan = next((v for k, v in names.items() if p['nom'].lower().startswith(k)), None)
+            if plan:
+                self.store.set_used(plan, max(self.store.used(plan), int(p['consultesRealitzades'])))
+                out[plan] = (int(p['consultesRealitzades']), int(p['maxConsultes']))
+        return out
 
     def meteocat(self, plan: str, path: str, max_age: float):
         key = f'mc:{path}'
@@ -130,13 +149,16 @@ class Sources:
             return hit
         if not settings.meteocat_key:
             raise QuotaExceeded('no Meteocat key')
-        if settings.quota[plan] - self.store.used(plan) <= 0:
+        if self.allowance(plan) <= 0:  # today's share is used up: last known answer, or nothing
             stale = self.store.stale(key)
             if stale is not None:
                 return stale
             raise QuotaExceeded(plan)
         self.store.spend(plan)
-        return self._get(key, METEOCAT + path, {}, 0, headers={'X-Api-Key': settings.meteocat_key})
+        self.store.spend(self._today_plan(plan))
+        # httpx replaces a URL's own query with `params`, so the query has to travel as params.
+        url, _, query = path.partition('?')
+        return self._get(key, METEOCAT + url, dict(parse_qsl(query)), 0, headers={'X-Api-Key': settings.meteocat_key})
 
     def try_meteocat(self, plan: str, path: str, max_age: float):
         try:
