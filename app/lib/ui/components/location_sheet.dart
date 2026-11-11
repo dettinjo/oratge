@@ -107,6 +107,16 @@ class _LocationPickerState extends State<_LocationPicker> {
           trailing: trailing ?? (selected ? Icon(Icons.check, color: c.r4) : null),
           onTap: onTap,
         );
+    // Star a search result to keep it as a favourite (synced across devices when sync is on).
+    Widget star(Place p) {
+      final on = app.isFavorite(p);
+      return IconButton(
+        tooltip: on ? 'Remove from favourites' : 'Add to favourites',
+        onPressed: () => app.toggleFavorite(p),
+        icon: Icon(on ? Icons.star : Icons.star_outline, color: on ? c.sun : c.text2),
+      );
+    }
+
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Text('Location', style: OgText.verdictBest.copyWith(color: c.text)),
       const SizedBox(height: 12),
@@ -127,13 +137,19 @@ class _LocationPickerState extends State<_LocationPicker> {
       ),
       const SizedBox(height: 8),
       for (final p in _results)
-        tile(Icons.place_outlined, p.name, p.region, () => _pick(p), selected: cur?.name == p.name && cur?.current == false),
+        tile(Icons.place_outlined, p.name, p.region, () => _pick(p),
+            selected: cur?.name == p.name && cur?.current == false, trailing: star(p)),
       if (_results.isEmpty) ...[
         tile(Icons.my_location, 'Current location', _locError ?? (cur?.current == true ? cur!.name : 'Uses your approximate position'),
             _locating ? () {} : _useCurrent,
             selected: cur?.current == true,
             trailing: _locating ? SizedBox.square(dimension: 18, child: CircularProgressIndicator(strokeWidth: 2, color: c.text2)) : null),
         tile(Icons.home_outlined, 'Home · ${app.profile['home']}', 'From your profile', () => _pick(null), selected: cur == null),
+        if (app.favorites.isNotEmpty) ...[
+          const OgSectionLabel('Favourites'),
+          for (final p in app.favorites)
+            tile(Icons.star_outline, p.name, p.region, () => _pick(p), selected: cur?.name == p.name, trailing: star(p)),
+        ],
         const OgSectionLabel('Your spots'),
         for (final p in savedPlaces) tile(Icons.flag_outlined, p.name, p.region, () => _pick(p), selected: cur?.name == p.name),
       ],

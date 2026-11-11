@@ -222,3 +222,48 @@ def test_warnings_from_real_episode():
 def test_warning_texts_in_english(name, thr, title, text):
     from oratge.build import meteor_en, threshold_en
     assert meteor_en(name) == title and threshold_en(thr) == text
+
+
+@pytest.fixture
+def synced(monkeypatch):
+    """Sync needs a server token; requests below carry it."""
+    import dataclasses
+    monkeypatch.setattr(api, 'settings', dataclasses.replace(api.settings, app_token='t'))
+    client.headers['Authorization'] = 'Bearer t'
+    yield
+    client.headers.pop('Authorization', None)
+
+
+def test_sync_refused_without_server_token():
+    assert client.get('/v1/sync').status_code == 403
+
+
+def test_sync_last_writer_wins_per_key(synced):
+    from oratge.store import Store
+    st = Store(':memory:')
+    api_store = api._store
+    api._store = st
+    try:
+        r = client.put('/v1/sync', json={'fields': {'p.windFrom': {'v': '12', 't': 1000}, 'p.name': {'v': 'Joel', 't': 1000}}})
+        assert r.status_code == 200 and r.json()['changed'] == 2
+        # Another device: newer wind range, older name → only the wind range changes.
+        r = client.put('/v1/sync', json={'fields': {'p.windFrom': {'v': '15', 't': 2000}, 'p.name': {'v': 'Alex', 't': 500}}})
+        assert r.json()['changed'] == 1
+        f = client.get('/v1/sync').json()['fields']
+        assert f['p.windFrom'] == {'v': '15', 't': 2000} and f['p.name']['v'] == 'Joel'
+        # Lists and deletions (null) round-trip.
+        client.put('/v1/sync', json={'fields': {'favorites': {'v': [{'name': 'Sitges', 'lat': 41.2, 'lon': 1.8}], 't': 3000},
+                                                'p.ftp': {'v': None, 't': 3000}}})
+        f = client.get('/v1/sync').json()['fields']
+        assert f['favorites']['v'][0]['name'] == 'Sitges' and f['p.ftp']['v'] is None
+    finally:
+        api._store = api_store
+
+
+def test_sync_rejects_bad_payloads(synced):
+    client.headers['Authorization'] = 'Bearer wrong'
+    assert client.get('/v1/sync').status_code == 401
+    client.headers['Authorization'] = 'Bearer t'
+    assert client.put('/v1/sync', json={'nope': 1}).status_code == 422
+    assert client.put('/v1/sync', json={'fields': {'k': {'v': 1}}}).status_code == 422  # no timestamp
+    assert client.put('/v1/sync', content=b'x' * 300_000).status_code == 413

@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'models.dart';
 import 'repository.dart';
+import 'sync.dart';
 
 /// Field kinds used by the setup flow.
 enum FieldKind { text, number, choice, multi, toggle, range }
@@ -131,9 +132,11 @@ const setupSteps = <SetupStep>[
       FieldDef('alertChange', 'The plan changes by a full point', kind: FieldKind.toggle),
       FieldDef('alertMorning', 'Morning summary at 07:00', kind: FieldKind.toggle),
     ]),
-    FieldGroup('Privacy', [FieldDef('sync', 'Sync between my devices', kind: FieldKind.toggle, hint: 'End-to-end encrypted')]),
+    FieldGroup('Privacy', [
+      FieldDef('sync', 'Sync between my devices', kind: FieldKind.toggle, hint: 'Through your own Oratge server'),
+    ]),
   ], changes:
-      'Your details stay on this device. Forecast requests include your sport ranges so ratings fit you; the Oratge server uses them for that answer and doesn’t store them. Every field is optional.'),
+      'Forecast requests include your sport ranges so ratings fit you. With sync off your details stay on this device; with sync on, your profile, setup and favourite places are kept on your Oratge server so every device you sign in on shares them. Every field is optional.'),
 ];
 
 /// Defaults = the sample profile from the design (Alex in Barcelona).
@@ -151,8 +154,13 @@ const Map<String, dynamic> defaultProfile = {
   'alertWindow': true, 'alertWarnings': true, 'alertChange': true, 'alertMorning': false, 'sync': false,
 };
 
-/// App-wide state: theme, profile, setup progress, data source. Persisted locally.
-class AppState extends ChangeNotifier {
+/// Backend address and token from the build (--dart-define); the app's server settings override them.
+const buildApi = String.fromEnvironment('ORATGE_API');
+const buildToken = String.fromEnvironment('ORATGE_TOKEN');
+
+/// App-wide state: theme, profile, setup progress, favourite places, data source. Persisted locally,
+/// and with sync on, shared across devices through the backend (see [SyncService]).
+class AppState extends ChangeNotifier implements Syncable {
   AppState(this._prefs, {ForecastRepository? repository}) : repository = repository ?? SampleRepository() {
     final raw = _prefs?.getString('profile');
     profile = {...defaultProfile, if (raw != null) ...(jsonDecode(raw) as Map<String, dynamic>)};
@@ -160,6 +168,13 @@ class AppState extends ChangeNotifier {
     final rawPlace = _prefs?.getString('place');
     place = rawPlace == null ? null : Place.fromJson(jsonDecode(rawPlace) as Map<String, dynamic>);
     doneSteps = {...(_prefs?.getStringList('doneSteps') ?? ['you', 'body', 'sports', 'wing', 'surf', 'bike', 'hike', 'alerts'])};
+    favorites = [
+      for (final f in (jsonDecode(_prefs?.getString('favorites') ?? '[]') as List)) Place.fromJson(f as Map<String, dynamic>),
+    ];
+    stamps = {
+      for (final e in (jsonDecode(_prefs?.getString('sync:stamps') ?? '{}') as Map<String, dynamic>).entries)
+        e.key: (e.value as num).toInt(),
+    };
   }
 
   final SharedPreferences? _prefs;
@@ -171,9 +186,58 @@ class AppState extends ChangeNotifier {
   late Map<String, dynamic> profile;
   late ThemeMode themeMode;
   late Set<String> doneSteps;
+  late List<Place> favorites;
 
-  /// Place shown on Today (null = home from the profile).
+  /// Last local change per synced key (epoch ms). Kept even with sync off, so turning it on later
+  /// knows which side is newer.
+  late Map<String, int> stamps;
+
+  /// Place shown on Today (null = home from the profile). Per device, not synced.
   Place? place;
+
+  // ── Server connection ──
+  String get serverUrl => _prefs?.getString('server.url') ?? buildApi;
+  String get serverToken => _prefs?.getString('server.token') ?? buildToken;
+  bool get hasServer => serverUrl.isNotEmpty;
+  SyncService? sync;
+  bool get syncOn => profile['sync'] == true;
+
+  /// (Re)connects to the backend: forecasts from [serverUrl], sync when it is on. Without a server the
+  /// bundled sample data is shown.
+  void connect() {
+    sync?.dispose();
+    sync = null;
+    if (!hasServer) {
+      repository = SampleRepository();
+    } else {
+      final api = ApiRepository(serverUrl,
+          token: serverToken.isEmpty ? null : serverToken,
+          fallback: SampleRepository(),
+          profile: () => profile,
+          prefs: _prefs,
+          status: status);
+      repository = api;
+      api.prefetch(); // warm every screen in parallel; navigation then reads from the cache
+      if (syncOn) {
+        sync = SyncService(this, serverUrl, serverToken.isEmpty ? null : serverToken)..start();
+      }
+    }
+    status.bump(); // screens reload from the new source
+    notifyListeners();
+  }
+
+  /// Saves new server settings (empty url = back to the build's default) and reconnects.
+  void setServer(String url, String token) {
+    url = url.trim().replaceAll(RegExp(r'/+$'), '');
+    if (url.isEmpty) {
+      _prefs?.remove('server.url');
+      _prefs?.remove('server.token');
+    } else {
+      _prefs?.setString('server.url', url);
+      _prefs?.setString('server.token', token.trim());
+    }
+    connect();
+  }
 
   void setPlace(Place? p) {
     place = p;
@@ -193,16 +257,87 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
+  void _touch(String key) {
+    stamps[key] = DateTime.now().millisecondsSinceEpoch;
+    _prefs?.setString('sync:stamps', jsonEncode(stamps));
+    sync?.changed();
+  }
+
   void setField(String key, dynamic value) {
     profile[key] = value;
     _prefs?.setString('profile', jsonEncode(profile));
+    if (key == 'sync') {
+      // The switch itself is per device; turning it on starts syncing right away.
+      notifyListeners();
+      connect();
+      return;
+    }
+    _touch('p.$key');
     notifyListeners();
   }
 
   void markDone(String stepId) {
-    doneSteps.add(stepId);
+    if (!doneSteps.add(stepId)) return;
     _prefs?.setStringList('doneSteps', doneSteps.toList());
+    _touch('doneSteps');
     notifyListeners();
+  }
+
+  bool isFavorite(Place p) => favorites.any((f) => _same(f, p));
+  static bool _same(Place a, Place b) => (a.lat - b.lat).abs() < 0.005 && (a.lon - b.lon).abs() < 0.005;
+
+  void toggleFavorite(Place p) {
+    if (isFavorite(p)) {
+      favorites.removeWhere((f) => _same(f, p));
+    } else {
+      favorites.add(Place(name: p.name, region: p.region, lat: p.lat, lon: p.lon));
+    }
+    _prefs?.setString('favorites', jsonEncode([for (final f in favorites) f.toJson()]));
+    _touch('favorites');
+    notifyListeners();
+  }
+
+  // ── Syncable ──
+  @override
+  Map<String, ({Object? v, int t})> syncFields() => {
+        for (final e in profile.entries)
+          if (e.key != 'sync') 'p.${e.key}': (v: e.value, t: stamps['p.${e.key}'] ?? 0),
+        'doneSteps': (v: (doneSteps.toList()..sort()), t: stamps['doneSteps'] ?? 0),
+        'favorites': (v: [for (final f in favorites) f.toJson()], t: stamps['favorites'] ?? 0),
+      };
+
+  @override
+  int applyRemote(Map<String, ({Object? v, int t})> fields) {
+    var n = 0;
+    for (final MapEntry(:key, :value) in fields.entries) {
+      if (value.t <= (stamps[key] ?? 0)) continue;
+      if (key.startsWith('p.')) {
+        final k = key.substring(2);
+        if (k == 'sync') continue;
+        if (value.v == null) {
+          profile[k] = defaultProfile[k];
+        } else {
+          profile[k] = value.v;
+        }
+      } else if (key == 'doneSteps' && value.v is List) {
+        doneSteps = {for (final s in value.v as List) '$s'};
+      } else if (key == 'favorites' && value.v is List) {
+        favorites = [for (final f in value.v as List) Place.fromJson(Map<String, dynamic>.from(f as Map))];
+      } else {
+        continue; // unknown key from a newer app version: leave it on the server
+      }
+      stamps[key] = value.t;
+      n++;
+    }
+    if (n > 0) {
+      _prefs?.setString('profile', jsonEncode(profile));
+      _prefs?.setStringList('doneSteps', doneSteps.toList());
+      _prefs?.setString('favorites', jsonEncode([for (final f in favorites) f.toJson()]));
+      _prefs?.setString('sync:stamps', jsonEncode(stamps));
+      status.bump(); // ranges may have changed: ratings reload
+      notifyListeners();
+    }
+    return n;
   }
 
   List<String> get mySports => [for (final s in (profile['sports'] as List? ?? const [])) s as String];

@@ -3,7 +3,9 @@
 Planner/summary requests may carry the user's ranges as query parameters; they are used for the
 rating and never stored.
 """
+import json
 import logging
+import time
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -23,7 +25,7 @@ logging.basicConfig(level=logging.INFO)
 app = FastAPI(title='Oratge', version='0.1.0')
 # Read-only API protected by a bearer token; the web build may run on another origin.
 app.add_middleware(GZipMiddleware, minimum_size=2000)
-app.add_middleware(CORSMiddleware, allow_origins=['*'], allow_methods=['GET'], allow_headers=['Authorization'])
+app.add_middleware(CORSMiddleware, allow_origins=['*'], allow_methods=['GET', 'PUT'], allow_headers=['Authorization', 'Content-Type'])
 _store = Store(settings.db_path)
 _sources = Sources(_store)
 
@@ -125,3 +127,40 @@ def spot(sid: str, b: Builder = Depends(builder)):
     if sid not in SPOTS:
         raise HTTPException(404, 'unknown spot')
     return b.spot(sid)
+
+
+# ── Settings sync: profile, setup progress and favourite places, shared by the owner's devices ──
+SYNC_MAX_KEYS, SYNC_MAX_BYTES = 400, 256_000
+
+
+def sync_auth(authorization: str | None = Header(default=None)):
+    """Unlike the read-only forecast routes, sync stores data: never without a configured token."""
+    if not settings.app_token:
+        raise HTTPException(403, 'sync needs ORATGE_TOKEN on the server')
+    auth(authorization)
+
+
+@app.get('/v1/sync', dependencies=[Depends(sync_auth)])
+def sync_get():
+    return {'fields': _store.sync_all(), 'now': time.time() * 1000}
+
+
+@app.put('/v1/sync', dependencies=[Depends(sync_auth)])
+async def sync_put(request: Request):
+    raw = await request.body()
+    if len(raw) > SYNC_MAX_BYTES:
+        raise HTTPException(413, 'sync payload too large')
+    try:
+        fields = json.loads(raw)['fields']
+        assert isinstance(fields, dict) and len(fields) <= SYNC_MAX_KEYS
+        clean = {}
+        for k, f in fields.items():
+            assert isinstance(k, str) and 0 < len(k) <= 100 and isinstance(f, dict)
+            clean[k] = {'v': f.get('v'), 't': float(f['t'])}
+    except Exception:
+        raise HTTPException(422, 'expected {"fields": {key: {"v": value, "t": epoch_ms}}}')
+    stored = _store.sync_all()
+    if len(stored.keys() | clean.keys()) > SYNC_MAX_KEYS:
+        raise HTTPException(507, 'too many synced keys')
+    changed = _store.sync_merge(clean)
+    return {'fields': _store.sync_all(), 'changed': changed, 'now': time.time() * 1000}

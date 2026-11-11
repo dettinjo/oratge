@@ -17,6 +17,7 @@ class Store:
             create table if not exists cache (key text primary key, at real, body text);
             create table if not exists quota (month text, plan text, used integer, primary key (month, plan));
             create table if not exists archive (kind text, spot text, ts text, payload text, primary key (kind, spot, ts));
+            create table if not exists sync (k text primary key, v text, t real);
         ''')
 
     def _one(self, sql: str, args=()):
@@ -75,3 +76,19 @@ class Store:
         rows = self._all('select ts, payload from archive where kind=? and spot=? and ts>=? order by ts',
                          (kind, spot, since))
         return [(ts, json.loads(p)) for ts, p in rows]
+
+    # ── settings sync (one owner per server: the bearer token holder) ──
+    def sync_all(self) -> dict:
+        return {k: {'v': json.loads(v), 't': t} for k, v, t in self._all('select k, v, t from sync')}
+
+    def sync_merge(self, fields: dict) -> int:
+        """Last writer wins per key, by the client's timestamp; equal or older writes are ignored."""
+        n = 0
+        with _lock:
+            for k, f in fields.items():
+                row = self.db.execute('select t from sync where k=?', (k,)).fetchone()
+                if row is None or f['t'] > row[0]:
+                    self.db.execute('insert or replace into sync values (?,?,?)', (k, json.dumps(f['v']), f['t']))
+                    n += 1
+            self.db.commit()
+        return n

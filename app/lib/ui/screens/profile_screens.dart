@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../data/profile.dart';
+import '../../data/sync.dart';
 import '../../theme/oratge_tokens.dart';
 import '../components/basics.dart';
 import '../components/rows_cards.dart';
@@ -112,6 +113,8 @@ class ProfileScreen extends StatelessWidget {
         row('sports', 'Add or remove sports'),
         const OgSectionLabel('App'),
         row('alerts', 'Alerts and privacy'),
+        const OgSectionLabel('Sync and server'),
+        const SyncCard(),
       ]),
     ]);
   }
@@ -326,5 +329,180 @@ class _Field extends StatelessWidget {
           ]),
         );
     }
+  }
+}
+
+
+/// Server address and token, the sync switch and its status.
+class SyncCard extends StatelessWidget {
+  const SyncCard({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final app = AppScope.of(context);
+    final c = context.og;
+    final sync = app.sync;
+    return ListenableBuilder(
+      listenable: sync ?? ValueNotifier(0),
+      builder: (context, _) {
+        String status;
+        if (!app.hasServer) {
+          status = 'Add your server to sync.';
+        } else if (!app.syncOn) {
+          status = 'Off: your details stay on this device.';
+        } else if (sync == null || (sync.busy && sync.lastSync == null)) {
+          status = 'Syncing…';
+        } else if (sync.error != null) {
+          status = sync.error!;
+        } else {
+          final t = sync.lastSync!;
+          status = 'Synced at ${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')} · profile, setup and places';
+        }
+        return OgCard(
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Row(children: [
+              Icon(Icons.dns_outlined, color: c.text2, size: 20),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text('Server', style: OgText.actName.copyWith(color: c.text)),
+                  Text(app.hasServer ? app.serverUrl : 'Not set: sample data',
+                      style: OgText.chip.copyWith(color: c.text2), overflow: TextOverflow.ellipsis),
+                ]),
+              ),
+              TextButton(
+                style: TextButton.styleFrom(minimumSize: const Size(48, 44), foregroundColor: c.text),
+                onPressed: () => showDialog(context: context, builder: (_) => AppScope(state: app, child: const _ServerDialog())),
+                child: const Text('Change'),
+              ),
+            ]),
+            Divider(color: c.line, height: 20),
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              value: app.syncOn,
+              onChanged: app.hasServer ? (v) => app.setField('sync', v) : null,
+              activeThumbColor: c.bg,
+              activeTrackColor: c.r4,
+              title: Text('Sync between my devices', style: OgText.actName.copyWith(color: c.text)),
+              subtitle: Text(status,
+                  style: OgText.chip.copyWith(color: sync?.error != null && app.syncOn ? c.warnRed : c.text2)),
+            ),
+            if (app.syncOn && sync != null)
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton.icon(
+                  style: TextButton.styleFrom(minimumSize: const Size(48, 44), foregroundColor: c.text),
+                  onPressed: sync.busy ? null : sync.syncNow,
+                  icon: sync.busy
+                      ? SizedBox.square(dimension: 14, child: CircularProgressIndicator(strokeWidth: 2, color: c.text2))
+                      : const Icon(Icons.sync, size: 18),
+                  label: const Text('Sync now'),
+                ),
+              ),
+          ]),
+        );
+      },
+    );
+  }
+}
+
+class _ServerDialog extends StatefulWidget {
+  const _ServerDialog();
+  @override
+  State<_ServerDialog> createState() => _ServerDialogState();
+}
+
+class _ServerDialogState extends State<_ServerDialog> {
+  late final _url = TextEditingController(text: AppScope.of(context).serverUrl);
+  late final _token = TextEditingController(text: AppScope.of(context).serverToken);
+  String? _msg;
+  bool _ok = false, _testing = false, _hide = true;
+
+  @override
+  void dispose() {
+    _url.dispose();
+    _token.dispose();
+    super.dispose();
+  }
+
+  Future<void> _test() async {
+    setState(() => _testing = true);
+    final url = _url.text.trim().replaceAll(RegExp(r'/+$'), '');
+    final err = url.isEmpty ? 'Enter the server address.' : await testServer(url, _token.text.trim());
+    if (!mounted) return;
+    setState(() {
+      _testing = false;
+      _ok = err == null;
+      _msg = err ?? 'Connected.';
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.og;
+    final app = AppScope.of(context);
+    InputDecoration deco(String label, {Widget? suffix}) => InputDecoration(
+          labelText: label,
+          labelStyle: OgText.chip.copyWith(color: c.text2),
+          suffixIcon: suffix,
+          filled: true,
+          fillColor: c.surface,
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+        );
+    return AlertDialog(
+      backgroundColor: c.bg,
+      title: Text('Oratge server', style: OgText.verdictBest.copyWith(color: c.text, fontSize: 20)),
+      content: SizedBox(
+        width: 380,
+        child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text('Forecasts and sync come from here. Leave the address empty to use the built-in setting.',
+              style: OgText.chip.copyWith(color: c.text2)),
+          const SizedBox(height: 14),
+          TextField(
+            controller: _url,
+            keyboardType: TextInputType.url,
+            autocorrect: false,
+            style: OgText.body.copyWith(color: c.text),
+            decoration: deco('Address, e.g. http://100.96.0.121:8199'),
+          ),
+          const SizedBox(height: 10),
+          TextField(
+            controller: _token,
+            obscureText: _hide,
+            autocorrect: false,
+            style: OgText.body.copyWith(color: c.text),
+            decoration: deco('Access token',
+                suffix: IconButton(
+                  tooltip: _hide ? 'Show token' : 'Hide token',
+                  icon: Icon(_hide ? Icons.visibility_outlined : Icons.visibility_off_outlined, color: c.text2),
+                  onPressed: () => setState(() => _hide = !_hide),
+                )),
+          ),
+          if (_msg != null) ...[
+            const SizedBox(height: 10),
+            Text(_msg!, style: OgText.chip.copyWith(color: _ok ? c.r4 : c.warnRed)),
+          ],
+        ]),
+      ),
+      actions: [
+        TextButton(
+          style: TextButton.styleFrom(foregroundColor: c.text2),
+          onPressed: _testing ? null : _test,
+          child: Text(_testing ? 'Testing…' : 'Test'),
+        ),
+        TextButton(
+            style: TextButton.styleFrom(foregroundColor: c.text2),
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel')),
+        FilledButton(
+          style: FilledButton.styleFrom(backgroundColor: c.text, foregroundColor: c.bg),
+          onPressed: () {
+            app.setServer(_url.text, _token.text);
+            Navigator.of(context).pop();
+          },
+          child: const Text('Save'),
+        ),
+      ],
+    );
   }
 }
