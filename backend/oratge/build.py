@@ -47,18 +47,28 @@ def win(w) -> str:
     return f'{w[0]:02d}–{w[1]:02d} h'
 
 
-METEOR_EN = {'Vent': 'Wind', 'Pluja': 'Rain', 'Intensitat de pluja': 'Heavy rain', 'Acumulació de pluja': 'Rain total',
-             'Neu': 'Snow', 'Neu acumulada en 24 hores': 'Snow', 'Calor': 'Heat', 'Calor intensa': 'Heat', 'Fred': 'Cold',
-             'Fred intens': 'Cold', 'Estat de la mar': 'Sea state', 'Onada de calor': 'Heatwave'}
+METEOR_EN = {'Vent': 'Wind', 'Neu': 'Snow', 'Calor': 'Heat', 'Calor intensa': 'Heat', 'Fred': 'Cold', 'Fred intens': 'Cold',
+             'Estat de la mar': 'Sea state', 'Onada de calor': 'Heatwave', 'Onada de fred': 'Cold wave'}
+
+
+def meteor_en(name: str) -> str:
+    """Meteocat hazard name in English (prefix match covers variants such as 'Intensitat de pluja en 30 minuts')."""
+    for ca, en in (('Intensitat de pluja', 'Heavy rain'), ('Acumulació de pluja', 'Rain (24 h total)'), ('Neu', 'Snow')):
+        if name.startswith(ca):
+            return en
+    return METEOR_EN.get(name, name)
 
 
 def threshold_en(s: str) -> str:
-    """'Ratxa màxima > 90 km/h (25 m/s)' → 'gusts above 90 km/h'; other thresholds get a light translation."""
+    """Thresholds as Meteocat words them (checked live 2026-11-11), in English:
+    'Ratxa màxima > 90 km/h (25 m/s)' → 'gusts above 90 km/h'; 'Intensitat > 20 mm / 30 minuts' → 'over 20 mm in 30 min';
+    'Acumulada > 100 mm /24 hores' → 'over 100 mm in 24 h'."""
     import re
     s = re.sub(r'\s*\([^)]*m/s\)', '', s or '').strip()
-    for ca, en in (('Ratxa màxima', 'gusts'), ('Intensitat de pluja', 'rain'), ('Acumulació', 'total'),
-                   ('en 24 hores', 'in 24 h'), ('en 1 hora', 'in 1 h'), ('en 30 minuts', 'in 30 min'), ('Onada', 'waves'),
-                   ('Temperatura màxima', 'max temperature'), ('Temperatura mínima', 'min temperature'), (' > ', ' above '), (' < ', ' below ')):
+    s = re.sub(r'(?:Intensitat|Acumulada|Acumulació)\s*>\s*([\d.,]+)\s*(mm|cm)\s*/\s*(\d+)\s*(minuts|hores|hora)',
+               lambda m: f'over {m[1]} {m[2]} in {m[3]} {"min" if m[4] == "minuts" else "h"}', s)
+    for ca, en in (('Ratxa màxima', 'gusts'), ('Temperatura màxima', 'max temperature'),
+                   ('Temperatura mínima', 'min temperature'), ('Onada', 'waves'), (' > ', ' above '), (' < ', ' below ')):
         s = s.replace(ca, en)
     return s
 
@@ -282,7 +292,7 @@ class Builder:
             when = (f'{WD[a.weekday()]} {a.hour:02d}–{b.hour or 24:02d} h' if same
                     else f'{WD[a.weekday()]} {a.hour:02d} h – {WD[b.weekday()]} {b.hour:02d} h')
             out.append({'level': level, 'pre': pre,
-                        'title': f'{level.capitalize()} {"heads-up" if pre else "warning"} · {METEOR_EN.get(meteor, meteor)}',
+                        'title': f'{level.capitalize()} {"heads-up" if pre else "warning"} · {meteor_en(meteor)}',
                         'detail': ' · '.join(x for x in (', '.join(dict.fromkeys(g['names'])), when, thr) if x),
                         'areas': sorted(set(g['comarques']))})
         return out[:4]

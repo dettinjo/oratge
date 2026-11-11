@@ -1,0 +1,57 @@
+# Builds the Mac app (universal: Apple silicon + Intel) on a macOS runner and publishes a DMG.
+# Run manually (Actions → macOS app → Run workflow) or push a tag like v0.6.
+name: macOS app
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+
+jobs:
+  build:
+    runs-on: macos-latest
+    timeout-minutes: 40
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.47.9
+          cache: true
+
+      - name: Dependencies
+        run: flutter pub get
+
+      - name: Analyze and test
+        run: |
+          flutter analyze
+          flutter test
+
+      - name: Build
+        env:
+          ORATGE_API: ${{ vars.ORATGE_API || 'http://100.96.0.121:8199' }}
+          ORATGE_TOKEN: ${{ secrets.ORATGE_TOKEN }}
+        run: |
+          VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //')
+          flutter build macos --release \
+            --build-name="${VERSION%%+*}" --build-number="${{ github.run_number }}" \
+            --dart-define=ORATGE_API="$ORATGE_API" --dart-define=ORATGE_TOKEN="$ORATGE_TOKEN"
+
+      - name: Package DMG
+        run: |
+          APP=build/macos/Build/Products/Release/Oratge.app
+          codesign --verify --deep --strict "$APP" && codesign -dv "$APP" 2>&1 | grep -E 'Identifier|Signature'
+          lipo -archs "$APP/Contents/MacOS/Oratge"
+          mkdir -p dmg && cp -R "$APP" dmg/ && ln -s /Applications dmg/Applications
+          hdiutil create -volname Oratge -srcfolder dmg -ov -format UDZO Oratge.dmg
+          shasum -a 256 Oratge.dmg
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Oratge-macos
+          path: app/Oratge.dmg
+          retention-days: 30

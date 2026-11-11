@@ -133,201 +133,224 @@ class _MapFullScreenState extends State<MapFullScreen> {
         _images.entries.where((e) => e.key.$1 == _layer && e.key.$3 == b).map((e) => e.value).firstOrNull;
     final motionOn = !reduceMotion(context);
 
-    return Scaffold(
-      body: Stack(
-        children: [
-          if (_inTest)
-            Positioned.fill(child: ColoredBox(color: c.surface))
-          else
-            FlutterMap(
-              mapController: _map,
-              options: MapOptions(
-                initialCenter: const LatLng(41.75, 1.85),
-                initialZoom: 7.6,
-                minZoom: 6,
-                maxZoom: 13,
-                backgroundColor: c.bg,
-                interactionOptions: const InteractionOptions(flags: InteractiveFlag.all & ~InteractiveFlag.rotate),
-                onTap: (_, ll) {
-                  HapticFeedback.selectionClick();
-                  setState(() => _probe = ll);
-                },
-              ),
-              children: [
-                oratgeTiles(context),
-                if (s != null && img != null && _layer != FieldLayer.rating) FieldImageLayer(image: img, nw: s.nw, se: s.se),
-                if (s != null && _layer == FieldLayer.wind && motionOn) WindParticleLayer(sampler: s),
-                if (s != null && (_layer == FieldLayer.rain || _layer == FieldLayer.chance)) RainLayer(sampler: s),
-                if (s != null) ValueLabelsLayer(sampler: s, layer: _layer),
-                MarkerLayer(
-                  markers: [
-                    for (final p in _pins.where((p) => p.lat != null))
-                      Marker(
-                        point: LatLng(p.lat!, p.lon!),
-                        width: 130,
-                        height: 56,
-                        child: GestureDetector(
-                          onTap: () => _spotSheet(context, p),
-                          child: Semantics(
-                            button: true,
-                            label: '${p.name}, rating ${p.rating}. Open',
-                            child: Column(
-                              children: [
-                                AnimatedContainer(
-                                  duration: motion(context, 250),
-                                  width: _layer == FieldLayer.rating ? 30 : 22,
-                                  height: _layer == FieldLayer.rating ? 30 : 22,
-                                  decoration: BoxDecoration(
-                                    color: c.ratingColor(p.rating),
-                                    shape: BoxShape.circle,
-                                    border: Border.all(color: c.bg, width: 2.5),
-                                    boxShadow: [BoxShadow(color: c.bg.withValues(alpha: 0.5), blurRadius: 6)],
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      '${p.rating}',
-                                      style: OgText.chip.copyWith(color: c.bg, fontWeight: FontWeight.w800, fontSize: 12),
-                                    ),
-                                  ),
-                                ),
-                                Text(
-                                  p.name.split(' · ').first,
-                                  style: OgText.chip.copyWith(
-                                    color: c.text,
-                                    fontWeight: FontWeight.w700,
-                                    shadows: [
-                                      Shadow(color: c.bg, blurRadius: 3),
-                                      Shadow(color: c.bg, blurRadius: 8),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    if (_probe != null)
-                      Marker(
-                        point: _probe!,
-                        width: 26,
-                        height: 26,
-                        child: IgnorePointer(
-                          child: Container(
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(color: c.text, width: 2.5),
-                              color: c.text.withValues(alpha: 0.15),
-                            ),
-                          ),
-                        ),
-                      ),
-                    if (_me != null)
-                      Marker(
-                        point: _me!,
-                        width: 22,
-                        height: 22,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: c.water,
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Colors.white, width: 3),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-                const SimpleAttributionWidget(source: Text('OpenStreetMap contributors · Open-Meteo')),
-              ],
-            ),
-          // Top: back, title, layers, legend.
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      _RoundButton(icon: Icons.arrow_back, label: 'Back', onTap: () => context.pop()),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: _Glass(
-                          child: Text(
-                            _fc == null
-                                ? (_error ?? 'Loading the forecast…')
-                                : _fc!.isEmpty
-                                ? 'Forecast map needs the backend (offline)'
-                                : '${_layer.label} · ${_timeLabel(_fc!.times[_t], _t)}',
-                            style: OgText.chip.copyWith(color: c.text, fontWeight: FontWeight.w600),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: _Glass(
-                      padding: const EdgeInsets.symmetric(horizontal: 6),
-                      child: OgChipGroup(
-                        options: [for (final l in FieldLayer.values) l.label],
-                        selected: _layer.label,
-                        onSelect: (o) => setState(() => _layer = FieldLayer.values.firstWhere((l) => l.label == o)),
-                      ),
+    final n = _fc?.times.length ?? 0;
+    void step(int d) {
+      if (n == 0) return;
+      setState(() => _t = (_t + d).clamp(0, n - 1));
+    }
+
+    return CallbackShortcuts(
+      // Keyboard (Mac/desktop): ←/→ step the hour (shift: 6 h), space plays, Esc goes back.
+      bindings: {
+        const SingleActivator(LogicalKeyboardKey.arrowLeft): () => step(-1),
+        const SingleActivator(LogicalKeyboardKey.arrowRight): () => step(1),
+        const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true): () => step(-6),
+        const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true): () => step(6),
+        const SingleActivator(LogicalKeyboardKey.space): _togglePlay,
+        const SingleActivator(LogicalKeyboardKey.escape): () => context.pop(),
+      },
+      child: Focus(
+        autofocus: true,
+        child: Scaffold(
+          body: Stack(
+            children: [
+              if (_inTest)
+                Positioned.fill(child: ColoredBox(color: c.surface))
+              else
+                FlutterMap(
+                  mapController: _map,
+                  options: MapOptions(
+                    // Fit the forecast area to any window, from a phone to a large Mac display.
+                    initialCameraFit: CameraFit.bounds(
+                      bounds: LatLngBounds(const LatLng(40.45, 0.2), const LatLng(42.85, 3.35)),
+                      padding: const EdgeInsets.fromLTRB(16, 150, 16, 130),
                     ),
+                    minZoom: 6,
+                    maxZoom: 13,
+                    backgroundColor: c.bg,
+                    interactionOptions: const InteractionOptions(flags: InteractiveFlag.all & ~InteractiveFlag.rotate),
+                    onTap: (_, ll) {
+                      HapticFeedback.selectionClick();
+                      setState(() => _probe = ll);
+                    },
                   ),
-                  const SizedBox(height: 8),
-                  _Legend(layer: _layer),
-                ],
-              ),
-            ),
-          ),
-          // Bottom: probe card + timeline.
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: SafeArea(
-              top: false,
-              child: Padding(
-                // Leaves room for the map attribution underneath.
-                padding: const EdgeInsets.fromLTRB(12, 0, 12, 26),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    _RoundButton(icon: Icons.my_location, label: 'My location', onTap: _locate),
-                    const SizedBox(height: 10),
-                    AnimatedSwitcher(
-                      duration: motion(context, 200),
-                      child: (_probe != null && s != null)
-                          ? _ProbeCard(
-                              key: ValueKey(_probe),
-                              sampler: s,
-                              at: _probe!,
-                              onClose: () => setState(() => _probe = null),
-                            )
-                          : const SizedBox.shrink(),
+                    oratgeTiles(context),
+                    if (s != null && img != null && _layer != FieldLayer.rating) FieldImageLayer(image: img, nw: s.nw, se: s.se),
+                    if (s != null && _layer == FieldLayer.wind && motionOn) WindParticleLayer(sampler: s),
+                    if (s != null && (_layer == FieldLayer.rain || _layer == FieldLayer.chance)) RainLayer(sampler: s),
+                    if (s != null) ValueLabelsLayer(sampler: s, layer: _layer),
+                    MarkerLayer(
+                      markers: [
+                        for (final p in _pins.where((p) => p.lat != null))
+                          Marker(
+                            point: LatLng(p.lat!, p.lon!),
+                            width: 130,
+                            height: 56,
+                            child: GestureDetector(
+                              onTap: () => _spotSheet(context, p),
+                              child: Semantics(
+                                button: true,
+                                label: '${p.name}, rating ${p.rating}. Open',
+                                child: Column(
+                                  children: [
+                                    AnimatedContainer(
+                                      duration: motion(context, 250),
+                                      width: _layer == FieldLayer.rating ? 30 : 22,
+                                      height: _layer == FieldLayer.rating ? 30 : 22,
+                                      decoration: BoxDecoration(
+                                        color: c.ratingColor(p.rating),
+                                        shape: BoxShape.circle,
+                                        border: Border.all(color: c.bg, width: 2.5),
+                                        boxShadow: [BoxShadow(color: c.bg.withValues(alpha: 0.5), blurRadius: 6)],
+                                      ),
+                                      child: Center(
+                                        child: Text(
+                                          '${p.rating}',
+                                          style: OgText.chip.copyWith(color: c.bg, fontWeight: FontWeight.w800, fontSize: 12),
+                                        ),
+                                      ),
+                                    ),
+                                    Text(
+                                      p.name.split(' · ').first,
+                                      style: OgText.chip.copyWith(
+                                        color: c.text,
+                                        fontWeight: FontWeight.w700,
+                                        shadows: [
+                                          Shadow(color: c.bg, blurRadius: 3),
+                                          Shadow(color: c.bg, blurRadius: 8),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        if (_probe != null)
+                          Marker(
+                            point: _probe!,
+                            width: 26,
+                            height: 26,
+                            child: IgnorePointer(
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(color: c.text, width: 2.5),
+                                  color: c.text.withValues(alpha: 0.15),
+                                ),
+                              ),
+                            ),
+                          ),
+                        if (_me != null)
+                          Marker(
+                            point: _me!,
+                            width: 22,
+                            height: 22,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: c.water,
+                                shape: BoxShape.circle,
+                                border: Border.all(color: Colors.white, width: 3),
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
-                    if (_fc != null && !_fc!.isEmpty) ...[
-                      const SizedBox(height: 8),
-                      _Timeline(
-                        fc: _fc!,
-                        t: _t,
-                        playing: _playing,
-                        onPlay: _togglePlay,
-                        onChanged: (v) {
-                          if (v != _t) HapticFeedback.selectionClick();
-                          setState(() => _t = v);
-                        },
-                      ),
-                    ],
+                    const SimpleAttributionWidget(source: Text('OpenStreetMap contributors · Open-Meteo')),
                   ],
                 ),
+              // Top: back, title, layers, legend.
+              SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          _RoundButton(icon: Icons.arrow_back, label: 'Back', onTap: () => context.pop()),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: _Glass(
+                              child: Text(
+                                _fc == null
+                                    ? (_error ?? 'Loading the forecast…')
+                                    : _fc!.isEmpty
+                                    ? 'Forecast map needs the backend (offline)'
+                                    : '${_layer.label} · ${_timeLabel(_fc!.times[_t], _t)}',
+                                style: OgText.chip.copyWith(color: c.text, fontWeight: FontWeight.w600),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: _Glass(
+                          padding: const EdgeInsets.symmetric(horizontal: 6),
+                          child: OgChipGroup(
+                            options: [for (final l in FieldLayer.values) l.label],
+                            selected: _layer.label,
+                            onSelect: (o) => setState(() => _layer = FieldLayer.values.firstWhere((l) => l.label == o)),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      _Legend(layer: _layer),
+                    ],
+                  ),
+                ),
               ),
-            ),
+              // Bottom: probe card + timeline.
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: SafeArea(
+                  top: false,
+                  child: Padding(
+                    // Leaves room for the map attribution underneath.
+                    padding: const EdgeInsets.fromLTRB(12, 0, 12, 26),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        _RoundButton(icon: Icons.my_location, label: 'My location', onTap: _locate),
+                        const SizedBox(height: 10),
+                        AnimatedSwitcher(
+                          duration: motion(context, 200),
+                          child: (_probe != null && s != null)
+                              ? _ProbeCard(
+                                  key: ValueKey(_probe),
+                                  sampler: s,
+                                  at: _probe!,
+                                  onClose: () => setState(() => _probe = null),
+                                )
+                              : const SizedBox.shrink(),
+                        ),
+                        if (_fc != null && !_fc!.isEmpty) ...[
+                          const SizedBox(height: 8),
+                          _Timeline(
+                            fc: _fc!,
+                            t: _t,
+                            playing: _playing,
+                            onPlay: _togglePlay,
+                            onChanged: (v) {
+                              if (v != _t) HapticFeedback.selectionClick();
+                              setState(() => _t = v);
+                            },
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

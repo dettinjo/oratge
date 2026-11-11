@@ -212,3 +212,13 @@ def test_warnings_from_real_episode():
     assert w['title'] == 'Yellow warning · Wind'
     assert w['detail'] == 'Castelldefels, Collserola loop, Passeig Marítim, Barcelona, Ocata · Thu 07–19 h · gusts above 72 km/h'
     assert w['areas'] == ['Baix Llobregat', 'Barcelonès', 'Maresme', 'Vallès Occidental']
+
+
+@pytest.mark.parametrize('name,thr,title,text', [
+    ('Vent', 'Ratxa màxima > 90 km/h (25 m/s)', 'Wind', 'gusts above 90 km/h'),
+    ('Intensitat de pluja en 30 minuts', 'Intensitat > 20 mm / 30 minuts', 'Heavy rain', 'over 20 mm in 30 min'),
+    ('Acumulació de pluja', 'Acumulada > 100 mm /24 hores', 'Rain (24 h total)', 'over 100 mm in 24 h'),
+])
+def test_warning_texts_in_english(name, thr, title, text):
+    from oratge.build import meteor_en, threshold_en
+    assert meteor_en(name) == title and threshold_en(thr) == text

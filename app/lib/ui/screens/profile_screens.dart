@@ -23,6 +23,7 @@ class AppearanceSwitch extends StatelessWidget {
           foregroundColor: c.text2,
           side: BorderSide(color: c.line),
           minimumSize: const Size(0, 44),
+          padding: const EdgeInsets.symmetric(horizontal: 8), // fits the 200 px desktop sidebar
         ),
         segments: const [
           ButtonSegment(value: ThemeMode.light, label: Text('Light')),
