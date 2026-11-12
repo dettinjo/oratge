@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'app.dart';
+import 'data/alerts.dart';
 import 'data/location.dart';
 import 'data/profile.dart';
 
@@ -12,4 +13,5 @@ Future<void> main() async {
   state.connect();
   LocationFollower(state).start(); // only acts when Today is set to "Current location"
   runApp(OratgeApp(state: state));
+  AlertService(state).start(); // notifications for good windows, warnings, plan changes, morning summary
 }

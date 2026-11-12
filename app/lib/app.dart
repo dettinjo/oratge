@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import 'data/alerts.dart';
 import 'data/profile.dart';
 import 'theme/oratge_tokens.dart';
 import 'ui/screens/browse_screens.dart';
@@ -71,6 +72,12 @@ class OratgeApp extends StatefulWidget {
 
 class _OratgeAppState extends State<OratgeApp> {
   late final GoRouter _router = buildRouter();
+
+  @override
+  void initState() {
+    super.initState();
+    AlertService.onOpen = (route) => _router.go(route); // tapping a notification opens its screen
+  }
 
   @override
   Widget build(BuildContext context) {

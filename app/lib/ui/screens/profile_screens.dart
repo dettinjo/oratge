@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../data/alerts.dart';
 import '../../data/profile.dart';
 import '../../data/sync.dart';
 import '../../theme/oratge_tokens.dart';
@@ -113,6 +114,22 @@ class ProfileScreen extends StatelessWidget {
         row('sports', 'Add or remove sports'),
         const OgSectionLabel('App'),
         row('alerts', 'Alerts and privacy'),
+        if (AlertService.supported)
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              style: TextButton.styleFrom(foregroundColor: c.text, minimumSize: const Size(48, 44)),
+              onPressed: () async {
+                final ok = await AlertService.test();
+                if (!ok && context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Notifications are off for Oratge. Turn them on in the system settings.')));
+                }
+              },
+              icon: const Icon(Icons.notifications_active_outlined, size: 18),
+              label: const Text('Send a test notification'),
+            ),
+          ),
         const OgSectionLabel('Sync and server'),
         const SyncCard(),
       ]),

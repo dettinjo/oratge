@@ -6,12 +6,13 @@ plugins {
 
 android {
     namespace = "cat.oratge.oratge"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 37 // flutter_local_notifications 23 needs API 37 to compile against (runtime support unchanged)
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+        isCoreLibraryDesugaringEnabled = true // flutter_local_notifications
     }
 
     defaultConfig {
@@ -46,4 +47,8 @@ kotlin {
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 }

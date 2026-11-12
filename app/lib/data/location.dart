@@ -29,7 +29,9 @@ class LocationFollower {
       if (!await Geolocator.isLocationServiceEnabled()) return;
       final pos = await Geolocator.getCurrentPosition(
           locationSettings: const LocationSettings(accuracy: LocationAccuracy.low, timeLimit: Duration(seconds: 12)));
-      if (Geolocator.distanceBetween(cur.lat, cur.lon, pos.latitude, pos.longitude) < 2000) return;
+      // Unnamed ("41.23, 1.82", when reverse geocoding failed earlier): try naming it again even without moving.
+      final unnamed = RegExp(r'^-?\d+\.\d+, -?\d+\.\d+$').hasMatch(cur.name);
+      if (!unnamed && Geolocator.distanceBetween(cur.lat, cur.lon, pos.latitude, pos.longitude) < 2000) return;
       if (pos.latitude < 40 || pos.latitude > 43.5 || pos.longitude < -0.5 || pos.longitude > 3.6) return;
       final named = await app.repository.reverse(pos.latitude, pos.longitude);
       // Still following? (the user may have picked another place meanwhile)
