@@ -58,7 +58,10 @@ class _WeatherMapScreenState extends State<WeatherMapScreen> {
   Timer? _play;
   LatLng? _me, _probe;
   _Pin? _pin;
-  bool _expanded = false; // phone panel
+  _PanelSize _size = _PanelSize.compact; // phone panel: hidden, compact (timeline), full (details)
+  bool _sideOpen = true; // Mac: details panel on the right
+  bool _timelineMini = false; // Mac: timeline shrunk to a pill
+  final _panelKey = GlobalKey();
   MapForecast? _fc;
   Future<List<(double, double)>>? _strikes;
   List<_Pin> _pins = const [];
@@ -165,19 +168,53 @@ class _WeatherMapScreenState extends State<WeatherMapScreen> {
         _me = LatLng(p.latitude, p.longitude);
         _probe = _me;
         _pin = null;
-        _expanded = true;
+        _size = _PanelSize.full;
       });
-      _map.move(_me!, 9.5);
+      _focus(_me!, zoom: 9.5);
     } catch (_) {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Couldn’t get your location.')));
     }
+  }
+
+  /// Moves the map (after the panel has its new size) so [p] sits in the middle of the area the
+  /// panel and the top controls leave free — never hidden behind the details card.
+  void _focus(LatLng p, {double? zoom}) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_inTest || !mounted) return;
+      final wide = MediaQuery.sizeOf(context).width >= 900;
+      final cam0 = _map.camera;
+      final panelH = wide || _size == _PanelSize.hidden ? 0.0 : (_panelKey.currentContext?.size?.height ?? 0) + 70;
+      final top = 130.0, bottom = cam0.size.height - math.max(panelH, wide ? 110.0 : 90.0);
+      bool visible() {
+        final at = _map.camera.latLngToScreenOffset(p);
+        return at.dy >= top && at.dy <= bottom && at.dx >= 20 && at.dx <= _map.camera.size.width - 20;
+      }
+
+      if (zoom == null && visible()) return;
+      // Centre the point in the free area. Near the edge of the forecast grid the camera can't shift
+      // that far at this zoom, so zoom in a step at a time until it fits.
+      var z = zoom ?? cam0.zoom;
+      for (var i = 0; i < 5; i++) {
+        _map.move(p, z, offset: Offset(0, (top + bottom) / 2 - cam0.size.height / 2));
+        if (visible()) return;
+        z = math.min(13, z + 0.75);
+      }
+    });
+  }
+
+  /// Zoom at which [b] exactly covers [size] ([cover]) or fits inside it.
+  static double _coverZoom(LatLngBounds b, Size size, {bool cover = true}) {
+    double y(double lat) => math.log(math.tan(math.pi / 4 + lat * math.pi / 360));
+    final zx = math.log(size.width * 360 / (256 * (b.east - b.west))) / math.ln2;
+    final zy = math.log(size.height * 2 * math.pi / (256 * (y(b.north) - y(b.south)))) / math.ln2;
+    return cover ? math.max(zx, zy) + 0.02 : math.min(zx, zy);
   }
 
   /// The grid with half a cell trimmed: the camera may not show anything outside it.
   LatLngBounds? get _limits {
     final s = _sampler;
     if (s == null) return null;
-    return LatLngBounds(LatLng(s.se.latitude + 0.15, s.nw.longitude + 0.15), LatLng(s.nw.latitude - 0.15, s.se.longitude - 0.15));
+    return LatLngBounds(LatLng(s.se.latitude + 0.3, s.nw.longitude + 0.3), LatLng(s.nw.latitude - 0.3, s.se.longitude - 0.3));
   }
 
   @override
@@ -199,138 +236,151 @@ class _WeatherMapScreenState extends State<WeatherMapScreen> {
     final selected = _pin != null ? LatLng(_pin!.lat, _pin!.lon) : _probe;
     final map = _inTest
         ? ColoredBox(color: c.surface)
-        : FlutterMap(
-            key: ValueKey(_limits == null),
-            mapController: _map,
-            options: MapOptions(
-              initialCameraFit: CameraFit.bounds(
-                bounds: LatLngBounds(const LatLng(40.5, 0.2), const LatLng(42.85, 3.35)),
-                padding: EdgeInsets.fromLTRB(12, 120, 12, wide ? 90 : 170),
-              ),
-              cameraConstraint: _limits == null
-                  ? const CameraConstraint.unconstrained()
-                  : CameraConstraint.contain(bounds: _limits!),
-              minZoom: 6.2,
-              maxZoom: 13,
-              backgroundColor: c.bg,
-              interactionOptions: const InteractionOptions(flags: InteractiveFlag.all & ~InteractiveFlag.rotate),
-              onTap: (_, ll) {
-                HapticFeedback.selectionClick();
-                setState(() {
-                  _probe = ll;
-                  _pin = null;
-                  _expanded = true; // show the point's chart and days straight away
-                });
-              },
-            ),
-            children: [
-              oratgeTiles(context),
-              if (s != null && img != null && _layer != FieldLayer.rating) FieldImageLayer(image: img, nw: s.nw, se: s.se),
-              if (s != null && _layer == FieldLayer.wind && motionOn) WindParticleLayer(sampler: s),
-              if (s != null && (_layer == FieldLayer.rain || _layer == FieldLayer.chance)) RainLayer(sampler: s),
-              if (_layer == FieldLayer.thunder)
-                FutureBuilder<List<(double, double)>>(
-                  future: _strikes ??= AppScope.of(context).repository.lightning(),
-                  builder: (context, snap) => MarkerLayer(
+        : LayoutBuilder(
+            builder: (context, box) {
+              // Never zoom out past the point where the forecast grid stops covering the whole view
+              // (on a big Mac window that is a little closer than "all of Catalonia").
+              final lim = _limits;
+              final minZ = lim == null ? 6.2 : _coverZoom(lim, box.biggest);
+              final fitZ = _coverZoom(
+                LatLngBounds(const LatLng(40.5, 0.2), const LatLng(42.85, 3.35)),
+                Size(box.maxWidth - 24, box.maxHeight - (wide ? 210 : 290)),
+                cover: false,
+              );
+              return FlutterMap(
+                key: ValueKey('${lim == null}-${(minZ * 4).round()}'),
+                mapController: _map,
+                options: MapOptions(
+                  initialCenter: const LatLng(41.7, 1.8),
+                  initialZoom: math.max(minZ, fitZ),
+                  cameraConstraint: lim == null ? const CameraConstraint.unconstrained() : CameraConstraint.contain(bounds: lim),
+                  minZoom: minZ,
+                  maxZoom: 13,
+                  backgroundColor: c.bg,
+                  interactionOptions: const InteractionOptions(flags: InteractiveFlag.all & ~InteractiveFlag.rotate),
+                  onTap: (_, ll) {
+                    HapticFeedback.selectionClick();
+                    setState(() {
+                      _probe = ll;
+                      _pin = null;
+                      _size = _PanelSize.full; // show the point's chart and days straight away
+                    });
+                    _focus(ll);
+                  },
+                ),
+                children: [
+                  oratgeTiles(context),
+                  if (s != null && img != null && _layer != FieldLayer.rating) FieldImageLayer(image: img, nw: s.nw, se: s.se),
+                  if (s != null && _layer == FieldLayer.wind && motionOn) WindParticleLayer(sampler: s),
+                  if (s != null && (_layer == FieldLayer.rain || _layer == FieldLayer.chance)) RainLayer(sampler: s),
+                  if (_layer == FieldLayer.thunder)
+                    FutureBuilder<List<(double, double)>>(
+                      future: _strikes ??= AppScope.of(context).repository.lightning(),
+                      builder: (context, snap) => MarkerLayer(
+                        markers: [
+                          for (final (la, lo) in (snap.data ?? const <(double, double)>[]).take(600))
+                            Marker(
+                              point: LatLng(la, lo),
+                              width: 14,
+                              height: 14,
+                              child: IgnorePointer(
+                                child: Text('⚡', style: TextStyle(fontSize: 12, color: c.storm)),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  if (s != null) ValueLabelsLayer(sampler: s, layer: _layer),
+                  MarkerLayer(
                     markers: [
-                      for (final (la, lo) in (snap.data ?? const <(double, double)>[]).take(600))
+                      for (final p in _pins)
                         Marker(
-                          point: LatLng(la, lo),
-                          width: 14,
-                          height: 14,
+                          point: LatLng(p.lat, p.lon),
+                          width: 120,
+                          height: 52,
+                          child: GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _pin = p;
+                                _probe = null;
+                                _size = _PanelSize.full;
+                              });
+                              _focus(LatLng(p.lat, p.lon));
+                            },
+                            child: Semantics(
+                              button: true,
+                              label: '${p.name}. Show details',
+                              child: Column(
+                                children: [
+                                  Container(
+                                    width: _pin == p ? 26 : 20,
+                                    height: _pin == p ? 26 : 20,
+                                    decoration: BoxDecoration(
+                                      color: p.rating == null ? c.text : c.ratingColor(p.rating!),
+                                      shape: BoxShape.circle,
+                                      border: Border.all(color: c.bg, width: 2.5),
+                                    ),
+                                    child: p.rating == null
+                                        ? null
+                                        : Center(
+                                            child: Text(
+                                              '${p.rating}',
+                                              style: OgText.chip.copyWith(color: c.bg, fontWeight: FontWeight.w800, fontSize: 11),
+                                            ),
+                                          ),
+                                  ),
+                                  Text(
+                                    p.name,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: OgText.chip.copyWith(
+                                      color: c.text,
+                                      fontWeight: FontWeight.w700,
+                                      shadows: [
+                                        Shadow(color: c.bg, blurRadius: 3),
+                                        Shadow(color: c.bg, blurRadius: 8),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      if (_probe != null)
+                        Marker(
+                          point: _probe!,
+                          width: 26,
+                          height: 26,
                           child: IgnorePointer(
-                            child: Text('⚡', style: TextStyle(fontSize: 12, color: c.storm)),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(color: c.text, width: 2.5),
+                                color: c.text.withValues(alpha: 0.15),
+                              ),
+                            ),
+                          ),
+                        ),
+                      if (_me != null)
+                        Marker(
+                          point: _me!,
+                          width: 20,
+                          height: 20,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: c.water,
+                              shape: BoxShape.circle,
+                              border: Border.all(color: Colors.white, width: 3),
+                            ),
                           ),
                         ),
                     ],
                   ),
-                ),
-              if (s != null) ValueLabelsLayer(sampler: s, layer: _layer),
-              MarkerLayer(
-                markers: [
-                  for (final p in _pins)
-                    Marker(
-                      point: LatLng(p.lat, p.lon),
-                      width: 120,
-                      height: 52,
-                      child: GestureDetector(
-                        onTap: () => setState(() {
-                          _pin = p;
-                          _probe = null;
-                          _expanded = true;
-                        }),
-                        child: Semantics(
-                          button: true,
-                          label: '${p.name}. Show details',
-                          child: Column(
-                            children: [
-                              Container(
-                                width: _pin == p ? 26 : 20,
-                                height: _pin == p ? 26 : 20,
-                                decoration: BoxDecoration(
-                                  color: p.rating == null ? c.text : c.ratingColor(p.rating!),
-                                  shape: BoxShape.circle,
-                                  border: Border.all(color: c.bg, width: 2.5),
-                                ),
-                                child: p.rating == null
-                                    ? null
-                                    : Center(
-                                        child: Text(
-                                          '${p.rating}',
-                                          style: OgText.chip.copyWith(color: c.bg, fontWeight: FontWeight.w800, fontSize: 11),
-                                        ),
-                                      ),
-                              ),
-                              Text(
-                                p.name,
-                                overflow: TextOverflow.ellipsis,
-                                style: OgText.chip.copyWith(
-                                  color: c.text,
-                                  fontWeight: FontWeight.w700,
-                                  shadows: [
-                                    Shadow(color: c.bg, blurRadius: 3),
-                                    Shadow(color: c.bg, blurRadius: 8),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  if (_probe != null)
-                    Marker(
-                      point: _probe!,
-                      width: 26,
-                      height: 26,
-                      child: IgnorePointer(
-                        child: Container(
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(color: c.text, width: 2.5),
-                            color: c.text.withValues(alpha: 0.15),
-                          ),
-                        ),
-                      ),
-                    ),
-                  if (_me != null)
-                    Marker(
-                      point: _me!,
-                      width: 20,
-                      height: 20,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: c.water,
-                          shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white, width: 3),
-                        ),
-                      ),
-                    ),
+                  // Phones show the attribution inside the panel (it would sit under it).
+                  if (wide) const SimpleAttributionWidget(source: Text('OpenStreetMap contributors · Open-Meteo')),
                 ],
-              ),
-              // Phones show the attribution inside the panel (it would sit under it).
-              if (wide) const SimpleAttributionWidget(source: Text('OpenStreetMap contributors · Open-Meteo')),
-            ],
+              );
+            },
           );
 
     final panel = _Panel(
@@ -340,20 +390,22 @@ class _WeatherMapScreenState extends State<WeatherMapScreen> {
       at: selected,
       pin: _pin,
       pins: _pins,
-      expanded: wide || _expanded,
+      key: _panelKey,
+      size: wide ? _PanelSize.full : _size,
+      onSize: (v) => setState(() => _size = v),
+      onHideSide: () => setState(() => _sideOpen = false),
       wide: wide,
       playing: _playing,
       error: _error,
       onPlay: _togglePlay,
       onTime: _setT,
-      onToggle: () => setState(() => _expanded = !_expanded),
       onPick: (p) {
         setState(() {
           _pin = p;
           _probe = null;
-          _expanded = true;
+          _size = _PanelSize.full;
         });
-        if (!_inTest) _map.move(LatLng(p.lat, p.lon), math.max(_map.camera.zoom, 8.5));
+        if (!_inTest) _focus(LatLng(p.lat, p.lon), zoom: math.max(_map.camera.zoom, 8.5));
       },
       onClear: () => setState(() {
         _pin = null;
@@ -455,24 +507,50 @@ class _WeatherMapScreenState extends State<WeatherMapScreen> {
                         children: [
                           Positioned.fill(child: map),
                           overlays,
-                          Positioned(right: 12, bottom: 100, child: buttons),
+                          Positioned(right: 12, bottom: _timelineMini ? 80 : 110, child: buttons),
+                          if (!_sideOpen)
+                            Positioned(
+                              right: 12,
+                              top: 12,
+                              child: _RoundButton(
+                                icon: Icons.view_sidebar_outlined,
+                                label: 'Show details',
+                                onTap: () => setState(() => _sideOpen = true),
+                              ),
+                            ),
                           if (_fc != null && !_fc!.isEmpty)
                             Positioned(
                               left: 12,
-                              right: 12,
+                              right: _timelineMini ? null : 12,
                               bottom: 24,
-                              child: _Timeline(fc: _fc!, t: _t, playing: _playing, onPlay: _togglePlay, onChanged: _setT),
+                              child: _timelineMini
+                                  ? _MiniTimeline(
+                                      fc: _fc!,
+                                      t: _t,
+                                      playing: _playing,
+                                      onPlay: _togglePlay,
+                                      onOpen: () => setState(() => _timelineMini = false),
+                                    )
+                                  : _Timeline(
+                                      fc: _fc!,
+                                      t: _t,
+                                      playing: _playing,
+                                      onPlay: _togglePlay,
+                                      onChanged: _setT,
+                                      onMinimize: () => setState(() => _timelineMini = true),
+                                    ),
                             ),
                         ],
                       ),
                     ),
-                    Container(
-                      width: 380,
+                    AnimatedContainer(
+                      duration: motion(context, 200),
+                      width: _sideOpen ? 380 : 0,
                       decoration: BoxDecoration(
                         color: c.bg,
                         border: Border(left: BorderSide(color: c.line)),
                       ),
-                      child: SafeArea(left: false, child: panel),
+                      child: _sideOpen ? SafeArea(left: false, child: panel) : const SizedBox.shrink(),
                     ),
                   ],
                 )
@@ -489,7 +567,21 @@ class _WeatherMapScreenState extends State<WeatherMapScreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Padding(padding: const EdgeInsets.only(right: 12, bottom: 10), child: buttons),
-                          Padding(padding: const EdgeInsets.fromLTRB(8, 0, 8, 8), child: panel),
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
+                            child: _size == _PanelSize.hidden && _fc != null && !_fc!.isEmpty
+                                ? Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: _MiniTimeline(
+                                      fc: _fc!,
+                                      t: _t,
+                                      playing: _playing,
+                                      onPlay: _togglePlay,
+                                      onOpen: () => setState(() => _size = _PanelSize.compact),
+                                    ),
+                                  )
+                                : panel,
+                          ),
                         ],
                       ),
                     ),
@@ -530,21 +622,25 @@ class _WarningsList extends StatelessWidget {
 
 /// Details panel: timeline (phone), the selected point or place with every value and its 48-hour
 /// curve for the active layer, and — with nothing selected — your places at the selected hour.
+enum _PanelSize { hidden, compact, full }
+
 class _Panel extends StatelessWidget {
   const _Panel({
+    super.key,
+    required this.size,
+    required this.onSize,
+    required this.onHideSide,
     required this.fc,
     required this.t,
     required this.layer,
     required this.at,
     required this.pin,
     required this.pins,
-    required this.expanded,
     required this.wide,
     required this.playing,
     required this.error,
     required this.onPlay,
     required this.onTime,
-    required this.onToggle,
     required this.onPick,
     required this.onClear,
   });
@@ -554,9 +650,12 @@ class _Panel extends StatelessWidget {
   final LatLng? at;
   final _Pin? pin;
   final List<_Pin> pins;
-  final bool expanded, wide, playing;
+  final _PanelSize size;
+  final ValueChanged<_PanelSize> onSize;
+  final VoidCallback onHideSide;
+  final bool wide, playing;
   final String? error;
-  final VoidCallback onPlay, onToggle, onClear;
+  final VoidCallback onPlay, onClear;
   final ValueChanged<int> onTime;
   final ValueChanged<_Pin> onPick;
 
@@ -574,6 +673,7 @@ class _Panel extends StatelessWidget {
       );
     }
     final cur = f.times[t];
+    final expanded = size == _PanelSize.full;
     final title =
         pin?.name ?? (at == null ? 'Your places' : '${at!.latitude.toStringAsFixed(2)}, ${at!.longitude.toStringAsFixed(2)}');
     final timeLine = '${_wd[cur.weekday - 1]} ${cur.hour.toString().padLeft(2, '0')}:00 · ${t == 0 ? 'now' : 'in $t h'}';
@@ -602,12 +702,6 @@ class _Panel extends StatelessWidget {
               tooltip: 'Clear',
               onPressed: onClear,
               icon: Icon(Icons.close, color: c.text2),
-            )
-          else if (!wide)
-            IconButton(
-              tooltip: expanded ? 'Show less' : 'Show more',
-              onPressed: onToggle,
-              icon: Icon(expanded ? Icons.expand_more : Icons.expand_less, color: c.text2),
             ),
         ],
       ),
@@ -656,36 +750,161 @@ class _Panel extends StatelessWidget {
       return ListView(
         padding: const EdgeInsets.fromLTRB(18, 16, 18, 24),
         children: [
-          Text('DETAILS', style: OgText.label.copyWith(color: c.text2)),
-          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: Text('DETAILS', style: OgText.label.copyWith(color: c.text2)),
+              ),
+              IconButton(
+                tooltip: 'Hide details',
+                onPressed: onHideSide,
+                icon: Icon(Icons.keyboard_double_arrow_right, color: c.text2),
+              ),
+            ],
+          ),
           ...body,
         ],
       );
     }
-    return _Glass(
-      padding: const EdgeInsets.fromLTRB(14, 8, 6, 10),
-      child: ConstrainedBox(
-        constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(context).height * 0.55),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: _Timeline(fc: f, t: t, playing: playing, onPlay: onPlay, onChanged: onTime, bare: true),
-              ),
-              Divider(color: c.line, height: 14),
-              Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: body),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 6),
-                child: Text('© OpenStreetMap contributors · Open-Meteo', style: OgText.src.copyWith(color: c.text3, fontSize: 10)),
-              ),
-            ],
+    final smaller = expanded ? _PanelSize.compact : _PanelSize.hidden;
+    return GestureDetector(
+      // Swipe the panel down to shrink or hide it, up to show more.
+      onVerticalDragEnd: (d) {
+        final v = d.primaryVelocity ?? 0;
+        if (v > 250) onSize(smaller);
+        if (v < -250 && !expanded) onSize(_PanelSize.full);
+      },
+      child: _Glass(
+        padding: const EdgeInsets.fromLTRB(14, 2, 4, 10),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(context).height * (expanded ? 0.45 : 0.3)),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  children: [
+                    const Spacer(),
+                    Container(
+                      width: 36,
+                      height: 4,
+                      decoration: BoxDecoration(color: c.line, borderRadius: BorderRadius.circular(2)),
+                    ),
+                    const Spacer(),
+                    IconButton(
+                      tooltip: expanded ? 'Smaller' : 'Show details',
+                      visualDensity: VisualDensity.compact,
+                      onPressed: () => onSize(expanded ? _PanelSize.compact : _PanelSize.full),
+                      icon: Icon(expanded ? Icons.expand_more : Icons.expand_less, color: c.text2),
+                    ),
+                    IconButton(
+                      tooltip: 'Hide panel',
+                      visualDensity: VisualDensity.compact,
+                      onPressed: () => onSize(_PanelSize.hidden),
+                      icon: Icon(Icons.close_fullscreen, size: 20, color: c.text2),
+                    ),
+                  ],
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: _Timeline(fc: f, t: t, playing: playing, onPlay: onPlay, onChanged: onTime, bare: true),
+                ),
+                if (!expanded && at != null)
+                  InkWell(
+                    onTap: () => onSize(_PanelSize.full),
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 6, right: 8),
+                      child: _OneLine(f: f, t: t, at: at!, title: title, u: u),
+                    ),
+                  ),
+                if (expanded) ...[
+                  Divider(color: c.line, height: 14),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: body),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 6),
+                    child: Text(
+                      '© OpenStreetMap contributors · Open-Meteo',
+                      style: OgText.src.copyWith(color: c.text3, fontSize: 10),
+                    ),
+                  ),
+                ],
+              ],
+            ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Compact panel: the selected place in one line (tap for details).
+class _OneLine extends StatelessWidget {
+  const _OneLine({required this.f, required this.t, required this.at, required this.title, required this.u});
+  final MapForecast f;
+  final int t;
+  final LatLng at;
+  final String title;
+  final Units u;
+  @override
+  Widget build(BuildContext context) {
+    final c = context.og;
+    final s = FieldSampler(f, t);
+    final (wu, wv) = s.wind(at.latitude, at.longitude);
+    final from = (math.atan2(-wu, -wv) * 180 / math.pi + 360) % 360;
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            title,
+            style: OgText.day.copyWith(color: c.text, fontWeight: FontWeight.w600),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        Text('${compassName(from)} ${u.windText(math.sqrt(wu * wu + wv * wv))}', style: OgText.chip.copyWith(color: c.wind)),
+        const SizedBox(width: 8),
+        Text(u.tempText(s.sample('temp', at.latitude, at.longitude)), style: OgText.chip.copyWith(color: c.heat)),
+        const SizedBox(width: 8),
+        Text('${s.sample('pprob', at.latitude, at.longitude).round()}%', style: OgText.chip.copyWith(color: c.water)),
+        Icon(Icons.chevron_right, size: 18, color: c.text3),
+      ],
+    );
+  }
+}
+
+/// Timeline shrunk to a pill: play, the hour, and a button to open it again.
+class _MiniTimeline extends StatelessWidget {
+  const _MiniTimeline({required this.fc, required this.t, required this.playing, required this.onPlay, required this.onOpen});
+  final MapForecast fc;
+  final int t;
+  final bool playing;
+  final VoidCallback onPlay, onOpen;
+  @override
+  Widget build(BuildContext context) {
+    final c = context.og;
+    final cur = fc.times[t];
+    return _Glass(
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(
+            tooltip: playing ? 'Pause' : 'Play forecast',
+            onPressed: onPlay,
+            icon: Icon(playing ? Icons.pause_circle_filled : Icons.play_circle_fill, color: c.text),
+          ),
+          Text(
+            '${_wd[cur.weekday - 1]} ${cur.hour.toString().padLeft(2, '0')}:00${t == 0 ? ' · now' : ''}',
+            style: OgText.actName.copyWith(color: c.text),
+          ),
+          IconButton(
+            tooltip: 'Show timeline and details',
+            onPressed: onOpen,
+            icon: Icon(Icons.expand_less, color: c.text2),
+          ),
+        ],
       ),
     );
   }
@@ -994,7 +1213,9 @@ class _Timeline extends StatelessWidget {
     required this.onPlay,
     required this.onChanged,
     this.bare = false,
+    this.onMinimize,
   });
+  final VoidCallback? onMinimize;
   final MapForecast fc;
   final int t;
   final bool playing, bare;
@@ -1027,6 +1248,14 @@ class _Timeline extends StatelessWidget {
                   ),
                   const Spacer(),
                   Text(t == 0 ? 'now' : '+$t h', style: OgText.chip.copyWith(color: c.text2)),
+                  if (onMinimize != null)
+                    InkWell(
+                      onTap: onMinimize,
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 8),
+                        child: Icon(Icons.close_fullscreen, size: 16, color: c.text2),
+                      ),
+                    ),
                 ],
               ),
               SizedBox(

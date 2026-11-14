@@ -189,8 +189,8 @@ Future<ui.Image> renderField(FieldSampler s, FieldLayer layer, FieldColors color
       final i = (y * width + x) * 4;
       // Feather the outer edge so the field blends into the base map instead of ending in a hard box.
       final edge = math.min(
-        math.min(x + 0.5, width - x - 0.5) / (width * 0.07),
-        math.min(y + 0.5, height - y - 0.5) / (height * 0.07),
+        math.min(x + 0.5, width - x - 0.5) / (width * 0.025),
+        math.min(y + 0.5, height - y - 0.5) / (height * 0.025),
       );
       final a = col.a * edge.clamp(0.0, 1.0);
       // The engine reads raw rgba8888 as premultiplied alpha: scale the colour by alpha, or it renders opaque.
