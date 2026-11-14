@@ -85,12 +85,12 @@ class OgPage extends StatelessWidget {
                                 padding: const EdgeInsets.only(top: 2),
                                 child: Text(subtitle!, style: OgText.day.copyWith(color: c.text2)),
                               ),
+                            const SyncHint(),
                             ?headerExtra,
                             const _DataBanner(),
                           ],
                         ),
                       ),
-                      const Padding(padding: EdgeInsets.only(top: 6, right: 6), child: SyncPill()),
                       if (showProfile && ff == FormFactor.phone) const _ProfileButton(),
                     ],
                   ),
@@ -434,6 +434,68 @@ class _SyncDetailsState extends State<_SyncDetails> {
               ],
             ),
           ],
+        );
+      },
+    );
+  }
+}
+
+/// One quiet line under every page title: when data last came from the server and, with sync on,
+/// when settings last synced. Tap for details and "Refresh now".
+class SyncHint extends StatelessWidget {
+  const SyncHint({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final app = AppScope.of(context);
+    final c = context.og;
+    return ListenableBuilder(
+      listenable: Listenable.merge([app.status, ?app.sync]),
+      builder: (context, _) {
+        final st = app.status;
+        final sync = app.sync;
+        final offline = app.hasServer && st.error != null;
+        final parts = <String>[
+          if (!app.hasServer)
+            'Sample data'
+          else if (st.refreshing)
+            'Updating…'
+          else if (offline)
+            'Offline · showing data from ${SyncPill.ago(st.savedAt ?? st.lastLive)}'
+          else
+            'Updated ${SyncPill.ago(st.lastLive ?? st.savedAt)}',
+          if (app.syncOn && sync != null)
+            sync.error != null
+                ? 'settings sync failed'
+                : (sync.lastSync == null ? 'syncing settings…' : 'settings synced ${SyncPill.ago(sync.lastSync)}'),
+        ];
+        return Semantics(
+          button: true,
+          label: '${parts.join(', ')}. Show data and sync details',
+          excludeSemantics: true,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(8),
+            onTap: () => showOgSheet(context, child: const _SyncDetails()),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 3),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  st.refreshing
+                      ? SizedBox.square(dimension: 11, child: CircularProgressIndicator(strokeWidth: 1.5, color: c.text3))
+                      : Icon(offline ? Icons.cloud_off_outlined : Icons.sync, size: 13, color: offline ? c.sun : c.text3),
+                  const SizedBox(width: 5),
+                  Flexible(
+                    child: Text(
+                      parts.join(' · '),
+                      overflow: TextOverflow.ellipsis,
+                      style: OgText.chip.copyWith(color: offline ? c.sun : c.text3, fontSize: 12),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         );
       },
     );

@@ -11,7 +11,7 @@ import 'ui/screens/common.dart';
 import 'ui/screens/planner_screen.dart';
 import 'ui/screens/profile_screens.dart';
 import 'ui/motion.dart';
-import 'ui/screens/map_full.dart';
+import 'ui/screens/weather_map.dart';
 import 'ui/screens/notifications_screen.dart';
 import 'ui/screens/today_screen.dart';
 import 'ui/screens/wing_gear_screen.dart';
@@ -78,7 +78,7 @@ GoRouter buildRouter() => GoRouter(
             ),
           ],
         ),
-        GoRoute(path: '/map', pageBuilder: (c, s) => _tab(s, const MapScreen())),
+        GoRoute(path: '/map', pageBuilder: (c, s) => _tab(s, const WeatherMapScreen(embedded: true))),
         GoRoute(
           path: '/spots',
           pageBuilder: (c, s) => _tab(s, const SpotsScreen()),
@@ -96,7 +96,7 @@ GoRouter buildRouter() => GoRouter(
         ),
       ],
     ),
-    GoRoute(path: '/map/full', pageBuilder: (c, s) => _detail(s, const MapFullScreen())),
+    GoRoute(path: '/map/full', pageBuilder: (c, s) => _detail(s, const WeatherMapScreen())),
     GoRoute(
       path: '/setup/:step',
       builder: (c, s) => SetupScreen(step: int.tryParse(s.pathParameters['step'] ?? '1')?.clamp(1, 10) ?? 1),

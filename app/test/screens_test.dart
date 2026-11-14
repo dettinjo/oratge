@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:oratge/data/profile.dart';
 import 'package:oratge/theme/oratge_tokens.dart';
 import 'package:oratge/ui/screens/browse_screens.dart';
-import 'package:oratge/ui/screens/map_full.dart';
+import 'package:oratge/ui/screens/weather_map.dart';
 import 'package:oratge/ui/screens/planner_screen.dart';
 import 'package:oratge/ui/screens/profile_screens.dart';
 import 'package:oratge/ui/screens/today_screen.dart';
@@ -35,11 +35,11 @@ void main() {
   final screens = <String, Widget Function()>{
     'today': () => const TodayScreen(),
     'activities': () => const ActivitiesScreen(),
-    'map': () => const MapScreen(),
+    'map': () => const WeatherMapScreen(embedded: true),
     'spots': () => const SpotsScreen(),
     'spot': () => const SpotScreen(id: 'castelldefels'),
     'profile': () => const ProfileScreen(),
-    'map-full': () => const MapFullScreen(),
+    'map-full': () => const WeatherMapScreen(),
     for (final s in ['wing', 'surf', 'bike', 'run', 'hike']) 'planner-$s': () => PlannerScreen(sport: s),
     for (var i = 1; i <= 10; i++) 'setup-$i': () => SetupScreen(step: i),
   };

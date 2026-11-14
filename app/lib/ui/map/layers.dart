@@ -272,8 +272,9 @@ class ValueLabelsLayer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cam = MapCamera.of(context);
-    if (cam.zoom < 8.3 || layer == FieldLayer.rating) return const SizedBox.shrink();
-    final step = cam.zoom < 9 ? 2 : 1;
+    if (layer == FieldLayer.rating) return const SizedBox.shrink();
+    // Always readable: every 3rd grid point when zoomed out, every 2nd in between, all of them up close.
+    final step = cam.zoom < 7.4 ? 3 : (cam.zoom < 8.4 ? 2 : 1);
     final c = context.og;
     final f = sampler.f;
     final markers = <Marker>[];

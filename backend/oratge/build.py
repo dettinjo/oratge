@@ -1126,6 +1126,10 @@ def grid(src) -> dict:
 
 GRID_LATS = [round(40.5 + 0.25 * i, 2) for i in range(10)]   # south → north
 GRID_LONS = [round(0.15 + 0.25 * j, 2) for j in range(14)]   # west → east
+# The map timeline grid reaches well past Catalonia on every side, so the app can keep the camera
+# inside it and the weather always fills the screen (no visible edge when zooming out).
+MAP_LATS = [round(40.0 + 0.25 * i, 2) for i in range(14)]     # 40.00 → 43.25
+MAP_LONS = [round(-0.5 + 0.25 * j, 2) for j in range(19)]     # −0.50 → 4.00
 
 
 def grid_forecast(src, hours: int = 48) -> dict:
@@ -1133,8 +1137,8 @@ def grid_forecast(src, hours: int = 48) -> dict:
 
     fields[name][t][r * len(lons) + c] for time t, grid row r (lat) and column c (lon).
     """
-    la = [a for a in GRID_LATS for _ in GRID_LONS]
-    lo = [b for _ in GRID_LATS for b in GRID_LONS]
+    la = [a for a in MAP_LATS for _ in MAP_LONS]
+    lo = [b for _ in MAP_LATS for b in MAP_LONS]
     data = src.grid_forecast(la, lo, hours)
     pts = data if isinstance(data, list) else [data]
     times = pts[0]['hourly']['time']
@@ -1152,7 +1156,7 @@ def grid_forecast(src, hours: int = 48) -> dict:
                       cape=(hh.get('cape') or [0] * len(times))[t] or 0, freezing=0, pressure=0, cloud=0,
                       daylight=True).storm
     fields['storm'] = [[risk(p, t) for p in pts] for t in range(len(times))]
-    return {'lats': GRID_LATS, 'lons': GRID_LONS, 'times': times, 'fields': fields,
+    return {'lats': MAP_LATS, 'lons': MAP_LONS, 'times': times, 'fields': fields,
             'source': 'Open-Meteo hourly forecast (best-match models), 0.25° grid'}
 
 
