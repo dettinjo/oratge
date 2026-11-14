@@ -50,7 +50,7 @@ class OgPage extends StatelessWidget {
                       TextButton(
                         style: TextButton.styleFrom(
                             padding: EdgeInsets.zero, minimumSize: const Size(44, 44), alignment: Alignment.centerLeft),
-                        onPressed: () => context.go(back!.route),
+                        onPressed: () => goBack(context, back!.route),
                         child: Text('‹ ${back!.label}', style: OgText.day.copyWith(color: c.text2, fontSize: 14)),
                       ),
                     Semantics(
@@ -91,7 +91,7 @@ class _ProfileButton extends StatelessWidget {
       excludeSemantics: true,
       child: InkWell(
         customBorder: const CircleBorder(),
-        onTap: () => context.go('/profile'),
+        onTap: () => context.push('/profile'),
         child: Padding(
           padding: const EdgeInsets.all(2),
           child: CircleAvatar(
@@ -227,5 +227,15 @@ class Columns extends StatelessWidget {
         Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: right)),
       ]);
     });
+  }
+}
+
+
+/// Back to the screen the user came from; [fallback] when there is none (opened directly or from a tab).
+void goBack(BuildContext context, String fallback) {
+  if (context.canPop()) {
+    context.pop();
+  } else {
+    context.go(fallback);
   }
 }

@@ -56,7 +56,7 @@ class ProfileScreen extends StatelessWidget {
     Widget row(String stepId, String title) {
       final isDone = app.doneSteps.contains(stepId);
       return InkWell(
-        onTap: () => context.go('/setup/${setupSteps.indexWhere((s) => s.id == stepId) + 1}'),
+        onTap: () => context.push('/setup/${setupSteps.indexWhere((s) => s.id == stepId) + 1}'),
         child: Container(
           constraints: const BoxConstraints(minHeight: 56),
           padding: const EdgeInsets.symmetric(vertical: 8),
@@ -148,7 +148,7 @@ class ProfileScreen extends StatelessWidget {
             const OgSectionLabel('App'),
             row('alerts', 'Sync and privacy'),
             InkWell(
-              onTap: () => context.go('/profile/notifications'),
+              onTap: () => context.push('/profile/notifications'),
               child: Container(
                 constraints: const BoxConstraints(minHeight: 56),
                 padding: const EdgeInsets.symmetric(vertical: 8),
@@ -197,7 +197,7 @@ class SetupScreen extends StatelessWidget {
     final def = isDone ? null : setupSteps[step - 1];
     void next() {
       if (def != null) app.markDone(def.id);
-      context.go(step >= total ? '/today' : '/setup/${step + 1}');
+      step >= total ? goBack(context, '/today') : context.pushReplacement('/setup/${step + 1}');
     }
 
     return Scaffold(
@@ -212,7 +212,7 @@ class SetupScreen extends StatelessWidget {
                   children: [
                     TextButton(
                       style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: const Size(44, 44)),
-                      onPressed: () => context.go(step == 1 ? '/profile' : '/setup/${step - 1}'),
+                      onPressed: () => step == 1 ? goBack(context, '/profile') : context.pushReplacement('/setup/${step - 1}'),
                       child: Text(step == 1 ? '‹ Profile' : '‹ Back', style: OgText.day.copyWith(color: c.text2, fontSize: 14)),
                     ),
                     const Spacer(),
@@ -220,7 +220,7 @@ class SetupScreen extends StatelessWidget {
                     const Spacer(),
                     IconButton(
                       tooltip: 'Close setup',
-                      onPressed: () => context.go('/profile'),
+                      onPressed: () => goBack(context, '/profile'),
                       icon: Icon(Icons.close, color: c.text2),
                     ),
                   ],
@@ -268,7 +268,7 @@ class SetupScreen extends StatelessWidget {
                 if (!isDone && step > 1)
                   TextButton(
                     style: TextButton.styleFrom(minimumSize: const Size.fromHeight(48)),
-                    onPressed: () => context.go('/setup/${step + 1}'),
+                    onPressed: () => context.pushReplacement('/setup/${step + 1}'),
                     child: Text('Skip this step', style: OgText.day.copyWith(color: c.text2)),
                   ),
               ],
@@ -307,7 +307,7 @@ class SetupScreen extends StatelessWidget {
                       ),
                     ),
                     TextButton(
-                      onPressed: () => context.go('/setup/${i + 1}'),
+                      onPressed: () => context.pushReplacement('/setup/${i + 1}'),
                       child: Text('Edit', style: OgText.day.copyWith(color: c.text)),
                     ),
                   ],

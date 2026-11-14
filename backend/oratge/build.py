@@ -77,9 +77,16 @@ def threshold_en(s: str) -> str:
 
 
 class Builder:
-    def __init__(self, src: Sources, profile: dict | None = None):
+    def __init__(self, src: Sources, profile: dict | None = None, custom: dict | None = None):
         self.src = src
         self.p = {**E.DEFAULT_PROFILE, **(profile or {})}
+        # A user-added spot ("activity to check") replaces the built-in spot of its sport.
+        self.custom = custom
+
+    def spot_for(self, sport: str) -> dict:
+        if self.custom and self.custom.get('sport') == sport:
+            return self.custom
+        return SPOTS[SPORT_SPOT[sport]]
 
     # ── data per spot ──
     def hours(self, spot: dict, summit: bool = False) -> list[E.Hour]:
@@ -103,12 +110,12 @@ class Builder:
         return hours
 
     def rated_day(self, sport: str, day: date, hours: list[E.Hour] | None = None) -> list[E.Rated]:
-        spot = SPOTS[SPORT_SPOT[sport]]
+        spot = self.spot_for(sport)
         hours = hours or self.hours(spot, summit=sport == 'hike')
         return [E.rate(sport, h, spot, self.p) for h in E.day_hours(hours, day)]
 
     def day_ratings(self, sport: str, hours: list[E.Hour]) -> list[dict]:
-        spot = SPOTS[SPORT_SPOT[sport]]
+        spot = self.spot_for(sport)
         t0 = today_local()
         out = []
         for i in range(8):
@@ -139,7 +146,7 @@ class Builder:
             return 'no data'
         mid = inside[len(inside) // 2]
         if sport == 'wing':
-            spot = SPOTS[SPORT_SPOT[sport]]
+            spot = self.spot_for(sport)
             lo, hi = min(h.wind for h in inside), max(h.wind for h in inside)
             return f'{E.shore_relation(mid.wdir, spot["shore_facing"])} {E.compass(mid.wdir)} {rng(lo, hi)} kn'
         if sport == 'surf':
@@ -174,7 +181,7 @@ class Builder:
         gust = live['gust'] if live and live.get('gust') is not None else cur.gust
         wdir = live['wdir'] if live and live.get('wdir') is not None else cur.wdir
         days = [{'day': 'Today' if i == 0 else WD[date.fromisoformat(t).weekday()],
-                 'sky': E.sky_kind(int(d0['weather_code'][i] or 0), False),
+                 'sky': day_sky(hours, t, int(d0['weather_code'][i] or 0)),
                  'rainChance': int(d0['precipitation_probability_max'][i] or 0),
                  'min': round(d0['temperature_2m_min'][i]), 'max': round(d0['temperature_2m_max'][i])}
                 for i, t in enumerate(d0['time']) if date.fromisoformat(t) >= today_local()][:7]
@@ -195,9 +202,10 @@ class Builder:
                      'reason': best['reason'][:1].upper() + best['reason'][1:] + '.',
                      'note': 'Dry for the next 2 hours (forecast)' if dry else 'Rain likely within 2 hours (forecast)'},
             'warnings': self.warnings(place),
-            'observed': self.observed(place, live),
-            'current': {'place': place['name'], 'source': src_line, 'sky': cur.sky, 'temp': round(temp),
-                        'summary': SUMMARY.get(cur.sky, 'Variable'), 'feels': round(cur.feels),
+            'observed': (obs := self.observed(place, live)),
+            'current': {'place': place['name'], 'source': src_line, 'sky': (sky := now_sky(cur, obs)), 'temp': round(temp),
+                        'summary': ('Thunderstorm nearby' if sky == 'storm' and cur.sky != 'storm'
+                                    else SUMMARY.get(sky, 'Variable')), 'feels': round(cur.feels),
                         'min': round(d0['temperature_2m_min'][1]), 'max': round(d0['temperature_2m_max'][1]),
                         'wind': f'{E.compass(wdir)} {wind:.0f} kn · gusts {gust:.0f}'},
             'rightNow': [
@@ -211,7 +219,7 @@ class Builder:
                        'wind': [round(h.wind, 1) for h in nxt], 'gust': [round(h.gust, 1) for h in nxt],
                        'wdir': [round(h.wdir) for h in nxt], 'uv': [round(h.uv, 1) for h in nxt],
                        'feels': [round(h.feels, 1) for h in nxt], 'humidity': [round(h.rh) for h in nxt],
-                       'precip': [round(h.precip, 1) for h in nxt]},
+                       'precip': [round(h.precip, 1) for h in nxt], 'storm': [h.storm for h in nxt]},
             'sports': sports, 'days': days, 'scale': [lo, hi],
             'confidence': self.confidence(),
             'daylight': [{'label': 'Sunrise', 'value': d0['sunrise'][1][11:16]},
@@ -337,7 +345,7 @@ class Builder:
 
     # ── Planner ──
     def planner(self, sport: str, day: int = 0) -> dict:
-        spot = SPOTS[SPORT_SPOT[sport]]
+        spot = self.spot_for(sport)
         hours = self.hours(spot, summit=sport == 'hike')
         the_day = today_local() + timedelta(days=day)
         rated = [E.rate(sport, h, spot, self.p) for h in E.day_hours(hours, the_day)]
@@ -382,8 +390,8 @@ class Builder:
             return 'No good window today'
         if sport == 'hike':
             storms = [r.hour.t.hour for r in rated if r.hour.storm >= float(self.p['maxStorm'])]
-            spot = SPOTS['pedraforca']
-            ascent = math.ceil((spot['summit_alt'] - spot['base_alt']) / float(self.p.get('climbPace', 400)))
+            spot = self.spot_for('hike')
+            ascent = math.ceil(((spot.get('summit_alt') or 0) - (spot.get('base_alt') or 0)) / float(self.p.get('climbPace', 400)))
             first_light = min((r.hour.t.hour for r in rated if r.hour.daylight), default=8)
             start = max(first_light, w[0] - ascent)
             if storms:
@@ -573,15 +581,15 @@ class Builder:
                 {'type': 'TrendLine', 'props': {'accent': 'wind', 'values': [round(h.wind, 1) for h in past], 'band': [round(h.gust, 1) for h in past],
                                                 'nowIndex': len(past) - 1, 'nowLabel': f'{wind:.0f} kn', 'caption': [f'−{len(past) - 1} h', 'now'],
                                                 'min': 0, 'max': max(24, max(h.gust for h in past) + 2), 'height': 64}}]}]
-        if sport == 'surf':
+        if sport == 'surf' and spot.get('exposure'):
             h = rated[len(rated) // 3].hour
             return [{'label': 'Swell window', 'blocks': [{'type': 'SwellWindow', 'props': {'swellFrom': round(h.swell_dir or h.wave_dir or 90), 'exposure': spot['exposure']}}]}]
-        if sport == 'bike':
+        if sport == 'bike' and spot.get('route'):
             h = rated[(w[0] - E.HOURS[0]) if w else 2].hour
             return [{'label': f'Route wind · {h.t.hour:02d}:00 start', 'blocks': [{'type': 'RouteWind', 'props': {
                 'points': spot['route'], 'windFrom': round(h.wdir), 'windLabel': f'{E.compass(h.wdir)} {h.wind:.0f} kn',
                 'title': f'{tail_share(spot["route"], h.wdir)} % tailwind', 'labels': spot.get('route_labels', [])}}]}]
-        if sport == 'hike':
+        if sport == 'hike' and spot.get('summit_alt'):
             h = rated[min(4, len(rated) - 1)].hour
             dz = lambda a: (spot['summit_alt'] - a) / 1000 * 6.5  # noqa: E731
             pres = [h2 for h2 in hours if now - timedelta(hours=12) <= h2.t <= now + timedelta(hours=12)]
@@ -674,7 +682,7 @@ class Builder:
                                                {'label': 'Water', 'value': f'{hs[0].sst:.1f}°' if hs[0].sst else '—', 'sub': wetsuit(hs[0].sst)}]}
         if sport == 'bike':
             before = [h for h in hours if h.t <= hs[0].t][-6:]
-            live = self.live(SPOTS['collserola'])
+            live = self.live(self.spot_for('bike'))
             measured = live.get('rain_3h') if live else None
             roads = ({'label': 'Roads', 'value': 'Wet' if measured >= 0.3 else ('Damp' if measured > 0 else road(hs[0])),
                       'sub': f'{measured:.1f} mm measured in 3 h ({live["station_name"]})'} if measured is not None
@@ -824,7 +832,7 @@ class Builder:
         t0 = today_local()
         out, ratings = [], {}
         for sport in sports:
-            spot = SPOTS[SPORT_SPOT[sport]]
+            spot = self.spot_for(sport)
             hours = self.hours(spot, summit=sport == 'hike')
             for i in range(3):
                 day = t0 + timedelta(days=i)
@@ -976,13 +984,14 @@ def hourly(b: 'Builder', place: dict) -> dict:
     hours = E.parse_hours(fc)
     by_t = {x.t.strftime('%Y-%m-%dT%H:%M'): x for x in hours}
     series['sky'] = [by_t[h['time'][i]].sky if h['time'][i] in by_t else 'cloud' for i in idx]
+    series['storm'] = [by_t[h['time'][i]].storm if h['time'][i] in by_t else 0 for i in idx]
     days = []
     for i, t in enumerate(d['time']):
         dd = date.fromisoformat(t)
         if dd < t0 or len(days) >= 7:
             continue
         g = lambda k, nd=0: None if d.get(k) is None or d[k][i] is None else round(d[k][i], nd)  # noqa: E731
-        days.append({'date': t, 'day': 'Today' if dd == t0 else WD[dd.weekday()], 'sky': E.sky_kind(int(d['weather_code'][i] or 0), False),
+        days.append({'date': t, 'day': 'Today' if dd == t0 else WD[dd.weekday()], 'sky': day_sky(hours, t, int(d['weather_code'][i] or 0)),
                      'min': g('temperature_2m_min'), 'max': g('temperature_2m_max'), 'pprob': g('precipitation_probability_max'),
                      'precip': g('precipitation_sum', 1), 'uvMax': g('uv_index_max', 1), 'windMax': g('wind_speed_10m_max'),
                      'gustMax': g('wind_gusts_10m_max'), 'windDir': g('wind_direction_10m_dominant'),
@@ -1017,6 +1026,37 @@ def observed_today(b: 'Builder', place: dict) -> dict | None:
     except Exception as e:
         log.info('observed today failed: %s', e)
         return None
+
+
+def map_lightning(b: 'Builder') -> dict:
+    """Strikes in Catalonia over the last two hours (XDDE, same cached calls as the planners)."""
+    if not b.src.meteocat_available():
+        return {'strikes': [], 'source': 'no Meteocat key'}
+    now = datetime.now(timezone.utc)
+    out = []
+    for h, age in ((now - timedelta(hours=1), 7 * 86400), (now, 1200)):
+        data = b.src.try_meteocat('xdde', f'/xdde/v1/catalunya/{h:%Y/%m/%d/%H}', age)
+        for s_ in data if isinstance(data, list) else []:
+            try:
+                c = s_.get('coordenades') or s_
+                out.append({'lat': float(c.get('latitud', c.get('lat'))), 'lon': float(c.get('longitud', c.get('lon'))),
+                            't': s_.get('data', '')})
+            except (TypeError, ValueError, AttributeError):
+                continue
+    return {'strikes': out[-2000:], 'source': 'Meteocat XDDE lightning, last 2 hours'}
+
+
+def day_sky(hours: list, day_iso: str, code: int) -> str:
+    """Daily icon: thunder if any hour of the day reaches the storm threshold, else the model's daily code."""
+    if any(h.t.date().isoformat() == day_iso and h.storm >= E.STORM_ICON for h in hours):
+        return 'storm'
+    return E.sky_kind(code, False)
+
+
+def now_sky(cur, observed: dict | None) -> str:
+    """Current icon: thunder when Meteocat measured lightning within 10 km in the last two hours."""
+    lt = (observed or {}).get('lightning') or {}
+    return 'storm' if (lt.get('near') or 0) > 0 else cur.sky
 
 
 def ratingword(r: int) -> str:
@@ -1099,6 +1139,14 @@ def grid_forecast(src, hours: int = 48) -> dict:
     for name, k in keys.items():
         fields[name] = [[(round(v, 1) if isinstance(v, float) else (v if v is not None else 0))
                          for v in (p['hourly'][k][t] for p in pts)] for t in range(len(times))]
+    # Thunderstorm risk per cell, the same estimate as the planners use (instability, showers, thunder codes).
+    def risk(p, t):
+        hh = p['hourly']
+        return E.Hour(t=None, temp=0, feels=0, rh=0, precip=0, pprob=hh['precipitation_probability'][t] or 0,
+                      code=int(hh['weather_code'][t] or 0), wind=0, wdir=0, gust=0, uv=0,
+                      cape=(hh.get('cape') or [0] * len(times))[t] or 0, freezing=0, pressure=0, cloud=0,
+                      daylight=True).storm
+    fields['storm'] = [[risk(p, t) for p in pts] for t in range(len(times))]
     return {'lats': GRID_LATS, 'lons': GRID_LONS, 'times': times, 'fields': fields,
             'source': 'Open-Meteo hourly forecast (best-match models), 0.25° grid'}
 

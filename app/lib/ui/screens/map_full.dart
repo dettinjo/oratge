@@ -404,7 +404,7 @@ class _MapFullScreenState extends State<MapFullScreen> {
                     ),
                     onPressed: () {
                       Navigator.of(context).pop();
-                      context.go('/activities/${p.sport}');
+                      context.push('/activities/${p.sport}');
                     },
                     child: const Text('Open planner'),
                   ),
@@ -420,7 +420,7 @@ class _MapFullScreenState extends State<MapFullScreen> {
                     ),
                     onPressed: () {
                       Navigator.of(context).pop();
-                      context.go('/spots/${p.id}');
+                      context.push('/spots/${p.id}');
                     },
                     child: const Text('Spot details'),
                   ),

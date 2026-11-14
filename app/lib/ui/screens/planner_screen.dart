@@ -173,7 +173,7 @@ class _PlannerScreenState extends State<PlannerScreen> {
               ? null
               : [for (final r in gear.wings) '${WingGear.label(r.size)}: ${u.windText(r.low, unit: false)}–${u.windText(r.high)}']
                     .join(' · '),
-          onTap: () => context.go('/activities/wing/gear?wind=${w.toStringAsFixed(0)}&gust=${g.toStringAsFixed(0)}'),
+          onTap: () => context.push('/activities/wing/gear?wind=${w.toStringAsFixed(0)}&gust=${g.toStringAsFixed(0)}'),
         );
       case 'tuned':
         if (d.tuned.isEmpty) return null;
@@ -273,7 +273,7 @@ class _Tuned extends StatelessWidget {
             alignment: Alignment.centerLeft,
             child: TextButton(
               style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: const Size(44, 44)),
-              onPressed: () => context.go('/profile'),
+              onPressed: () => context.push('/profile'),
               child: Text(
                 'Edit your setup ›',
                 style: OgText.day.copyWith(color: c.text, fontWeight: FontWeight.w600),

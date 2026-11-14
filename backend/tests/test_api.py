@@ -153,7 +153,8 @@ def test_map_forecast_grid():
     d = client.get('/v1/map/forecast?hours=12').json()
     n = len(d['lats']) * len(d['lons'])
     assert len(d['times']) == 12 and len(d['fields']['wind']) == 12 and len(d['fields']['wind'][0]) == n
-    assert set(d['fields']) == {'wind', 'wdir', 'gust', 'temp', 'precip', 'pprob', 'code'}
+    assert set(d['fields']) == {'wind', 'wdir', 'gust', 'temp', 'precip', 'pprob', 'code', 'storm'}
+    assert all(0 <= v <= 95 for v in d['fields']['storm'][0])
 
 
 class KeyedSources(FakeSources):
@@ -354,3 +355,70 @@ def test_old_apps_only_get_default_alerts():
     assert {r['sport'] for r in old['ratings'].values()} <= {'wing'}
     new = client.get('/v1/alerts?sports=wing,bike,run&v=2').json()
     assert all('rating' in a and 'days_ahead' in a for a in new['alerts'] if a['kind'] == 'window')
+
+
+def test_thunder_icons():
+    from datetime import datetime
+    from oratge import engine as E
+    from oratge.build import now_sky
+    base = dict(t=datetime(2026, 11, 14, 15), temp=20, feels=20, rh=70, precip=1, wind=5, wdir=200, gust=9, uv=1,
+                freezing=3000, pressure=1010, cloud=80, daylight=True)
+    assert E.Hour(**base, pprob=80, code=81, cape=900).sky == 'storm'      # showers + high instability
+    assert E.Hour(**base, pprob=80, code=61, cape=0).sky == 'rain'         # plain rain
+    assert E.Hour(**base, pprob=50, code=95, cape=0).sky == 'storm'        # model's thunder code
+    calm = E.Hour(**base, pprob=10, code=3, cape=0)
+    assert now_sky(calm, {'lightning': {'near': 2}}) == 'storm' and now_sky(calm, {'lightning': {'near': 0}}) == 'cloud'
+
+
+class ActivitySources(FakeSources):
+    """Sea to the south of 41.25° (elevation 0), land north; route forecast: rain 14–16 h, N wind 12 kn."""
+
+    def elevation(self, lats, lons):
+        return {'elevation': [0.0 if la < 41.25 else 40.0 for la in lats]}
+
+    def route_forecast(self, lats, lons):
+        times = [f'2026-11-{d:02d}T{h:02d}:00' for d in range(14, 21) for h in range(24)]
+        n = len(times)
+        hourly = {'time': times, 'temperature_2m': [15.0] * n, 'apparent_temperature': [13.0] * n,
+                  'precipitation': [1.2 if 14 <= int(t[11:13]) < 16 else 0.0 for t in times],
+                  'precipitation_probability': [80 if 14 <= int(t[11:13]) < 16 else 5 for t in times],
+                  'weather_code': [61 if 14 <= int(t[11:13]) < 16 else 1 for t in times],
+                  'wind_speed_10m': [12.0] * n, 'wind_direction_10m': [0] * n, 'wind_gusts_10m': [18.0] * n,
+                  'cape': [0] * n, 'is_day': [1 if 8 <= int(t[11:13]) < 18 else 0 for t in times]}
+        return [{'latitude': a, 'longitude': b, 'hourly': hourly} for a, b in zip(lats, lons)]
+
+
+def test_shore_facing_points_at_the_sea(monkeypatch):
+    monkeypatch.setattr(api, '_sources', ActivitySources(api._store))
+    f = client.get('/v1/shore?lat=41.26&lon=1.98').json()
+    assert 150 <= f['facing'] <= 210  # sea to the south
+
+
+def test_custom_spot_planner_and_check(monkeypatch):
+    monkeypatch.setattr(api, '_sources', ActivitySources(api._store))
+    p = client.get('/v1/planner/wing?lat=41.24&lon=1.81&name=Sitges&facing=170').json()
+    assert p['title'].endswith('Sitges') and p['verdict']
+    r = client.post('/v1/activities/check', json={'activities': [
+        {'id': 'a1', 'sport': 'wing', 'lat': 41.24, 'lon': 1.81, 'name': 'Sitges', 'facing': 170},
+        {'id': 'a2', 'sport': 'run', 'lat': 41.39, 'lon': 2.17, 'name': 'Park'}], 'days': 3}).json()
+    assert [a['id'] for a in r['activities']] == ['a1', 'a2'] and len(r['activities'][0]['days']) == 3
+
+
+def test_route_finds_rain_and_headwind(monkeypatch):
+    from oratge import activities as A
+    monkeypatch.setattr(api, '_sources', ActivitySources(api._store))
+    # 40 km heading north (into the N wind), starting 13:00 at 20 km/h → in the rain 14–16 h, km ~20–40.
+    pts = [[41.30 + i * 0.009, 2.00, 100] for i in range(41)]
+    d = client.post('/v1/route', json={'points': pts, 'sport': 'bike', 'start': '2026-11-15T13:00', 'speed': 20}).json()
+    lines = ' · '.join(d['summary']['lines'])
+    assert 'Rain km' in lines and 'Headwind' in lines and not d['summary']['dry']
+    start = int(d['best_start'][:2])
+    assert start + d['duration_h'] <= 14 or start >= 16  # the suggested start avoids the 14–16 h rain
+    assert abs(d['distance_km'] - 40) < 1.5 and len(d['samples']) >= 20
+    assert all(s['head'] > 10 for s in d['samples'] if not s.get('missing'))  # straight into the wind
+    assert len(A.resample([[41.3, 2.0], [41.3, 2.0001]])) >= 2
+
+
+def test_route_rejects_bad_input():
+    assert client.post('/v1/route', json={'points': [[41.3, 2.0]], 'sport': 'bike'}).status_code == 422
+    assert client.post('/v1/route', json={'points': [[48.8, 2.3], [48.9, 2.3]], 'sport': 'bike'}).status_code == 422

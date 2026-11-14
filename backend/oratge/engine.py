@@ -47,6 +47,9 @@ def shore_relation(wind_from: float, shore_facing: float) -> str:
     return 'off'
 
 
+STORM_ICON = 30  # % storm risk from which an hour shows the thunder icon
+
+
 def sky_kind(code: int, night: bool) -> str:
     if code >= 95:
         return 'storm'
@@ -92,6 +95,9 @@ class Hour:
 
     @property
     def sky(self) -> str:
+        # Thunder: the model's thunder codes, or our own storm risk (instability + showers) from 30 %.
+        if self.storm >= STORM_ICON:
+            return 'storm'
         return sky_kind(self.code, not self.daylight)
 
     @property

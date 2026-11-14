@@ -4,6 +4,7 @@ Every fetch goes through the store: fresh cache → network → stale cache. Met
 quota governor, which spreads each plan's monthly budget over the remaining days.
 """
 import calendar
+import hashlib
 from urllib.parse import parse_qsl
 import logging
 from datetime import datetime, timezone
@@ -99,14 +100,29 @@ class Sources:
     def grid_forecast(self, lats: list[float], lons: list[float], hours: int = 48):
         p = dict(latitude=','.join(f'{x:.2f}' for x in lats), longitude=','.join(f'{x:.2f}' for x in lons),
                  hourly='wind_speed_10m,wind_direction_10m,wind_gusts_10m,temperature_2m,precipitation,'
-                        'precipitation_probability,weather_code',
+                        'precipitation_probability,weather_code,cape',
                  forecast_hours=hours, wind_speed_unit='kn', timezone=settings.tz)
-        return self._get(f'om:gridfc:{len(lats)}:{hours}', OM_FORECAST, p, 3600)
+        return self._get(f'om:gridfc2:{len(lats)}:{hours}', OM_FORECAST, p, 3600)  # 2: + CAPE for the thunder layer
 
     def reverse_nearest(self, lat: float, lon: float):
         """Photon (OSM data): nearest named features, works for points just offshore."""
         p = dict(lat=f'{lat:.3f}', lon=f'{lon:.3f}', limit=5)
         return self._get(f'photon:rev:{lat:.3f},{lon:.3f}', 'https://photon.komoot.io/reverse', p, 30 * 86400)
+
+    def elevation(self, lats: list[float], lons: list[float]):
+        """Terrain elevation (m) for up to 100 points (Copernicus DEM; 0 over the sea)."""
+        p = dict(latitude=','.join(f'{x:.4f}' for x in lats), longitude=','.join(f'{x:.4f}' for x in lons))
+        key = 'om:elev:' + hashlib.md5((p['latitude'] + p['longitude']).encode()).hexdigest()[:16]
+        return self._get(key, 'https://api.open-meteo.com/v1/elevation', p, 365 * 86400)
+
+    def route_forecast(self, lats: list[float], lons: list[float]):
+        """Hourly forecast for up to 60 points along a route (7 days)."""
+        p = dict(latitude=','.join(f'{x:.3f}' for x in lats), longitude=','.join(f'{x:.3f}' for x in lons),
+                 hourly='temperature_2m,apparent_temperature,precipitation,precipitation_probability,weather_code,'
+                        'wind_speed_10m,wind_direction_10m,wind_gusts_10m,cape,is_day',
+                 forecast_days=7, wind_speed_unit='kn', timezone=settings.tz)
+        key = 'om:route:' + hashlib.md5((p['latitude'] + p['longitude']).encode()).hexdigest()[:16]
+        return self._get(key, OM_FORECAST, p, 3600)
 
     def grid(self, lats: list[float], lons: list[float]):
         p = dict(latitude=','.join(f'{x:.2f}' for x in lats), longitude=','.join(f'{x:.2f}' for x in lons),

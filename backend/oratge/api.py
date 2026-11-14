@@ -4,6 +4,7 @@ Planner/summary requests may carry the user's ranges as query parameters; they a
 rating and never stored.
 """
 import json
+from datetime import datetime
 import logging
 import time
 
@@ -14,6 +15,7 @@ from fastapi.middleware.gzip import GZipMiddleware
 import os
 
 from .archive import start_scheduler
+from . import activities as A
 from . import build as build_mod
 from .build import Builder
 from .config import settings
@@ -25,13 +27,13 @@ logging.basicConfig(level=logging.INFO)
 app = FastAPI(title='Oratge', version='0.1.0')
 # Read-only API protected by a bearer token; the web build may run on another origin.
 app.add_middleware(GZipMiddleware, minimum_size=2000)
-app.add_middleware(CORSMiddleware, allow_origins=['*'], allow_methods=['GET', 'PUT'], allow_headers=['Authorization', 'Content-Type'])
+app.add_middleware(CORSMiddleware, allow_origins=['*'], allow_methods=['GET', 'PUT', 'POST'], allow_headers=['Authorization', 'Content-Type'])
 _store = Store(settings.db_path)
 _sources = Sources(_store)
 
 PROFILE_KEYS = {'windFrom', 'windTo', 'gustLimit', 'waveFrom', 'waveTo', 'minPeriod', 'maxWindBike', 'comfortFrom',
                 'comfortTo', 'maxStorm', 'maxSummitWind', 'weight', 'climbPace', 'daylightMargin', 'runDistance',
-                'boardVolume', 'frontWing'}
+                'boardVolume', 'frontWing', 'rideSpeed'}
 PROFILE_FLAGS = {'mudguards', 'lights', 'lightRainOk', 'crampons'}
 
 
@@ -58,6 +60,8 @@ def builder(request: Request) -> Builder:
         p['wings'] = q['wings'].split(',')
     if 'wingLevel' in q:
         p['wingLevel'] = q['wingLevel']
+    if 'runPace' in q:
+        p['runPace'] = q['runPace']
     return Builder(_sources, p)
 
 
@@ -106,6 +110,11 @@ def alerts(sports: str | None = None, lat: float | None = None, lon: float | Non
     return out
 
 
+@app.get('/v1/map/lightning', dependencies=[Depends(auth)])
+def map_lightning(b: Builder = Depends(builder)):
+    return build_mod.map_lightning(b)
+
+
 @app.get('/v1/places', dependencies=[Depends(auth)])
 def places(q: str = ''):
     return {'places': build_mod.places(_sources, q.strip())}
@@ -132,12 +141,71 @@ def activities(b: Builder = Depends(builder)):
 
 
 @app.get('/v1/planner/{sport}', dependencies=[Depends(auth)])
-def planner(sport: str, day: int = 0, b: Builder = Depends(builder)):
+def planner(sport: str, day: int = 0, lat: float | None = None, lon: float | None = None, name: str | None = None,
+            facing: float | None = None, b: Builder = Depends(builder)):
+    """Planner for the built-in spot of a sport, or for the user's own place (lat/lon, name, beach facing)."""
     if sport not in SPORT_SPOT:
         raise HTTPException(404, 'unknown sport')
     if not 0 <= day <= 7:
         raise HTTPException(400, 'day must be 0–7')
+    if lat is not None and lon is not None:
+        _in_catalonia(lat, lon)
+        b = Builder(_sources, b.p, custom=A.custom_spot(sport, lat, lon, name or f'{lat:.2f}, {lon:.2f}', facing))
     return b.planner(sport, day)
+
+
+def _in_catalonia(lat: float, lon: float):
+    if not (40.0 <= lat <= 43.5 and -0.5 <= lon <= 3.6):
+        raise HTTPException(422, 'Oratge covers Catalonia only')
+
+
+@app.get('/v1/shore', dependencies=[Depends(auth)])
+def shore(lat: float, lon: float):
+    """Which way a beach faces (degrees towards the sea), from terrain elevation around the point."""
+    _in_catalonia(lat, lon)
+    return A.shore_facing(_sources, lat, lon)
+
+
+@app.post('/v1/activities/check', dependencies=[Depends(auth)])
+async def activities_check(request: Request, b: Builder = Depends(builder)):
+    """Best window per day for the user's spot activities: {"activities": [{id, sport, lat, lon, name, facing}], "days": 3}."""
+    body = await _json(request, 64_000)
+    items = [a for a in body.get('activities', []) if isinstance(a, dict)]
+    days = max(1, min(7, int(body.get('days', 3))))
+    return {'activities': A.check(lambda spot: Builder(_sources, b.p, custom=spot), items, days)}
+
+
+@app.post('/v1/route', dependencies=[Depends(auth)])
+async def route(request: Request, b: Builder = Depends(builder)):
+    """Weather along a GPX track: {"points": [[lat, lon, ele?], …], "sport": "bike", "start": "2026-11-15T09:00", "speed": 24}."""
+    body = await _json(request, 400_000)
+    pts = body.get('points') or []
+    sport = body.get('sport', 'bike')
+    if sport not in ('bike', 'run', 'hike') or not isinstance(pts, list) or not 2 <= len(pts) <= 5000:
+        raise HTTPException(422, 'expected points (2–5000) and sport bike, run or hike')
+    try:
+        start = datetime.fromisoformat(body.get('start') or datetime.now().strftime('%Y-%m-%dT%H:00'))
+        points = [[float(p[0]), float(p[1]), (float(p[2]) if len(p) > 2 and p[2] is not None else None)] for p in pts]
+    except (ValueError, TypeError, IndexError):
+        raise HTTPException(422, 'bad start time or points')
+    _in_catalonia(points[0][0], points[0][1])
+    speed = body.get('speed')
+    try:
+        return A.route(_sources, b.p, points, sport, start.replace(tzinfo=None), float(speed) if speed else None)
+    except ValueError as e:
+        raise HTTPException(422, str(e))
+
+
+async def _json(request: Request, limit: int) -> dict:
+    raw = await request.body()
+    if len(raw) > limit:
+        raise HTTPException(413, 'payload too large')
+    try:
+        d = json.loads(raw)
+        assert isinstance(d, dict)
+        return d
+    except Exception:
+        raise HTTPException(422, 'expected a JSON object')
 
 
 @app.get('/v1/map', dependencies=[Depends(auth)])

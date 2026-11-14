@@ -140,12 +140,12 @@ class TodayScreen extends StatelessWidget {
             value: '${sportShort[best['sport']]} · ${best['window']}',
             sub: '${best['reason']}',
             minHeight: 0,
-            onTap: () => context.go('/activities/${best['sport']}'),
+            onTap: () => context.push('/activities/${best['sport']}'),
           );
         }
         return InkWell(
           borderRadius: BorderRadius.circular(OgRadius.card),
-          onTap: () => context.go('/activities/${best['sport']}'),
+          onTap: () => context.push('/activities/${best['sport']}'),
           child: OgCard(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -285,7 +285,7 @@ class TodayScreen extends StatelessWidget {
                         OgRatingDots(value: a.rating),
                       ],
                     ),
-                    onPressed: () => context.go('/activities/${a.sport}'),
+                    onPressed: () => context.push('/activities/${a.sport}'),
                   ),
               ],
             ),
@@ -302,7 +302,7 @@ class TodayScreen extends StatelessWidget {
                   window: a.window,
                   reason: a.reason,
                   last: i == sports.length - 1,
-                  onTap: () => context.go('/activities/${a.sport}'),
+                  onTap: () => context.push('/activities/${a.sport}'),
                 ),
             ],
           ),
@@ -321,7 +321,7 @@ class TodayScreen extends StatelessWidget {
                     onPlan: i <= 2
                         ? () {
                             Navigator.of(context).pop();
-                            context.go('/activities');
+                            context.push('/activities');
                           }
                         : null,
                   ),
