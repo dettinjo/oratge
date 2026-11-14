@@ -20,8 +20,9 @@ abstract class ForecastRepository {
   Future<Place> reverse(double lat, double lon);
   Future<GridData> grid();
 
-  /// 48-hour hourly forecast on the map grid (empty offline).
-  Future<MapForecast> mapForecast();
+  /// 48-hour hourly forecast on the map grid (empty offline); for a view (south, west, north, east)
+  /// the server picks a grid that covers it.
+  Future<MapForecast> mapForecast({(double, double, double, double)? view});
 
   /// Lightning strikes in Catalonia over the last two hours (lat, lon).
   Future<List<(double, double)>> lightning();
@@ -88,7 +89,7 @@ class SampleRepository implements ForecastRepository {
   @override
   Future<GridData> grid() async => GridData.fromJson({'time': '', 'points': [], 'source': 'offline'});
   @override
-  Future<MapForecast> mapForecast() async => MapForecast.fromJson(const {});
+  Future<MapForecast> mapForecast({(double, double, double, double)? view}) async => MapForecast.fromJson(const {});
   @override
   Future<List<(double, double)>> lightning() async => const [];
   @override
@@ -98,7 +99,8 @@ class SampleRepository implements ForecastRepository {
   @override
   Future<ActivitiesData> activities() async => ActivitiesData.fromJson(await _load('activities'));
   @override
-  Future<PlannerData> planner(String sport, {int day = 0, Activity? at}) async => PlannerData.fromJson(await _load('planner-$sport'));
+  Future<PlannerData> planner(String sport, {int day = 0, Activity? at}) async =>
+      PlannerData.fromJson(await _load('planner-$sport'));
   @override
   Future<List<Json>> checkActivities(List<Activity> spots, {int days = 3}) async => const [];
   @override
@@ -377,19 +379,26 @@ class ApiRepository implements ForecastRepository {
   @override
   Future<GridData> grid() => _load('map/grid', GridData.fromJson, (f) => f.grid());
   @override
-  Future<MapForecast> mapForecast() => _load('map/forecast', MapForecast.fromJson, (f) => f.mapForecast());
+  Future<MapForecast> mapForecast({(double, double, double, double)? view}) => _load(
+    view == null
+        ? 'map/forecast'
+        : 'map/forecast?south=${view.$1.toStringAsFixed(1)}&west=${view.$2.toStringAsFixed(1)}'
+              '&north=${view.$3.toStringAsFixed(1)}&east=${view.$4.toStringAsFixed(1)}',
+    MapForecast.fromJson,
+    (f) => f.mapForecast(view: view),
+  );
   @override
   Future<List<(double, double)>> lightning() async {
     try {
       final j = await _fetch('map/lightning');
       return [
-        for (final x in j['strikes'] as List? ?? const [])
-          (((x as Map)['lat'] as num).toDouble(), (x['lon'] as num).toDouble()),
+        for (final x in j['strikes'] as List? ?? const []) (((x as Map)['lat'] as num).toDouble(), (x['lon'] as num).toDouble()),
       ];
     } catch (_) {
       return const [];
     }
   }
+
   @override
   Future<HourlyData> hourly([Place? place]) => _load(
     place == null
@@ -402,12 +411,13 @@ class ApiRepository implements ForecastRepository {
   Future<ActivitiesData> activities() => _load('activities', ActivitiesData.fromJson, (f) => f.activities());
   @override
   Future<PlannerData> planner(String sport, {int day = 0, Activity? at}) => _load(
-      at == null || at.builtin != null || at.lat == null
-          ? 'planner/$sport?day=$day'
-          : 'planner/$sport?day=$day&lat=${at.lat!.toStringAsFixed(4)}&lon=${at.lon!.toStringAsFixed(4)}'
+    at == null || at.builtin != null || at.lat == null
+        ? 'planner/$sport?day=$day'
+        : 'planner/$sport?day=$day&lat=${at.lat!.toStringAsFixed(4)}&lon=${at.lon!.toStringAsFixed(4)}'
               '&name=${Uri.encodeQueryComponent(at.name)}${at.facing == null ? '' : '&facing=${at.facing!.round()}'}',
-      PlannerData.fromJson,
-      (f) => f.planner(sport, day: day));
+    PlannerData.fromJson,
+    (f) => f.planner(sport, day: day),
+  );
 
   final Map<String, (DateTime, Object)> _postCache = {};
 
@@ -418,8 +428,11 @@ class ApiRepository implements ForecastRepository {
     final hit = _postCache[key];
     if (hit != null && DateTime.now().difference(hit.$1) < fresh) return hit.$2;
     final res = await _client
-        .post(Uri.parse('$baseUrl/v1/${_query(path)}'),
-            headers: {'Content-Type': 'application/json', if (token != null) 'Authorization': 'Bearer $token'}, body: payload)
+        .post(
+          Uri.parse('$baseUrl/v1/${_query(path)}'),
+          headers: {'Content-Type': 'application/json', if (token != null) 'Authorization': 'Bearer $token'},
+          body: payload,
+        )
         .timeout(timeout);
     if (res.statusCode != 200) {
       String msg;
@@ -469,6 +482,7 @@ class ApiRepository implements ForecastRepository {
       return null;
     }
   }
+
   @override
   Future<MapData> map() => _load('map', MapData.fromJson, (f) => f.map());
   @override

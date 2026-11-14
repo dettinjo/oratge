@@ -273,13 +273,22 @@ class ValueLabelsLayer extends StatelessWidget {
   Widget build(BuildContext context) {
     final cam = MapCamera.of(context);
     if (layer == FieldLayer.rating) return const SizedBox.shrink();
-    // Always readable: every 3rd grid point when zoomed out, every 2nd in between, all of them up close.
-    final step = cam.zoom < 7.4 ? 3 : (cam.zoom < 8.4 ? 2 : 1);
+    // Spaced by what's on screen (the grid's resolution changes with the view): about 70 px apart.
+    final f0 = sampler.f;
+    final dx = f0.lons.length < 2
+        ? 100.0
+        : (cam.getOffsetFromOrigin(LatLng(f0.lats.first, f0.lons[1])) -
+                  cam.getOffsetFromOrigin(LatLng(f0.lats.first, f0.lons[0])))
+              .dx
+              .abs();
+    final step = math.max(1, (70 / math.max(dx, 1)).ceil());
+    final vb = cam.visibleBounds;
     final c = context.og;
     final f = sampler.f;
     final markers = <Marker>[];
     for (var r = 0; r < f.lats.length; r += step) {
       for (var col = 0; col < f.lons.length; col += step) {
+        if (!vb.contains(LatLng(f.lats[r], f.lons[col]))) continue;
         final i = r * f.lons.length + col;
         final field = f.fields;
         final text = switch (layer) {
@@ -287,8 +296,7 @@ class ValueLabelsLayer extends StatelessWidget {
           FieldLayer.temp => '${field['temp']![sampler.t][i].round()}°',
           FieldLayer.rain => field['precip']![sampler.t][i] >= 0.1 ? field['precip']![sampler.t][i].toStringAsFixed(1) : '',
           FieldLayer.chance => '${field['pprob']![sampler.t][i].round()}',
-          FieldLayer.thunder =>
-            (field['storm']?[sampler.t][i] ?? 0) >= 15 ? '${field['storm']![sampler.t][i].round()}' : '',
+          FieldLayer.thunder => (field['storm']?[sampler.t][i] ?? 0) >= 15 ? '${field['storm']![sampler.t][i].round()}' : '',
           FieldLayer.rating => '',
         };
         if (text.isEmpty) continue;

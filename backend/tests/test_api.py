@@ -433,3 +433,15 @@ def test_old_station_readings_are_not_now(monkeypatch):
     from oratge.spots import SPOTS
     monkeypatch.setattr(build, 'LIVE_MAX_AGE_MIN', 90)
     assert Builder(KeyedSources(api._store), {}).live(SPOTS['castelldefels']) is None  # fixture is from 10 Nov
+
+
+def test_map_forecast_for_a_view():
+    from oratge.build import map_grid
+    la, lo = map_grid((41.1, 1.6, 41.9, 2.6))                  # close up: 0.25°
+    assert la[1] - la[0] == 0.25 and la[0] <= 41.1 and la[-1] >= 41.9 and lo[0] <= 1.6 and lo[-1] >= 2.6
+    la, lo = map_grid((36.0, -6.0, 45.0, 6.0))                 # all of Spain-ish: coarser, still ≤ 360 points
+    assert la[1] - la[0] >= 0.5 and len(la) * len(lo) <= 360 and la[0] <= 36 and lo[-1] >= 6
+    la, lo = map_grid((30.0, -20.0, 60.0, 30.0))               # most of Europe zoomed out
+    assert len(la) * len(lo) <= 360 and la[-1] >= 60 and lo[0] <= -20
+    d = client.get('/v1/map/forecast?hours=12&south=41.1&west=1.6&north=41.9&east=2.6').json()
+    assert d['lats'][0] <= 41.1 and d['lons'][-1] >= 2.6 and len(d['fields']['wind'][0]) == len(d['lats']) * len(d['lons'])

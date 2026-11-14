@@ -81,6 +81,45 @@ class _WeatherMapScreenState extends State<WeatherMapScreen> {
     }
   }
 
+  Timer? _viewTimer;
+  int _viewRequest = 0;
+
+  /// After the map settles, make sure the loaded forecast covers what's on screen (plus a margin) at a
+  /// resolution that suits the zoom; otherwise fetch the grid for this view. The old one stays until then.
+  void _followView() {
+    _viewTimer?.cancel();
+    _viewTimer = Timer(const Duration(milliseconds: 450), () async {
+      if (!mounted || _inTest || _fc == null || _fc!.isEmpty) return;
+      final vb = _map.camera.visibleBounds;
+      final f = _fc!;
+      final step = f.lats.length > 1 ? f.lats[1] - f.lats[0] : 1.0;
+      final covered = f.lats.first <= vb.south && f.lats.last >= vb.north && f.lons.first <= vb.west && f.lons.last >= vb.east;
+      final span = math.max(vb.north - vb.south, vb.east - vb.west);
+      // Finest step that keeps the request ≤ ~360 points for this view with its margin.
+      final want = [0.25, 0.5, 1.0, 2.0].firstWhere((st) => math.pow(span * 1.6 / st + 1, 2) <= 360, orElse: () => 2.0);
+      if (covered && step <= want * 1.01) return;
+      final m = span * 0.3;
+      double down(double v) => (v * 2).floorToDouble() / 2;
+      double up(double v) => (v * 2).ceilToDouble() / 2;
+      final view = (down(vb.south - m), down(vb.west - m), up(vb.north + m), up(vb.east + m));
+      final req = ++_viewRequest;
+      try {
+        final fc = await AppScope.of(context).repository.mapForecast(view: view);
+        if (!mounted || req != _viewRequest || fc.isEmpty) return;
+        setState(() {
+          for (final img in _images.values) {
+            img.dispose();
+          }
+          _images.clear();
+          _fc = fc;
+          _t = _t.clamp(0, fc.times.length - 1);
+        });
+      } catch (_) {
+        // Offline: keep what we have.
+      }
+    });
+  }
+
   Future<void> _load() async {
     final app = AppScope.of(context);
     try {
@@ -118,6 +157,7 @@ class _WeatherMapScreenState extends State<WeatherMapScreen> {
   @override
   void dispose() {
     _play?.cancel();
+    _viewTimer?.cancel();
     for (final img in _images.values) {
       img.dispose();
     }
@@ -211,11 +251,6 @@ class _WeatherMapScreenState extends State<WeatherMapScreen> {
   }
 
   /// The grid with half a cell trimmed: the camera may not show anything outside it.
-  LatLngBounds? get _limits {
-    final s = _sampler;
-    if (s == null) return null;
-    return LatLngBounds(LatLng(s.se.latitude + 0.3, s.nw.longitude + 0.3), LatLng(s.nw.latitude - 0.3, s.se.longitude - 0.3));
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -238,23 +273,20 @@ class _WeatherMapScreenState extends State<WeatherMapScreen> {
         ? ColoredBox(color: c.surface)
         : LayoutBuilder(
             builder: (context, box) {
-              // Never zoom out past the point where the forecast grid stops covering the whole view
-              // (on a big Mac window that is a little closer than "all of Catalonia").
-              final lim = _limits;
-              final minZ = lim == null ? 6.2 : _coverZoom(lim, box.biggest);
+              // Start fitted to Catalonia; the forecast follows the view, so no limits on zoom or panning.
               final fitZ = _coverZoom(
                 LatLngBounds(const LatLng(40.5, 0.2), const LatLng(42.85, 3.35)),
                 Size(box.maxWidth - 24, box.maxHeight - (wide ? 210 : 290)),
                 cover: false,
               );
               return FlutterMap(
-                key: ValueKey('${lim == null}-${(minZ * 4).round()}'),
                 mapController: _map,
                 options: MapOptions(
                   initialCenter: const LatLng(41.7, 1.8),
-                  initialZoom: math.max(minZ, fitZ),
-                  cameraConstraint: lim == null ? const CameraConstraint.unconstrained() : CameraConstraint.contain(bounds: lim),
-                  minZoom: minZ,
+                  initialZoom: fitZ,
+                  onMapReady: _followView,
+                  onPositionChanged: (_, _) => _followView(),
+                  minZoom: 5,
                   maxZoom: 13,
                   backgroundColor: c.bg,
                   interactionOptions: const InteractionOptions(flags: InteractiveFlag.all & ~InteractiveFlag.rotate),

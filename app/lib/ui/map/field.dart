@@ -41,40 +41,50 @@ class FieldSampler {
   LatLng get nw => LatLng(north + dLat / 2, west - dLon / 2);
   LatLng get se => LatLng(south - dLat / 2, east + dLon / 2);
 
-  double _v(String name, int r, int c) => f.fields[name]![t][r * f.lons.length + c];
+
+  // Catmull-Rom: smooth through the grid points (no visible cell edges, unlike bilinear blending).
+  static double _cr(double p0, double p1, double p2, double p3, double x) =>
+      p1 + 0.5 * x * (p2 - p0 + x * (2 * p0 - 5 * p1 + 4 * p2 - p3 + x * (3 * (p1 - p2) + p3 - p0)));
+
+  /// Smooth value from a 4×4 neighbourhood, kept within the neighbours' range (no invented peaks,
+  /// no negative rain). [at] reads a grid value by row and column (already clamped).
+  double _bicubic(double lat, double lon, double Function(int r, int c) at) {
+    final nr = f.lats.length, nc = f.lons.length;
+    final rf = ((lat - south) / dLat).clamp(0.0, nr - 1.0);
+    final cf = ((lon - west) / dLon).clamp(0.0, nc - 1.0);
+    final r0 = math.min(rf.floor(), nr - 1), c0 = math.min(cf.floor(), nc - 1);
+    final fr = rf - r0, fc = cf - c0;
+    int rr(int r) => r.clamp(0, nr - 1);
+    int cc(int c) => c.clamp(0, nc - 1);
+    var lo = double.infinity, hi = -double.infinity;
+    final rows = <double>[];
+    for (var dr = -1; dr <= 2; dr++) {
+      final r = rr(r0 + dr);
+      final v0 = at(r, cc(c0 - 1)), v1 = at(r, cc(c0)), v2 = at(r, cc(c0 + 1)), v3 = at(r, cc(c0 + 2));
+      if (dr == 0 || dr == 1) {
+        lo = math.min(lo, math.min(v1, v2));
+        hi = math.max(hi, math.max(v1, v2));
+      }
+      rows.add(_cr(v0, v1, v2, v3, fc));
+    }
+    return _cr(rows[0], rows[1], rows[2], rows[3], fr).clamp(lo, hi);
+  }
 
   /// Value at a coordinate (clamped to the grid edge).
   double sample(String name, double lat, double lon) {
-    final rf = ((lat - south) / dLat).clamp(0.0, f.lats.length - 1.0);
-    final cf = ((lon - west) / dLon).clamp(0.0, f.lons.length - 1.0);
-    final r0 = rf.floor(), c0 = cf.floor();
-    final r1 = math.min(r0 + 1, f.lats.length - 1), c1 = math.min(c0 + 1, f.lons.length - 1);
-    final fr = rf - r0, fc = cf - c0;
-    final a = _v(name, r0, c0) * (1 - fc) + _v(name, r0, c1) * fc;
-    final b = _v(name, r1, c0) * (1 - fc) + _v(name, r1, c1) * fc;
-    return a * (1 - fr) + b * fr;
+    final grid = f.fields[name]![t];
+    final nc = f.lons.length;
+    return _bicubic(lat, lon, (r, c) => grid[r * nc + c]);
   }
 
   /// Wind as (u east, v north) in kn, interpolated component-wise (no direction wrap issues).
   (double, double) wind(double lat, double lon) {
-    double comp(int r, int c, bool u) {
-      final sp = _v('wind', r, c), dir = _v('wdir', r, c) * math.pi / 180;
-      // Direction is where the wind comes FROM; motion is the opposite.
-      return u ? -sp * math.sin(dir) : -sp * math.cos(dir);
-    }
-
-    final rf = ((lat - south) / dLat).clamp(0.0, f.lats.length - 1.0);
-    final cf = ((lon - west) / dLon).clamp(0.0, f.lons.length - 1.0);
-    final r0 = rf.floor(), c0 = cf.floor();
-    final r1 = math.min(r0 + 1, f.lats.length - 1), c1 = math.min(c0 + 1, f.lons.length - 1);
-    final fr = rf - r0, fc = cf - c0;
-    double bil(bool u) {
-      final a = comp(r0, c0, u) * (1 - fc) + comp(r0, c1, u) * fc;
-      final b = comp(r1, c0, u) * (1 - fc) + comp(r1, c1, u) * fc;
-      return a * (1 - fr) + b * fr;
-    }
-
-    return (bil(true), bil(false));
+    final sp = f.fields['wind']![t], dir = f.fields['wdir']![t];
+    final nc = f.lons.length;
+    // Direction is where the wind comes FROM; motion is the opposite.
+    double u(int r, int c) => -sp[r * nc + c] * math.sin(dir[r * nc + c] * math.pi / 180);
+    double v(int r, int c) => -sp[r * nc + c] * math.cos(dir[r * nc + c] * math.pi / 180);
+    return (_bicubic(lat, lon, u), _bicubic(lat, lon, v));
   }
 }
 

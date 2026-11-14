@@ -1132,13 +1132,33 @@ MAP_LATS = [round(40.0 + 0.25 * i, 2) for i in range(14)]     # 40.00 → 43.25
 MAP_LONS = [round(-0.5 + 0.25 * j, 2) for j in range(19)]     # −0.50 → 4.00
 
 
-def grid_forecast(src, hours: int = 48) -> dict:
+def map_grid(bbox: tuple[float, float, float, float] | None) -> tuple[list[float], list[float]]:
+    """Grid for a map view (south, west, north, east): 0.25° up close, coarser for big areas, at most
+    ~360 points (one Open-Meteo request). Snapped to the step so neighbouring views share a cache entry."""
+    if not bbox:
+        return MAP_LATS, MAP_LONS
+    s, w, n, e = bbox
+    # Europe and North Africa: wherever the map can reasonably be looked at.
+    s, n = max(25.0, min(s, n)), min(62.0, max(s, n))
+    w, e = max(-25.0, min(w, e)), min(35.0, max(w, e))
+    for step in (0.25, 0.5, 1.0, 2.0, 3.0):
+        la0, la1 = math.floor(s / step) * step, math.ceil(n / step) * step
+        lo0, lo1 = math.floor(w / step) * step, math.ceil(e / step) * step
+        lats = [round(la0 + i * step, 2) for i in range(int(round((la1 - la0) / step)) + 1)]
+        lons = [round(lo0 + j * step, 2) for j in range(int(round((lo1 - lo0) / step)) + 1)]
+        if len(lats) * len(lons) <= 360 and len(lats) >= 2 and len(lons) >= 2:
+            return lats, lons
+    return lats[::2], lons[::2]
+
+
+def grid_forecast(src, hours: int = 48, bbox: tuple[float, float, float, float] | None = None) -> dict:
     """Hourly forecast on a regular 0.25° grid over Catalonia for the map timeline.
 
     fields[name][t][r * len(lons) + c] for time t, grid row r (lat) and column c (lon).
     """
-    la = [a for a in MAP_LATS for _ in MAP_LONS]
-    lo = [b for _ in MAP_LATS for b in MAP_LONS]
+    glats, glons = map_grid(bbox)
+    la = [a for a in glats for _ in glons]
+    lo = [b for _ in glats for b in glons]
     data = src.grid_forecast(la, lo, hours)
     pts = data if isinstance(data, list) else [data]
     times = pts[0]['hourly']['time']
@@ -1156,7 +1176,7 @@ def grid_forecast(src, hours: int = 48) -> dict:
                       cape=(hh.get('cape') or [0] * len(times))[t] or 0, freezing=0, pressure=0, cloud=0,
                       daylight=True).storm
     fields['storm'] = [[risk(p, t) for p in pts] for t in range(len(times))]
-    return {'lats': MAP_LATS, 'lons': MAP_LONS, 'times': times, 'fields': fields,
+    return {'lats': glats, 'lons': glons, 'times': times, 'fields': fields,
             'source': 'Open-Meteo hourly forecast (best-match models), 0.25° grid'}
 
 

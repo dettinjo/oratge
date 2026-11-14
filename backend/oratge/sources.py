@@ -102,7 +102,9 @@ class Sources:
                  hourly='wind_speed_10m,wind_direction_10m,wind_gusts_10m,temperature_2m,precipitation,'
                         'precipitation_probability,weather_code,cape',
                  forecast_hours=hours, wind_speed_unit='kn', timezone=settings.tz)
-        return self._get(f'om:gridfc2:{len(lats)}:{hours}', OM_FORECAST, p, 3600)  # 2: + CAPE for the thunder layer
+        # Key by the actual coordinates: the map asks for different areas and resolutions.
+        key = 'om:gridfc3:' + hashlib.md5((p['latitude'] + '|' + p['longitude']).encode()).hexdigest()[:16] + f':{hours}'
+        return self._get(key, OM_FORECAST, p, 3600)
 
     def reverse_nearest(self, lat: float, lon: float):
         """Photon (OSM data): nearest named features, works for points just offshore."""

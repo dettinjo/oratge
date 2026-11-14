@@ -126,8 +126,11 @@ def reverse(lat: float, lon: float):
 
 
 @app.get('/v1/map/forecast', dependencies=[Depends(auth)])
-def map_forecast(hours: int = 48):
-    return build_mod.grid_forecast(_sources, max(6, min(hours, 72)))
+def map_forecast(hours: int = 48, south: float | None = None, west: float | None = None,
+                 north: float | None = None, east: float | None = None):
+    """Hourly grid for the map; with a bounding box, for that view (resolution chosen to fit)."""
+    bbox = (south, west, north, east) if None not in (south, west, north, east) else None
+    return build_mod.grid_forecast(_sources, max(6, min(hours, 72)), bbox)
 
 
 @app.get('/v1/map/grid', dependencies=[Depends(auth)])
