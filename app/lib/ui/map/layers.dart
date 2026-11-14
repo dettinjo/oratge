@@ -286,6 +286,8 @@ class ValueLabelsLayer extends StatelessWidget {
           FieldLayer.temp => '${field['temp']![sampler.t][i].round()}°',
           FieldLayer.rain => field['precip']![sampler.t][i] >= 0.1 ? field['precip']![sampler.t][i].toStringAsFixed(1) : '',
           FieldLayer.chance => '${field['pprob']![sampler.t][i].round()}',
+          FieldLayer.thunder =>
+            (field['storm']?[sampler.t][i] ?? 0) >= 15 ? '${field['storm']![sampler.t][i].round()}' : '',
           FieldLayer.rating => '',
         };
         if (text.isEmpty) continue;

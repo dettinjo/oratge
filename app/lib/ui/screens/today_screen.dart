@@ -11,17 +11,26 @@ import '../components/rows_cards.dart';
 import '../components/sheets.dart';
 import 'common.dart';
 import 'metric_detail.dart';
+import 'activities_module.dart';
 import '../components/weather_icon.dart';
 import '../components/modules.dart';
 import '../../data/units.dart';
 
 /// Modules on Today, in their default order (the user can reorder, hide and resize them).
 const todayModules = <ModuleDef>[
-  ModuleDef('best', 'Best today', Icons.emoji_events_outlined, wide: true, hint: 'The best sport and window today'),
+  ModuleDef('activities', 'Your activities', Icons.event_available, wide: true, hint: 'Spots when they’re good, planned routes'),
+  ModuleDef(
+    'best',
+    'Best today',
+    Icons.emoji_events_outlined,
+    wide: true,
+    defaultOn: false,
+    hint: 'The best sport and window today',
+  ),
   ModuleDef('warnings', 'Warnings', Icons.warning_amber_outlined, wide: true, hint: 'Official Meteocat warnings for your places'),
   ModuleDef('current', 'Now', Icons.thermostat_outlined, wide: true),
   ModuleDef('hourly', 'Next 24 hours', Icons.schedule, wide: true),
-  ModuleDef('sports', 'Today for you', Icons.show_chart, wide: true),
+  ModuleDef('sports', 'Today for you', Icons.show_chart, wide: true, defaultOn: false, hint: 'Every sport’s rating today'),
   ModuleDef('wind', 'Wind', Icons.air, defaultSize: ModuleSize.minimal),
   ModuleDef('rain', 'Rain', Icons.water_drop_outlined, defaultSize: ModuleSize.minimal),
   ModuleDef('uv', 'UV index', Icons.wb_sunny_outlined, defaultSize: ModuleSize.minimal),
@@ -52,6 +61,7 @@ class TodayScreen extends StatelessWidget {
     final app = AppScope.of(context);
     final place = app.place;
     final layout = ScreenLayout('today', todayModules, app);
+    _migrate(app);
     return AsyncView<(TodayData, HourlyData?)>(
       key: ValueKey('today-${place?.name}-${place?.lat}'),
       load: () async {
@@ -86,6 +96,17 @@ class TodayScreen extends StatelessWidget {
         );
       },
     );
+  }
+
+  /// Layouts saved before activities existed: add them on top and drop the daily rating list once.
+  static void _migrate(AppState app) {
+    final raw = app.profile['layout.today'];
+    if (raw is! List || raw.any((e) => (e as Map)['id'] == 'activities')) return;
+    final list = [
+      {'id': 'activities', 'size': 'detailed', 'on': true},
+      for (final e in raw) {...Map<String, dynamic>.from(e as Map), if (e['id'] == 'best' || e['id'] == 'sports') 'on': false},
+    ];
+    WidgetsBinding.instance.addPostFrameCallback((_) => app.setField('layout.today', list));
   }
 
   /// One module. Null = nothing to show right now (no warnings, no station nearby…).
@@ -131,6 +152,8 @@ class TodayScreen extends StatelessWidget {
     );
 
     switch (id) {
+      case 'activities':
+        return ActivitiesModule(minimal: minimal);
       case 'best':
         final best = d.best;
         if (minimal) {

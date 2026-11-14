@@ -4,7 +4,9 @@ import 'package:go_router/go_router.dart';
 import 'data/alerts.dart';
 import 'data/profile.dart';
 import 'theme/oratge_tokens.dart';
+import 'ui/screens/activity_edit_screen.dart';
 import 'ui/screens/browse_screens.dart';
+import 'ui/screens/route_screen.dart';
 import 'ui/screens/common.dart';
 import 'ui/screens/planner_screen.dart';
 import 'ui/screens/profile_screens.dart';
@@ -47,6 +49,17 @@ GoRouter buildRouter() => GoRouter(
           path: '/activities',
           pageBuilder: (c, s) => _tab(s, const ActivitiesScreen()),
           routes: [
+            // Before ':sport', which would match these single segments too.
+            GoRoute(path: 'new', pageBuilder: (c, s) => _detail(s, const ActivityEditScreen())),
+            GoRoute(path: 'edit/:id', pageBuilder: (c, s) => _detail(s, ActivityEditScreen(id: s.pathParameters['id']))),
+            GoRoute(path: 'route/:id', pageBuilder: (c, s) => _detail(s, RouteScreen(id: s.pathParameters['id']!))),
+            GoRoute(
+              path: 'place/:id',
+              pageBuilder: (c, s) {
+                final a = AppScope.of(c).activity(s.pathParameters['id']!);
+                return _detail(s, PlannerScreen(sport: a?.sport ?? 'wing', activityId: a?.id));
+              },
+            ),
             GoRoute(
               path: ':sport',
               pageBuilder: (c, s) => _detail(s, PlannerScreen(sport: s.pathParameters['sport']!)),

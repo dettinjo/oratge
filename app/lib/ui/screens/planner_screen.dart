@@ -17,8 +17,11 @@ import '../components/modules.dart';
 
 /// Daily planner for one sport: answer → key numbers → hour chart → advice → method (collapsed).
 class PlannerScreen extends StatefulWidget {
-  const PlannerScreen({super.key, required this.sport});
+  const PlannerScreen({super.key, required this.sport, this.activityId});
   final String sport;
+
+  /// A user-added place (activity) instead of the built-in spot.
+  final String? activityId;
 
   @override
   State<PlannerScreen> createState() => _PlannerScreenState();
@@ -33,8 +36,8 @@ class _PlannerScreenState extends State<PlannerScreen> {
     final app = AppScope.of(context);
     final layout = ScreenLayout('planner', plannerModules, app);
     return AsyncView<PlannerData>(
-      key: ValueKey('${widget.sport}-$_day'),
-      load: () => app.repository.planner(widget.sport, day: _day),
+      key: ValueKey('${widget.sport}-${widget.activityId}-$_day'),
+      load: () => app.repository.planner(widget.sport, day: _day, at: widget.activityId == null ? null : app.activity(widget.activityId!)),
       builder: (context, d) {
         return OgPage(
           title: d.title,

@@ -9,8 +9,10 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:workmanager/workmanager.dart';
 
+import 'activities.dart';
 import 'notify_settings.dart';
 import 'profile.dart';
+import 'repository.dart';
 
 /// One notification to show.
 class AlertNote {
@@ -30,12 +32,35 @@ List<AlertNote> pickAlerts(Map<String, dynamic> answer, Map<String, dynamic> pro
   final cfg = NotifySettings.fromJson(profile['notify']);
   final firstRun = prefs.getBool('alerts:v2') != true;
   final alerts = [for (final a in answer['alerts'] as List? ?? const []) Map<String, dynamic>.from(a as Map)];
-  final ratings = Map<String, dynamic>.from(answer['ratings'] as Map? ?? const {});
+  // Activities the user asked to be told about (good conditions come only from these).
+  final acts = {
+    for (final a
+        in profile['activities'] is List
+            ? [for (final x in profile['activities'] as List) Activity.fromJson(Map<String, dynamic>.from(x as Map))]
+            : [Activity.castelldefels()])
+      a.id: a,
+  };
+  final checks = [for (final x in answer['activities'] as List? ?? const []) Map<String, dynamic>.from(x as Map)];
+  // Ratings per activity and day (plan changes and the morning summary compare these).
+  final ratings = <String, dynamic>{
+    for (final ch in checks)
+      if (acts[ch['id']] case final a? when a.notify)
+        for (final d in ch['days'] as List? ?? const [])
+          'act:${a.id}:${(d as Map)['date']}': {
+            'rating': d['rating'],
+            'window': d['window'],
+            'sport': a.sport,
+            'day': d['date'],
+            'name': a.name,
+            'id': a.id,
+            'reason': d['reason'],
+            'dayLabel': d['day'],
+          },
+  };
   final before = Map<String, dynamic>.from(jsonDecode(prefs.getString('alerts:ratings') ?? '{}') as Map);
   final windows = Map<String, dynamic>.from(jsonDecode(prefs.getString('alerts:win') ?? '{}') as Map); // sport:day → rating
   final warned = Map<String, dynamic>.from(jsonDecode(prefs.getString('alerts:warn') ?? '{}') as Map); // title → epoch ms
   final changed = (prefs.getStringList('alerts:changes') ?? const <String>[]).toSet();
-  final mine = [for (final s in profile['sports'] as List? ?? const []) '$s'];
   final out = <AlertNote>[];
   final record = <void Function()>[];
 
@@ -49,18 +74,55 @@ List<AlertNote> pickAlerts(Map<String, dynamic> answer, Map<String, dynamic> pro
     prefs.setString('alerts:ratings', jsonEncode(ratings));
   }
 
-  // Good conditions.
-  for (final a in alerts.where((a) => a['kind'] == 'window')) {
-    final sport = '${a['sport']}';
-    final sc = cfg.sport(sport);
-    final rating = (a['rating'] as num?)?.toInt() ?? 4;
-    final ahead = (a['days_ahead'] as num?)?.toInt() ?? 0;
-    if (!sc.on || !mine.contains(sport) || rating < sc.minRating || ahead > sc.daysAhead) continue;
-    final key = '$sport:${a['day']}';
-    final was = (windows[key] as num?)?.toInt();
-    if (was != null && rating <= was) continue;
-    out.add(AlertNote('window:$key:$rating', '${a['title']}', '${a['body']}', '${a['route'] ?? '/activities/$sport'}'));
-    record.add(() => windows[key] = rating);
+  // Good conditions: per activity, from its own rating and look-ahead; once per activity and day,
+  // again only if it improves.
+  String route(Activity a) =>
+      a.isRoute ? '/activities/route/${a.id}' : (a.builtin != null ? '/activities/${a.sport}' : '/activities/place/${a.id}');
+  for (final ch in checks) {
+    final a = acts[ch['id']];
+    if (a == null || !a.notify || a.isRoute) continue;
+    for (final (i, d) in [for (final x in ch['days'] as List? ?? const []) Map<String, dynamic>.from(x as Map)].indexed) {
+      final rating = (d['rating'] as num?)?.toInt() ?? 0;
+      if (i > a.daysAhead || rating < a.minRating || d['window'] == '—') continue;
+      final key = '${a.id}:${d['date']}';
+      final was = (windows[key] as num?)?.toInt();
+      if (was != null && rating <= was) continue;
+      out.add(
+        AlertNote(
+          'act:$key:$rating',
+          '${_title(a.sport)} at ${a.name}: ${_word(rating)} ${'${d['day']}'.toLowerCase()} ${d['window']}',
+          '${d['reason']}',
+          route(a),
+        ),
+      );
+      record.add(() => windows[key] = rating);
+    }
+  }
+  // Planned routes: from 18:00 the day before, and again if the rain picture changes.
+  for (final e in (answer['routes'] as Map? ?? const {}).entries) {
+    final a = acts[e.key];
+    if (a == null || !a.notify) continue;
+    final r = Map<String, dynamic>.from(e.value as Map);
+    final start = a.startAt(now);
+    final hoursAhead = start.difference(now).inMinutes / 60;
+    final eveningBefore = DateTime(start.year, start.month, start.day).subtract(const Duration(hours: 6)); // 18:00 the day before
+    if (hoursAhead < -1 || now.isBefore(eveningBefore)) continue;
+    final lines = [for (final l in (r['summary'] as Map)['lines'] as List) '$l'];
+    final key = 'route:${a.id}:${a.date ?? _iso(now)}';
+    final state = lines.first;
+    if (windows[key] == state) continue;
+    final when = DateTime(start.year, start.month, start.day).difference(DateTime(now.year, now.month, now.day)).inDays == 0
+        ? 'today'
+        : 'tomorrow';
+    out.add(
+      AlertNote(
+        '$key:${state.hashCode}',
+        '${a.name} $when ${a.start}: $state',
+        lines.skip(1).take(2).join(' · ') + (r['best_start'] != null ? ' · best start ${r['best_start']}' : ''),
+        route(a),
+      ),
+    );
+    record.add(() => windows[key] = state);
   }
   // Official warnings.
   if (cfg.warnings != 'off') {
@@ -73,11 +135,10 @@ List<AlertNote> pickAlerts(Map<String, dynamic> answer, Map<String, dynamic> pro
       record.add(() => warned[key] = now.millisecondsSinceEpoch);
     }
   }
-  // Plan changes (only sports with alerts on).
+  // Plan changes (activities with notifications on).
   if (cfg.changes) {
     for (final e in ratings.entries) {
       final r = Map<String, dynamic>.from(e.value as Map);
-      if (!cfg.sport('${r['sport']}').on) continue;
       final was = (before[e.key] as Map?)?['rating'] as num?;
       final now_ = r['rating'] as num;
       final id = 'change:${e.key}:$was>$now_';
@@ -85,9 +146,9 @@ List<AlertNote> pickAlerts(Map<String, dynamic> answer, Map<String, dynamic> pro
       out.add(
         AlertNote(
           id,
-          '${_title(r['sport'])} ${_day(r['day'] as String, now)} ${now_ > was ? 'improved' : 'got worse'}: $was → $now_',
+          '${_title(r['sport'])} at ${r['name']} ${_day(r['day'] as String, now)} ${now_ > was ? 'improved' : 'got worse'}: $was → $now_',
           'Best window ${r['window']}',
-          '/activities/${r['sport']}',
+          acts[r['id']] == null ? '/activities' : route(acts[r['id']]!),
         ),
       );
       record.add(() => changed.add(id));
@@ -98,15 +159,15 @@ List<AlertNote> pickAlerts(Map<String, dynamic> answer, Map<String, dynamic> pro
   if (cfg.morning && now.hour >= cfg.morningHour && now.hour < 11 && prefs.getString('alerts:morning') != today) {
     final todays = [
       for (final e in ratings.entries)
-        if (e.key.endsWith(today) && mine.contains((e.value as Map)['sport'])) Map<String, dynamic>.from(e.value as Map),
+        if (e.key.endsWith(today) && (e.value as Map)['window'] != '—') Map<String, dynamic>.from(e.value as Map),
     ]..sort((a, b) => (b['rating'] as num).compareTo(a['rating'] as num));
     if (todays.isNotEmpty) {
       final best = todays.first;
       out.add(
         AlertNote(
           'morning:$today',
-          'Today: ${_title(best['sport'])} ${best['window']} (${best['rating']}/5)',
-          todays.skip(1).map((r) => '${_title(r['sport'])} ${r['rating']}/5').join(' · '),
+          'Today: ${_title(best['sport'])} at ${best['name']} ${best['window']} (${best['rating']}/5)',
+          todays.skip(1).map((r) => '${r['name']} ${r['rating']}/5').join(' · '),
           '/today',
         ),
       );
@@ -147,6 +208,7 @@ List<AlertNote> pickAlerts(Map<String, dynamic> answer, Map<String, dynamic> pro
   return send;
 }
 
+String _word(int r) => r >= 5 ? 'epic' : (r == 4 ? 'good' : 'fair');
 String _iso(DateTime d) => '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
 String _title(Object? s) =>
     const {'wing': 'Wing foil', 'surf': 'Surf', 'bike': 'Bike', 'run': 'Run', 'hike': 'Hike'}['$s'] ?? '$s';
@@ -165,7 +227,11 @@ Future<int> checkAlerts(SharedPreferences prefs, {http.Client? client, FlutterLo
   await prefs.reload(); // the foreground may have changed settings
   final profile = Map<String, dynamic>.from(jsonDecode(prefs.getString('profile') ?? '{}') as Map);
   final p = {...defaultProfile, ...profile};
-  if (!NotifySettings.fromJson(p['notify']).any) return 0;
+  final cfg = NotifySettings.fromJson(p['notify']);
+  final acts = p['activities'] is List
+      ? [for (final x in p['activities'] as List) Activity.fromJson(Map<String, dynamic>.from(x as Map))]
+      : [Activity.castelldefels()];
+  if (!cfg.on || !(acts.any((a) => a.notify) || cfg.warnings != 'off' || cfg.morning)) return 0;
   final url = prefs.getString('server.url') ?? buildApi;
   final token = prefs.getString('server.token') ?? buildToken;
   if (url.isEmpty) return 0;
@@ -182,7 +248,51 @@ Future<int> checkAlerts(SharedPreferences prefs, {http.Client? client, FlutterLo
       .get(Uri.parse('$url/v1/alerts?$q'), headers: {if (token.isNotEmpty) 'Authorization': 'Bearer $token'})
       .timeout(const Duration(seconds: 20));
   if (r.statusCode != 200) return 0;
-  final notes = pickAlerts(jsonDecode(r.body) as Map<String, dynamic>, p, prefs, DateTime.now());
+  final answer = jsonDecode(r.body) as Map<String, dynamic>;
+  final headers = {'Content-Type': 'application/json', if (token.isNotEmpty) 'Authorization': 'Bearer $token'};
+  final pq = ApiRepository.profileQuery(p);
+  // Spot activities: best window per day.
+  final spots = acts.where((a) => a.notify && !a.isRoute && a.lat != null).toList();
+  if (spots.isNotEmpty) {
+    final cr = await c
+        .post(
+          Uri.parse('$url/v1/activities/check?$pq'),
+          headers: headers,
+          body: jsonEncode({
+            'days': 3,
+            'activities': [
+              for (final a in spots)
+                {'id': a.id, 'sport': a.sport, 'lat': a.lat, 'lon': a.lon, 'name': a.name, 'facing': a.facing},
+            ],
+          }),
+        )
+        .timeout(const Duration(seconds: 30));
+    if (cr.statusCode == 200) answer['activities'] = (jsonDecode(cr.body) as Map)['activities'];
+  }
+  // Routes planned for today or tomorrow.
+  final now = DateTime.now();
+  final routes = <String, dynamic>{};
+  for (final a in acts.where((a) => a.notify && a.isRoute && a.track.length > 1)) {
+    final at = a.startAt(now);
+    final days = DateTime(at.year, at.month, at.day).difference(DateTime(now.year, now.month, now.day)).inDays;
+    if (days < 0 || days > 1) continue;
+    String two(int x) => x.toString().padLeft(2, '0');
+    final rr = await c
+        .post(
+          Uri.parse('$url/v1/route?$pq'),
+          headers: headers,
+          body: jsonEncode({
+            'sport': a.sport,
+            'points': a.track,
+            'start': '${at.year}-${two(at.month)}-${two(at.day)}T${two(at.hour)}:${two(at.minute)}',
+            if (a.speed != null) 'speed': a.speed,
+          }),
+        )
+        .timeout(const Duration(seconds: 30));
+    if (rr.statusCode == 200) routes[a.id] = jsonDecode(rr.body);
+  }
+  answer['routes'] = routes;
+  final notes = pickAlerts(answer, p, prefs, now);
   if (notes.isEmpty) return 0;
   final n = plugin ?? await AlertService.plugin();
   const details = NotificationDetails(
@@ -250,7 +360,10 @@ class AlertService {
     return _plugin = p;
   }
 
-  bool get _wanted => NotifySettings.fromJson(app.profile['notify']).any;
+  bool get _wanted {
+    final cfg = NotifySettings.fromJson(app.profile['notify']);
+    return cfg.on && (app.activities.any((a) => a.notify) || cfg.warnings != 'off' || cfg.morning);
+  }
 
   Future<void> start() async {
     if (!supported) return;

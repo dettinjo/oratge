@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'activities.dart';
 import 'models.dart';
 import 'repository.dart';
 import 'sync.dart';
@@ -488,6 +489,26 @@ class AppState extends ChangeNotifier implements Syncable {
     }
     return n;
   }
+
+  // ── Activities to check (spots and GPX routes) ──
+  List<Activity> get activities {
+    final raw = profile['activities'];
+    if (raw is! List) return [Activity.castelldefels()]; // default: wing foil at Castelldefels
+    return [for (final a in raw) Activity.fromJson(Map<String, dynamic>.from(a as Map))];
+  }
+
+  void saveActivities(List<Activity> list) => setField('activities', [for (final a in list) a.toJson()]);
+
+  void upsertActivity(Activity a) {
+    final list = activities;
+    final i = list.indexWhere((x) => x.id == a.id);
+    i < 0 ? list.add(a) : list[i] = a;
+    saveActivities(list);
+  }
+
+  void removeActivity(String id) => saveActivities(activities..removeWhere((a) => a.id == id));
+
+  Activity? activity(String id) => activities.where((a) => a.id == id).firstOrNull;
 
   List<String> get mySports => [for (final s in (profile['sports'] as List? ?? const [])) s as String];
 

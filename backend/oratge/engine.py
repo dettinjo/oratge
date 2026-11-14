@@ -103,11 +103,17 @@ class Hour:
     @property
     def storm(self) -> float:
         """Storm risk %, estimated from CAPE, showers and thunder codes (Open-Meteo has no direct probability)."""
-        base = min(70.0, self.cape / 12.0) * (0.35 + 0.65 * self.pprob / 100)
+        # Instability only becomes thunder when showers form: weight CAPE by the precipitation chance.
+        # (Before 2026-11-14: 0.35 + 0.65 × chance, which shaded dry, unstable days at 10–20 %.)
+        # CAPE below ~150 J/kg is negligible; drizzle (codes 51–57) is not convective.
+        base = min(75.0, max(0.0, self.cape - 150) / 14.0) * (0.1 + 0.9 * self.pprob / 100)
+        if 51 <= self.code <= 57:
+            base *= 0.6
+        # The model's own codes set a floor that grows with the precipitation chance.
         if self.code >= 95:
-            base = max(base, 60)
+            base = max(base, 40 + 30 * self.pprob / 100)
         elif self.code in (80, 81, 82):
-            base = max(base, 25)
+            base = max(base, 10 + 20 * self.pprob / 100)
         return round(min(95.0, base))
 
 

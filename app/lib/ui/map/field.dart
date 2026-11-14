@@ -11,7 +11,7 @@ import '../../theme/og_helpers.dart';
 import '../../theme/oratge_tokens.dart';
 
 /// Map layers.
-enum FieldLayer { wind, temp, rain, chance, rating }
+enum FieldLayer { wind, temp, rain, chance, thunder, rating }
 
 extension FieldLayerX on FieldLayer {
   String get label => switch (this) {
@@ -19,6 +19,7 @@ extension FieldLayerX on FieldLayer {
     FieldLayer.temp => 'Temp',
     FieldLayer.rain => 'Rain',
     FieldLayer.chance => 'Rain chance',
+    FieldLayer.thunder => 'Thunder',
     FieldLayer.rating => 'Spots',
   };
 }
@@ -124,11 +125,22 @@ class FieldColors {
 
   Color chance(double pct) => pct < 10 ? const Color(0x00000000) : c.water.withValues(alpha: (pct / 100) * 0.65);
 
+  /// Thunderstorm risk %: nothing below 15 %, then yellow → storm violet.
+  Color thunder(double pct) => pct < 15
+      ? const Color(0x00000000)
+      : _ramp([
+          (15, c.sun.withValues(alpha: 0.25)),
+          (30, c.sun.withValues(alpha: 0.5)),
+          (50, Color.lerp(c.sun, c.storm, 0.6)!.withValues(alpha: 0.65)),
+          (80, c.storm.withValues(alpha: 0.8)),
+        ], pct);
+
   Color forLayer(FieldLayer l, FieldSampler s, double lat, double lon) => switch (l) {
     FieldLayer.wind => wind(s.sample('wind', lat, lon)),
     FieldLayer.temp => temp(s.sample('temp', lat, lon)),
     FieldLayer.rain => rain(s.sample('precip', lat, lon)),
     FieldLayer.chance => chance(s.sample('pprob', lat, lon)),
+    FieldLayer.thunder => s.f.fields.containsKey('storm') ? thunder(s.sample('storm', lat, lon)) : const Color(0x00000000),
     FieldLayer.rating => const Color(0x00000000),
   };
 
@@ -146,6 +158,9 @@ class FieldColors {
     FieldLayer.chance => [
       for (final p in [20, 50, 80, 100]) ('$p', chance(p.toDouble()).withValues(alpha: 1)),
     ],
+    FieldLayer.thunder => [
+      for (final p in [15, 30, 50, 80]) ('$p', thunder(p.toDouble()).withValues(alpha: 1)),
+    ],
     FieldLayer.rating => [for (var r = 1; r <= 5; r++) ('$r', c.ratingColor(r))],
   };
 
@@ -154,6 +169,7 @@ class FieldColors {
     FieldLayer.temp => '',
     FieldLayer.rain => 'mm/h',
     FieldLayer.chance => '%',
+    FieldLayer.thunder => '% storm risk · ⚡ strikes, last 2 h',
     FieldLayer.rating => '',
   };
 }

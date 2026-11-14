@@ -89,12 +89,9 @@ class NotifySettings {
   };
 
   /// One line for the Profile list.
-  String summary(String Function(String) sportName) {
+  String summary(String Function(String) sportName, {List<String> activities = const []}) {
     if (!on) return 'Off';
-    final s = [
-      for (final e in sports.entries)
-        if (e.value.on) sportName(e.key),
-    ];
+    final s = activities;
     final parts = [
       if (s.isNotEmpty) s.join(', '),
       if (warnings != 'off')

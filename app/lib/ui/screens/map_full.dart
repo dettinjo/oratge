@@ -43,6 +43,7 @@ class _MapFullScreenState extends State<MapFullScreen> {
   Timer? _play;
   LatLng? _me, _probe;
   MapForecast? _fc;
+  Future<List<(double, double)>>? _strikes; // measured lightning, loaded when the Thunder layer opens
   List<MapPin> _pins = const [];
   String? _error;
   final Map<(FieldLayer, int, Brightness), ui.Image> _images = {};
@@ -179,6 +180,19 @@ class _MapFullScreenState extends State<MapFullScreen> {
                     if (s != null && img != null && _layer != FieldLayer.rating) FieldImageLayer(image: img, nw: s.nw, se: s.se),
                     if (s != null && _layer == FieldLayer.wind && motionOn) WindParticleLayer(sampler: s),
                     if (s != null && (_layer == FieldLayer.rain || _layer == FieldLayer.chance)) RainLayer(sampler: s),
+                    if (_layer == FieldLayer.thunder)
+                      FutureBuilder<List<(double, double)>>(
+                        future: _strikes ??= AppScope.of(context).repository.lightning(),
+                        builder: (context, snap) => MarkerLayer(markers: [
+                          for (final (la, lo) in (snap.data ?? const <(double, double)>[]).take(600))
+                            Marker(
+                              point: LatLng(la, lo),
+                              width: 14,
+                              height: 14,
+                              child: IgnorePointer(child: Text('⚡', style: TextStyle(fontSize: 12, color: c.storm))),
+                            ),
+                        ]),
+                      ),
                     if (s != null) ValueLabelsLayer(sampler: s, layer: _layer),
                     MarkerLayer(
                       markers: [
@@ -481,6 +495,8 @@ class _ProbeCard extends StatelessWidget {
                         item('Temp', '${s.sample('temp', at.latitude, at.longitude).round()}°', c.heat),
                         item('Rain', '${s.sample('precip', at.latitude, at.longitude).toStringAsFixed(1)} mm', c.water),
                         item('Chance', '${s.sample('pprob', at.latitude, at.longitude).round()}%', c.water),
+                        if (s.f.fields.containsKey('storm'))
+                          item('Thunder', '${s.sample('storm', at.latitude, at.longitude).round()}%', c.storm),
                       ],
                     ),
                   ),

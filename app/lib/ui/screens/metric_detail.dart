@@ -229,6 +229,8 @@ class _MetricDetailState extends State<MetricDetail> {
                     ReadoutItem('from', compassName(d.series['wdir']?[a + i] ?? 0)),
                   ],
                   if (m == Metric.rain) ReadoutItem('chance', '${(d.series['pprob']?[a + i] ?? 0).round()} %', color: c.water),
+                  if ((d.series['storm']?[a + i] ?? 0) >= 30)
+                    ReadoutItem('⚡ thunder likely', '${d.series['storm']![a + i]!.round()} %', color: c.storm),
                   if (m == Metric.humidity) ReadoutItem('dew point', Metric.temp.fmt(d.series['dew']?[a + i], u)),
                   if (m == Metric.uv) ReadoutItem('', uvWord(vals[i] ?? 0)),
                   if (observed[DateTime(t.year, t.month, t.day, t.hour)] case final o?)

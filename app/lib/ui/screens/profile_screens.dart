@@ -163,7 +163,8 @@ class ProfileScreen extends StatelessWidget {
                         children: [
                           Text('Notifications', style: OgText.actName.copyWith(color: c.text)),
                           Text(
-                            NotifySettings.fromJson(app.profile['notify']).summary((s) => sportNames[s] ?? s),
+                            NotifySettings.fromJson(app.profile['notify'])
+                                .summary((s) => sportNames[s] ?? s, activities: [for (final a in app.activities) if (a.notify) a.name]),
                             style: OgText.chip.copyWith(color: c.text2),
                           ),
                         ],

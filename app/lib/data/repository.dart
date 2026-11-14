@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'activities.dart';
 import 'models.dart';
 import 'units.dart';
 
@@ -21,10 +22,22 @@ abstract class ForecastRepository {
   /// 48-hour hourly forecast on the map grid (empty offline).
   Future<MapForecast> mapForecast();
 
+  /// Lightning strikes in Catalonia over the last two hours (lat, lon).
+  Future<List<(double, double)>> lightning();
+
   /// Seven days hour by hour for one place (metric detail views).
   Future<HourlyData> hourly([Place? place]);
   Future<ActivitiesData> activities();
-  Future<PlannerData> planner(String sport, {int day = 0});
+  Future<PlannerData> planner(String sport, {int day = 0, Activity? at});
+
+  /// Best window per day for spot activities (raw answer of POST /v1/activities/check).
+  Future<List<Json>> checkActivities(List<Activity> spots, {int days = 3});
+
+  /// Weather along a route at the time you pass each point (POST /v1/route).
+  Future<Json> route(Activity a, {DateTime? start});
+
+  /// Which way a beach faces (degrees towards the sea), or null.
+  Future<double?> shore(double lat, double lon);
   Future<MapData> map();
   Future<List<SpotSummary>> spots();
   Future<SpotDetail> spot(String id);
@@ -73,11 +86,19 @@ class SampleRepository implements ForecastRepository {
   @override
   Future<MapForecast> mapForecast() async => MapForecast.fromJson(const {});
   @override
+  Future<List<(double, double)>> lightning() async => const [];
+  @override
   Future<HourlyData> hourly([Place? place]) async => HourlyData.fromJson(await _load('hourly'));
   @override
   Future<ActivitiesData> activities() async => ActivitiesData.fromJson(await _load('activities'));
   @override
-  Future<PlannerData> planner(String sport, {int day = 0}) async => PlannerData.fromJson(await _load('planner-$sport'));
+  Future<PlannerData> planner(String sport, {int day = 0, Activity? at}) async => PlannerData.fromJson(await _load('planner-$sport'));
+  @override
+  Future<List<Json>> checkActivities(List<Activity> spots, {int days = 3}) async => const [];
+  @override
+  Future<Json> route(Activity a, {DateTime? start}) async => throw StateError('Route analysis needs the Oratge server.');
+  @override
+  Future<double?> shore(double lat, double lon) async => null;
   @override
   Future<MapData> map() async => MapData.fromJson(await _load('map'));
   @override
@@ -168,16 +189,23 @@ class ApiRepository implements ForecastRepository {
     'frontWing',
     'wings',
     'wingLevel',
+    'rideSpeed',
+    'runPace',
   ];
 
   String _query(String path) {
-    final p = profile?.call() ?? const {};
+    final q = profileQuery(profile?.call() ?? const {});
+    if (q.isEmpty) return path;
+    return '$path${path.contains('?') ? '&' : '?'}$q';
+  }
+
+  /// The user's ranges and gear as a query string (also used by the background alert check).
+  static String profileQuery(Map<String, dynamic> p) {
     final q = <String, String>{
       for (final k in _keys)
         if (p[k] != null) k: p[k] is List ? (p[k] as List).join(',') : '${p[k]}',
     };
-    if (q.isEmpty) return path;
-    return '$path${path.contains('?') ? '&' : '?'}${Uri(queryParameters: q).query}';
+    return q.isEmpty ? '' : Uri(queryParameters: q).query;
   }
 
   (DateTime, Json)? _cached(String key) {
@@ -299,6 +327,18 @@ class ApiRepository implements ForecastRepository {
   @override
   Future<MapForecast> mapForecast() => _load('map/forecast', MapForecast.fromJson, (f) => f.mapForecast());
   @override
+  Future<List<(double, double)>> lightning() async {
+    try {
+      final j = await _fetch('map/lightning');
+      return [
+        for (final x in j['strikes'] as List? ?? const [])
+          (((x as Map)['lat'] as num).toDouble(), (x['lon'] as num).toDouble()),
+      ];
+    } catch (_) {
+      return const [];
+    }
+  }
+  @override
   Future<HourlyData> hourly([Place? place]) => _load(
     place == null
         ? 'hourly'
@@ -309,8 +349,74 @@ class ApiRepository implements ForecastRepository {
   @override
   Future<ActivitiesData> activities() => _load('activities', ActivitiesData.fromJson, (f) => f.activities());
   @override
-  Future<PlannerData> planner(String sport, {int day = 0}) =>
-      _load('planner/$sport?day=$day', PlannerData.fromJson, (f) => f.planner(sport, day: day));
+  Future<PlannerData> planner(String sport, {int day = 0, Activity? at}) => _load(
+      at == null || at.builtin != null || at.lat == null
+          ? 'planner/$sport?day=$day'
+          : 'planner/$sport?day=$day&lat=${at.lat!.toStringAsFixed(4)}&lon=${at.lon!.toStringAsFixed(4)}'
+              '&name=${Uri.encodeQueryComponent(at.name)}${at.facing == null ? '' : '&facing=${at.facing!.round()}'}',
+      PlannerData.fromJson,
+      (f) => f.planner(sport, day: day));
+
+  final Map<String, (DateTime, Object)> _postCache = {};
+
+  /// POST with the same token, timeout and profile query as GET; answers kept 10 minutes in memory.
+  Future<Object> _post(String path, Map<String, dynamic> body, {Duration timeout = const Duration(seconds: 25)}) async {
+    final payload = jsonEncode(body);
+    final key = '$path|$payload';
+    final hit = _postCache[key];
+    if (hit != null && DateTime.now().difference(hit.$1) < fresh) return hit.$2;
+    final res = await _client
+        .post(Uri.parse('$baseUrl/v1/${_query(path)}'),
+            headers: {'Content-Type': 'application/json', if (token != null) 'Authorization': 'Bearer $token'}, body: payload)
+        .timeout(timeout);
+    if (res.statusCode != 200) {
+      String msg;
+      try {
+        msg = '${(jsonDecode(res.body) as Map)['detail']}';
+      } catch (_) {
+        msg = 'HTTP ${res.statusCode}';
+      }
+      throw http.ClientException(msg);
+    }
+    final out = currentUnits.convertJson(jsonDecode(utf8.decode(res.bodyBytes)))!;
+    _postCache[key] = (DateTime.now(), out);
+    return out;
+  }
+
+  @override
+  Future<List<Json>> checkActivities(List<Activity> spots, {int days = 3}) async {
+    if (spots.isEmpty) return const [];
+    final r = await _post('activities/check', {
+      'days': days,
+      'activities': [
+        for (final a in spots) {'id': a.id, 'sport': a.sport, 'lat': a.lat, 'lon': a.lon, 'name': a.name, 'facing': a.facing},
+      ],
+    });
+    return [for (final x in (r as Map)['activities'] as List) Map<String, dynamic>.from(x as Map)];
+  }
+
+  @override
+  Future<Json> route(Activity a, {DateTime? start}) async {
+    final at = start ?? a.startAt(DateTime.now());
+    String two(int x) => x.toString().padLeft(2, '0');
+    final r = await _post('route', {
+      'sport': a.sport,
+      'points': a.track,
+      'start': '${at.year}-${two(at.month)}-${two(at.day)}T${two(at.hour)}:${two(at.minute)}',
+      if (a.speed != null) 'speed': a.speed,
+    });
+    return Map<String, dynamic>.from(r as Map);
+  }
+
+  @override
+  Future<double?> shore(double lat, double lon) async {
+    try {
+      final j = await _fetch('shore?lat=${lat.toStringAsFixed(4)}&lon=${lon.toStringAsFixed(4)}');
+      return (j['facing'] as num?)?.toDouble();
+    } catch (_) {
+      return null;
+    }
+  }
   @override
   Future<MapData> map() => _load('map', MapData.fromJson, (f) => f.map());
   @override

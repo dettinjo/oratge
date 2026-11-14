@@ -366,6 +366,8 @@ def test_thunder_icons():
     assert E.Hour(**base, pprob=80, code=81, cape=900).sky == 'storm'      # showers + high instability
     assert E.Hour(**base, pprob=80, code=61, cape=0).sky == 'rain'         # plain rain
     assert E.Hour(**base, pprob=50, code=95, cape=0).sky == 'storm'        # model's thunder code
+    assert E.Hour(**base, pprob=95, code=51, cape=480).sky != 'storm'      # drizzle with modest instability
+    assert E.Hour(**base, pprob=5, code=3, cape=1200).storm < 15            # unstable but dry
     calm = E.Hour(**base, pprob=10, code=3, cape=0)
     assert now_sky(calm, {'lightning': {'near': 2}}) == 'storm' and now_sky(calm, {'lightning': {'near': 0}}) == 'cloud'
 

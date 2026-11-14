@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart' hide Block;
 
+import '../../data/activities.dart';
 import '../../data/models.dart';
 import '../../data/profile.dart';
 import '../../theme/og_helpers.dart';
@@ -39,7 +40,16 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
           children: [
             Columns(
               left: [
-                const OgSectionLabel('Today for you', top: 4),
+                Row(children: [
+                  const Expanded(child: OgSectionLabel('Your activities', top: 4)),
+                  TextButton.icon(
+                    onPressed: () => context.push('/activities/new'),
+                    icon: const Icon(Icons.add, size: 18),
+                    label: const Text('Add'),
+                  ),
+                ]),
+                _YourActivities(app.activities),
+                const OgSectionLabel('All sports at the built-in spots'),
                 OgCard(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                   child: Column(
@@ -439,6 +449,56 @@ class SpotScreen extends StatelessWidget {
           ],
         );
       },
+    );
+  }
+}
+
+
+/// The user's activities: tap to open (planner for a place, route analysis for a GPX), pencil to edit.
+class _YourActivities extends StatelessWidget {
+  const _YourActivities(this.items);
+  final List<Activity> items;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.og;
+    if (items.isEmpty) {
+      return Text('Add a spot (for example a wing foil beach) or a GPX route to have it checked on Today and in notifications.',
+          style: OgText.chip.copyWith(color: c.text2, fontSize: 13));
+    }
+    return OgCard(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      child: Column(children: [
+        for (final (i, a) in items.indexed)
+          InkWell(
+            onTap: () => context.push(a.isRoute
+                ? '/activities/route/${a.id}'
+                : (a.builtin != null ? '/activities/${a.sport}' : '/activities/place/${a.id}')),
+            child: Container(
+              constraints: const BoxConstraints(minHeight: 56),
+              decoration: BoxDecoration(border: i == 0 ? null : Border(top: BorderSide(color: c.line))),
+              child: Row(children: [
+                Icon(a.isRoute ? Icons.route : Icons.place_outlined, color: c.text2, size: 20),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
+                    Text('${sportNames[a.sport]} · ${a.name}', style: OgText.actName.copyWith(color: c.text)),
+                    Text(
+                        a.isRoute
+                            ? '${a.distanceKm.toStringAsFixed(0)} km · ${a.date ?? 'today'} ${a.start}'
+                            : '${a.notify ? 'Notifies' : 'Shows'} from ${a.minRating}/5${a.onlyWhenGood ? ' · on Today only when good' : ''}',
+                        style: OgText.chip.copyWith(color: c.text2)),
+                  ]),
+                ),
+                IconButton(
+                  tooltip: 'Edit',
+                  onPressed: () => context.push('/activities/edit/${a.id}'),
+                  icon: Icon(Icons.edit_outlined, color: c.text3, size: 20),
+                ),
+              ]),
+            ),
+          ),
+      ]),
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../data/alerts.dart';
 import '../../data/notify_settings.dart';
@@ -20,7 +21,6 @@ class NotificationsScreen extends StatelessWidget {
     final c = context.og;
     final cfg = NotifySettings.fromJson(app.profile['notify']);
     void save() => app.setField('notify', cfg.toJson());
-    final mine = app.mySports;
 
     Widget seg<T>(List<(T, String)> opts, T value, void Function(T) onChanged) => SegmentedButton<T>(
       showSelectedIcon: false,
@@ -71,7 +71,7 @@ class NotificationsScreen extends StatelessWidget {
 
     return OgPage(
       title: 'Notifications',
-      subtitle: cfg.summary((s) => sportNames[s] ?? s),
+      subtitle: cfg.summary((s) => sportNames[s] ?? s, activities: [for (final a in app.activities) if (a.notify) a.name]),
       back: (label: 'Back to Profile', route: '/profile'),
       children: [
         OgCard(
@@ -82,43 +82,50 @@ class NotificationsScreen extends StatelessWidget {
         ),
         Columns(
           left: [
-            const OgSectionLabel('Good conditions'),
+            const OgSectionLabel('Your activities'),
             Text(
-              'A notification when a window reaches your rating, once per sport and day (again only if it gets better).',
+              'Spots notify when a window reaches the activity’s rating (once per day, again only if it improves); '
+              'routes the evening before and if the rain picture changes.',
               style: OgText.chip.copyWith(color: c.text2, fontSize: 13),
             ),
             const SizedBox(height: 8),
-            for (final sport in mine)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: OgCard(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      toggle(sportNames[sport] ?? sport, null, cfg.sport(sport).on, (v) {
-                        cfg.sports[sport] = cfg.sport(sport)..on = v;
-                        save();
-                      }, enabled: on),
-                      if (cfg.sport(sport).on && on) ...[
-                        labelled(
-                          'Rating',
-                          seg<int>([(4, 'Good (4+)'), (5, 'Epic (5)')], cfg.sport(sport).minRating, (v) {
-                            cfg.sports[sport] = cfg.sport(sport)..minRating = v;
-                            save();
-                          }),
-                        ),
-                        labelled(
-                          'Looking ahead',
-                          seg<int>([(0, 'Today'), (1, '+ tomorrow'), (2, '+ 2 days')], cfg.sport(sport).daysAhead, (v) {
-                            cfg.sports[sport] = cfg.sport(sport)..daysAhead = v;
-                            save();
-                          }),
-                        ),
-                      ],
-                    ],
+            OgCard(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              child: Column(
+                children: [
+                  for (final a in app.activities)
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      value: a.notify && on,
+                      onChanged: on
+                          ? (v) {
+                              a.notify = v;
+                              app.upsertActivity(a);
+                            }
+                          : null,
+                      activeThumbColor: c.bg,
+                      activeTrackColor: c.r4,
+                      title: Text('${sportNames[a.sport]} · ${a.name}', style: OgText.actName.copyWith(color: c.text)),
+                      subtitle: Text(
+                        a.isRoute
+                            ? 'Route · ${a.date ?? 'today'} ${a.start}'
+                            : 'From ${a.minRating}/5 · ${a.daysAhead == 0 ? 'today' : (a.daysAhead == 1 ? 'today and tomorrow' : 'up to 2 days ahead')}',
+                        style: OgText.chip.copyWith(color: c.text2),
+                      ),
+                      secondary: IconButton(
+                        tooltip: 'Edit',
+                        icon: Icon(Icons.edit_outlined, color: c.text3, size: 20),
+                        onPressed: () => context.push('/activities/edit/${a.id}'),
+                      ),
+                    ),
+                  TextButton.icon(
+                    onPressed: () => context.push('/activities/new'),
+                    icon: const Icon(Icons.add, size: 18),
+                    label: const Text('Add an activity'),
                   ),
-                ),
+                ],
               ),
+            ),
             const OgSectionLabel('Official warnings'),
             OgCard(
               child: Column(
@@ -142,7 +149,7 @@ class NotificationsScreen extends StatelessWidget {
             OgCard(
               child: Column(
                 children: [
-                  toggle('Plan changes', 'A day’s rating moves by a full point (sports with alerts on)', cfg.changes, (v) {
+                  toggle('Plan changes', 'A day’s rating moves by a full point (activities with notifications on)', cfg.changes, (v) {
                     cfg.changes = v;
                     save();
                   }, enabled: on),

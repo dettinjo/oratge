@@ -261,6 +261,7 @@ Widget interactiveNextHours(Json p, {String? semanticLabel}) {
   final sky = [for (final s in p['sky'] as List) weatherKindFrom(s as String)];
   final start = (p['startHour'] as num).toInt();
   final wind = p['wind'] == null ? null : nums(p['wind']);
+  final storm = p['storm'] == null ? null : nums(p['storm']);
   return Scrub(
     count: temps.length,
     indexAt: (dx, w) => indexNextHours(dx, w, temps.length),
@@ -273,6 +274,7 @@ Widget interactiveNextHours(Json p, {String? semanticLabel}) {
         ReadoutItem('temp', '${_fmt(temps[i])}°', color: c.heat),
         ReadoutItem('rain', '${_fmt(rain[i])} %', color: c.water),
         if (wind != null && i < wind.length) ReadoutItem('wind', '${_fmt(wind[i])} kn', color: c.wind),
+        if (storm != null && i < storm.length && storm[i] >= 30) ReadoutItem('⚡ thunder likely', '${storm[i].round()} %', color: c.storm),
       ],
     ),
   );
