@@ -79,6 +79,7 @@ def fake(monkeypatch):
     from datetime import date
     first = date.fromisoformat(fx('fc.json')['hourly']['time'][24][:10])
     monkeypatch.setattr(build, 'today_local', lambda: first)
+    monkeypatch.setattr(build, 'LIVE_MAX_AGE_MIN', 10**9)  # recorded readings are days old
 
 
 client = TestClient(api.app)
@@ -424,3 +425,11 @@ def test_route_finds_rain_and_headwind(monkeypatch):
 def test_route_rejects_bad_input():
     assert client.post('/v1/route', json={'points': [[41.3, 2.0]], 'sport': 'bike'}).status_code == 422
     assert client.post('/v1/route', json={'points': [[48.8, 2.3], [48.9, 2.3]], 'sport': 'bike'}).status_code == 422
+
+
+def test_old_station_readings_are_not_now(monkeypatch):
+    from oratge import build
+    from oratge.build import Builder
+    from oratge.spots import SPOTS
+    monkeypatch.setattr(build, 'LIVE_MAX_AGE_MIN', 90)
+    assert Builder(KeyedSources(api._store), {}).live(SPOTS['castelldefels']) is None  # fixture is from 10 Nov

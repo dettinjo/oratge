@@ -17,6 +17,7 @@ class ModuleDef {
     this.defaultSize = ModuleSize.detailed,
     this.defaultOn = true,
     this.wide = false,
+    this.fullRow = false,
     this.hint,
   });
   final String id, title;
@@ -27,6 +28,9 @@ class ModuleDef {
 
   /// Wide modules (lists, charts) span a row; tiles sit side by side.
   final bool wide;
+
+  /// Always the whole row (modules that may show nothing, so no half-empty row is left).
+  final bool fullRow;
   final String? hint;
 }
 
@@ -85,6 +89,7 @@ class ModuleGrid extends StatelessWidget {
       builder: (context, box) {
         final cols = box.maxWidth >= 880 ? 4 : (box.maxWidth >= 560 ? 3 : 2);
         int span(ModuleDef d, ModuleSize s) {
+        if (d.fullRow) return cols;
           if (d.wide) return cols == 4 ? (s == ModuleSize.detailed && d.id == 'hourly' ? 4 : 2) : cols;
           return s == ModuleSize.detailed ? (cols == 4 ? 2 : cols) : 1;
         }

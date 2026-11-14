@@ -18,7 +18,7 @@ import '../../data/units.dart';
 
 /// Modules on Today, in their default order (the user can reorder, hide and resize them).
 const todayModules = <ModuleDef>[
-  ModuleDef('activities', 'Your activities', Icons.event_available, wide: true, hint: 'Spots when they’re good, planned routes'),
+  ModuleDef('activities', 'Your activities', Icons.event_available, wide: true, fullRow: true, hint: 'Spots when they’re good, planned routes'),
   ModuleDef(
     'best',
     'Best today',

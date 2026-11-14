@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/services.dart';
@@ -24,6 +25,9 @@ abstract class ForecastRepository {
 
   /// Lightning strikes in Catalonia over the last two hours (lat, lon).
   Future<List<(double, double)>> lightning();
+
+  /// Fetch everything again now (no-op without a server).
+  Future<void> refresh();
 
   /// Seven days hour by hour for one place (metric detail views).
   Future<HourlyData> hourly([Place? place]);
@@ -88,6 +92,8 @@ class SampleRepository implements ForecastRepository {
   @override
   Future<List<(double, double)>> lightning() async => const [];
   @override
+  Future<void> refresh() async {}
+  @override
   Future<HourlyData> hourly([Place? place]) async => HourlyData.fromJson(await _load('hourly'));
   @override
   Future<ActivitiesData> activities() async => ActivitiesData.fromJson(await _load('activities'));
@@ -115,6 +121,32 @@ enum DataSource { live, saved, sample }
 class DataStatus extends ChangeNotifier {
   DataSource source = DataSource.live;
   DateTime? savedAt;
+
+  /// Last time fresh data arrived from the server, and the last connection problem (null = fine).
+  DateTime? lastLive;
+  String? error;
+
+  /// A manual refresh is running.
+  bool refreshing = false;
+
+  void live() {
+    final now = DateTime.now();
+    final changed = error != null || lastLive == null || now.difference(lastLive!).inSeconds >= 30;
+    lastLive = now;
+    error = null;
+    if (changed) notifyListeners();
+  }
+
+  void failed(String e) {
+    if (error == e) return;
+    error = e;
+    notifyListeners();
+  }
+
+  void setRefreshing(bool v) {
+    refreshing = v;
+    notifyListeners();
+  }
 
   /// Bumped when a background refresh brings newer data, so screens reload from the cache.
   int version = 0;
@@ -230,11 +262,13 @@ class ApiRepository implements ForecastRepository {
   }
 
   /// One network fetch per path at a time; fails fast while in back-off.
-  Future<Json> _fetch(String path) {
-    final key = _query(path);
+  Future<Json> _fetch(String path) => _fetchKey(_query(path));
+
+  Future<Json> _fetchKey(String key, {bool force = false}) {
+    final path = key;
     return _inflight[key] ??= () async {
       try {
-        if (_offlineUntil != null && DateTime.now().isBefore(_offlineUntil!)) {
+        if (!force && _offlineUntil != null && DateTime.now().isBefore(_offlineUntil!)) {
           throw http.ClientException('offline (backing off)');
         }
         final res = await _client
@@ -245,10 +279,12 @@ class ApiRepository implements ForecastRepository {
         _offlineUntil = null;
         _store(key, body);
         status.set(DataSource.live);
+        status.live();
         return body;
       } catch (e) {
         if (e is! http.ClientException || !e.message.startsWith('offline')) {
           _offlineUntil = DateTime.now().add(backoff);
+          status.failed(e is TimeoutException ? 'The server didn’t answer (is Tailscale on?)' : 'Couldn’t reach the server');
         }
         rethrow;
       } finally {
@@ -275,6 +311,22 @@ class ApiRepository implements ForecastRepository {
       if (fallback == null) rethrow;
       status.set(DataSource.sample);
       return local(fallback!);
+    }
+  }
+
+  /// Fetches everything on screen or in the cache again, now (pull to refresh, "Refresh now").
+  @override
+  Future<void> refresh() async {
+    status.setRefreshing(true);
+    _offlineUntil = null;
+    _postCache.clear();
+    try {
+      final keys = {..._mem.keys};
+      await Future.wait([for (final k in keys) _fetchKey(k, force: true).then((_) {}, onError: (_) {})]);
+      if (keys.isEmpty) await prefetch();
+    } finally {
+      status.setRefreshing(false);
+      status.bump(); // screens reload from the fresh cache
     }
   }
 

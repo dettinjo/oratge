@@ -369,6 +369,9 @@ class AppState extends ChangeNotifier implements Syncable {
     notifyListeners();
   }
 
+  /// Pull to refresh / "Refresh now": fresh data from the server and, with sync on, settings too.
+  Future<void> refreshAll() => Future.wait([repository.refresh(), if (sync != null) sync!.syncNow()]);
+
   /// Saves new server settings (empty url = back to the build's default) and reconnects.
   void setServer(String url, String token) {
     url = url.trim().replaceAll(RegExp(r'/+$'), '');

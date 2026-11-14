@@ -76,6 +76,9 @@ def threshold_en(s: str) -> str:
     return s
 
 
+LIVE_MAX_AGE_MIN = 90  # station readings older than this are not shown as "now"
+
+
 class Builder:
     def __init__(self, src: Sources, profile: dict | None = None, custom: dict | None = None):
         self.src = src
@@ -322,7 +325,9 @@ class Builder:
         """Latest XEMA readings for a place: its own station if it has one, else the closest (≤ 30 km);
         wind from the closest anemometer when that station has none. Key needed."""
         try:
-            return self.mc.live(place['lat'], place['lon'], place.get('station'), place.get('wind_station'))
+            live = self.mc.live(place['lat'], place['lon'], place.get('station'), place.get('wind_station'))
+            # Older than 90 min (daily budget used, station offline): not "now" any more — use the model.
+            return live if live and live.get('age_min', 0) <= LIVE_MAX_AGE_MIN else None
         except Exception as e:
             log.info('live failed: %s', e)
             return None
