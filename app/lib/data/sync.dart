@@ -87,8 +87,11 @@ class SyncService extends ChangeNotifier {
         },
       });
       final r = await _client
-          .put(Uri.parse('$baseUrl/v1/sync'),
-              headers: {'Content-Type': 'application/json', if (token != null) 'Authorization': 'Bearer $token'}, body: body)
+          .put(
+            Uri.parse('$baseUrl/v1/sync'),
+            headers: {'Content-Type': 'application/json', if (token != null) 'Authorization': 'Bearer $token'},
+            body: body,
+          )
           .timeout(timeout);
       if (r.statusCode != 200) {
         throw switch (r.statusCode) {
@@ -100,8 +103,7 @@ class SyncService extends ChangeNotifier {
       final fields = (jsonDecode(r.body) as Map<String, dynamic>)['fields'] as Map<String, dynamic>;
       keys = fields.length;
       target.applyRemote({
-        for (final e in fields.entries)
-          e.key: (v: (e.value as Map)['v'], t: ((e.value as Map)['t'] as num).toInt()),
+        for (final e in fields.entries) e.key: (v: (e.value as Map)['v'], t: ((e.value as Map)['t'] as num).toInt()),
       });
       lastSync = DateTime.now();
       error = null;

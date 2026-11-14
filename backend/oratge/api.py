@@ -88,9 +88,17 @@ def hourly(lat: float | None = None, lon: float | None = None, place: str | None
 
 @app.get('/v1/alerts', dependencies=[Depends(auth)])
 def alerts(sports: str | None = None, lat: float | None = None, lon: float | None = None, place: str | None = None,
-           b: Builder = Depends(builder)):
+           v: int = 1, b: Builder = Depends(builder)):
+    """v=2 (app 0.8+) filters on the device with the user's notification settings. Older apps notified about
+    everything, so they only get the defaults: severe (orange/red) warnings and good wing foil windows."""
     p = None if lat is None or lon is None else {'name': place or f'{lat:.2f}, {lon:.2f}', 'lat': lat, 'lon': lon}
-    return b.alerts(sports.split(',') if sports else None, p)
+    out = b.alerts(sports.split(',') if sports else None, p)
+    if v < 2:
+        out['alerts'] = [a for a in out['alerts']
+                         if (a['kind'] == 'window' and a.get('sport') == 'wing')
+                         or (a['kind'] == 'warning' and a.get('level') in ('orange', 'red'))]
+        out['ratings'] = {k: r for k, r in out['ratings'].items() if r['sport'] == 'wing'}
+    return out
 
 
 @app.get('/v1/places', dependencies=[Depends(auth)])

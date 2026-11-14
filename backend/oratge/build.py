@@ -823,6 +823,7 @@ class Builder:
                 if w[2] >= 4 and not ended:
                     when = 'Today' if i == 0 else ('Tomorrow' if i == 1 else WD[day.weekday()])
                     out.append({'id': f'window:{sport}:{day}:{w[0]}', 'kind': 'window', 'sport': sport,
+                                'day': str(day), 'days_ahead': i, 'rating': w[2], 'spot': spot['name'],
                                 'title': f'{SPORT_TITLE[sport]}: {ratingword(w[2])} window '
                                          + ('today' if i == 0 else 'tomorrow' if i == 1 else f'on {when}'),
                                 'body': f'{spot["name"]} · {when} {win(w)} · {self.reason(sport, rated, w)}',

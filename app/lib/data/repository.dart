@@ -59,9 +59,12 @@ class SampleRepository implements ForecastRepository {
       _towns.where((t) => t.name.toLowerCase().contains(query.toLowerCase())).toList();
   @override
   Future<Place> reverse(double lat, double lon) async {
-    final near = [..._towns]..sort((a, b) =>
-        ((a.lat - lat) * (a.lat - lat) + (a.lon - lon) * (a.lon - lon))
-            .compareTo((b.lat - lat) * (b.lat - lat) + (b.lon - lon) * (b.lon - lon)));
+    final near = [..._towns]
+      ..sort(
+        (a, b) => ((a.lat - lat) * (a.lat - lat) + (a.lon - lon) * (a.lon - lon)).compareTo(
+          (b.lat - lat) * (b.lat - lat) + (b.lon - lon) * (b.lon - lon),
+        ),
+      );
     return Place(name: near.first.name, region: near.first.region, lat: lat, lon: lon, current: true);
   }
 
@@ -78,8 +81,9 @@ class SampleRepository implements ForecastRepository {
   @override
   Future<MapData> map() async => MapData.fromJson(await _load('map'));
   @override
-  Future<List<SpotSummary>> spots() async =>
-      [for (final s in (await _load('spots'))['spots'] as List) SpotSummary.fromJson(s as Json)];
+  Future<List<SpotSummary>> spots() async => [
+    for (final s in (await _load('spots'))['spots'] as List) SpotSummary.fromJson(s as Json),
+  ];
   @override
   Future<SpotDetail> spot(String id) async => SpotDetail.fromJson(await _load('spot-castelldefels'));
 }
@@ -114,10 +118,9 @@ class DataStatus extends ChangeNotifier {
 /// After a network failure the backend isn't tried again for [backoff], so screens never wait
 /// on repeated timeouts; with no cache at all the bundled sample data is shown.
 class ApiRepository implements ForecastRepository {
-  ApiRepository(this.baseUrl,
-      {this.token, http.Client? client, this.fallback, this.profile, this.prefs, DataStatus? status})
-      : _client = client ?? http.Client(),
-        status = status ?? DataStatus();
+  ApiRepository(this.baseUrl, {this.token, http.Client? client, this.fallback, this.profile, this.prefs, DataStatus? status})
+    : _client = client ?? http.Client(),
+      status = status ?? DataStatus();
   final String baseUrl;
   final String? token;
   final http.Client _client;
@@ -138,9 +141,29 @@ class ApiRepository implements ForecastRepository {
   final Map<String, Future<Json>> _inflight = {};
   DateTime? _offlineUntil;
 
-  static const _keys = ['windFrom', 'windTo', 'gustLimit', 'waveFrom', 'waveTo', 'minPeriod', 'maxWindBike',
-      'comfortFrom', 'comfortTo', 'maxStorm', 'maxSummitWind', 'weight', 'climbPace', 'daylightMargin', 'runDistance',
-      'mudguards', 'lights', 'lightRainOk', 'crampons', 'cold', 'directions'];
+  static const _keys = [
+    'windFrom',
+    'windTo',
+    'gustLimit',
+    'waveFrom',
+    'waveTo',
+    'minPeriod',
+    'maxWindBike',
+    'comfortFrom',
+    'comfortTo',
+    'maxStorm',
+    'maxSummitWind',
+    'weight',
+    'climbPace',
+    'daylightMargin',
+    'runDistance',
+    'mudguards',
+    'lights',
+    'lightRainOk',
+    'crampons',
+    'cold',
+    'directions',
+  ];
 
   String _query(String path) {
     final p = profile?.call() ?? const {};
@@ -224,19 +247,26 @@ class ApiRepository implements ForecastRepository {
 
   /// Loads every screen in parallel (call at startup) so navigation is instant.
   Future<void> prefetch() async {
-    await Future.wait([
-      today(), activities(), map(), spots(), spot('castelldefels'),
-      for (final s in sports) planner(s),
-    ].map((f) => f.then((_) {}, onError: (_) {})));
+    await Future.wait(
+      [
+        today(),
+        activities(),
+        map(),
+        spots(),
+        spot('castelldefels'),
+        for (final s in sports) planner(s),
+      ].map((f) => f.then((_) {}, onError: (_) {})),
+    );
   }
 
   @override
   Future<TodayData> today([Place? place]) => _load(
-      place == null
-          ? 'today'
-          : 'today?lat=${place.lat.toStringAsFixed(3)}&lon=${place.lon.toStringAsFixed(3)}&place=${Uri.encodeQueryComponent(place.name)}',
-      TodayData.fromJson,
-      (f) => f.today(place));
+    place == null
+        ? 'today'
+        : 'today?lat=${place.lat.toStringAsFixed(3)}&lon=${place.lon.toStringAsFixed(3)}&place=${Uri.encodeQueryComponent(place.name)}',
+    TodayData.fromJson,
+    (f) => f.today(place),
+  );
 
   /// Live search (not cached on disk): falls back to the offline town list.
   @override
@@ -265,11 +295,12 @@ class ApiRepository implements ForecastRepository {
   Future<MapForecast> mapForecast() => _load('map/forecast', MapForecast.fromJson, (f) => f.mapForecast());
   @override
   Future<HourlyData> hourly([Place? place]) => _load(
-      place == null
-          ? 'hourly'
-          : 'hourly?lat=${place.lat.toStringAsFixed(3)}&lon=${place.lon.toStringAsFixed(3)}&place=${Uri.encodeQueryComponent(place.name)}',
-      HourlyData.fromJson,
-      (f) => f.hourly(place));
+    place == null
+        ? 'hourly'
+        : 'hourly?lat=${place.lat.toStringAsFixed(3)}&lon=${place.lon.toStringAsFixed(3)}&place=${Uri.encodeQueryComponent(place.name)}',
+    HourlyData.fromJson,
+    (f) => f.hourly(place),
+  );
   @override
   Future<ActivitiesData> activities() => _load('activities', ActivitiesData.fromJson, (f) => f.activities());
   @override
@@ -278,8 +309,8 @@ class ApiRepository implements ForecastRepository {
   @override
   Future<MapData> map() => _load('map', MapData.fromJson, (f) => f.map());
   @override
-  Future<List<SpotSummary>> spots() => _load(
-      'spots', (j) => [for (final s in j['spots'] as List) SpotSummary.fromJson(s as Json)], (f) => f.spots());
+  Future<List<SpotSummary>> spots() =>
+      _load('spots', (j) => [for (final s in j['spots'] as List) SpotSummary.fromJson(s as Json)], (f) => f.spots());
   @override
   Future<SpotDetail> spot(String id) => _load('spots/$id', SpotDetail.fromJson, (f) => f.spot(id));
 }

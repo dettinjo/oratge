@@ -9,6 +9,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:workmanager/workmanager.dart';
 
+import 'notify_settings.dart';
 import 'profile.dart';
 
 /// One notification to show.
@@ -17,65 +18,146 @@ class AlertNote {
   final String id, title, body, route;
 }
 
-/// Decides what to notify from a /v1/alerts answer and what this device already saw. Pure, so it is
-/// testable: [prefs] holds seen ids, last ratings and the morning-summary date.
+/// Decides what to notify from a /v1/alerts answer, the user's [NotifySettings] and what this device
+/// already sent. Pure apart from [prefs] (dedupe state, daily count, log), so it is testable.
+///
+/// - Good conditions: once per sport and day; again only if the rating improves (a window moving by an
+///   hour stays quiet).
+/// - Warnings: at or above the chosen level; again only if it escalates or after 24 h.
+/// - Quiet hours: nothing is recorded, so items still current afterwards are sent then.
+/// - Daily cap: extra items are recorded as handled and dropped.
 List<AlertNote> pickAlerts(Map<String, dynamic> answer, Map<String, dynamic> profile, SharedPreferences prefs, DateTime now) {
-  final seen = (prefs.getStringList('alerts:seen') ?? const <String>[]).toSet();
-  final firstRun = prefs.getBool('alerts:baseline') != true;
+  final cfg = NotifySettings.fromJson(profile['notify']);
+  final firstRun = prefs.getBool('alerts:v2') != true;
   final alerts = [for (final a in answer['alerts'] as List? ?? const []) Map<String, dynamic>.from(a as Map)];
   final ratings = Map<String, dynamic>.from(answer['ratings'] as Map? ?? const {});
   final before = Map<String, dynamic>.from(jsonDecode(prefs.getString('alerts:ratings') ?? '{}') as Map);
+  final windows = Map<String, dynamic>.from(jsonDecode(prefs.getString('alerts:win') ?? '{}') as Map); // sport:day → rating
+  final warned = Map<String, dynamic>.from(jsonDecode(prefs.getString('alerts:warn') ?? '{}') as Map); // title → epoch ms
+  final changed = (prefs.getStringList('alerts:changes') ?? const <String>[]).toSet();
+  final mine = [for (final s in profile['sports'] as List? ?? const []) '$s'];
   final out = <AlertNote>[];
+  final record = <void Function()>[];
 
-  if (!firstRun) {
-    for (final a in alerts) {
-      final on = switch (a['kind']) { 'window' => profile['alertWindow'] == true, 'warning' => profile['alertWarnings'] == true, _ => false };
-      if (on && !seen.contains(a['id'])) out.add(AlertNote('${a['id']}', '${a['title']}', '${a['body']}', '${a['route'] ?? '/today'}'));
-    }
-    if (profile['alertChange'] == true) {
-      for (final e in ratings.entries) {
-        final was = (before[e.key] as Map?)?['rating'] as num?;
-        final r = Map<String, dynamic>.from(e.value as Map);
-        final now_ = r['rating'] as num;
-        final id = 'change:${e.key}:$now_';
-        if (was != null && (now_ - was).abs() >= 1 && !seen.contains(id)) {
-          final up = now_ > was;
-          out.add(AlertNote(id, '${_title(r['sport'])} ${_day(r['day'] as String, now)} ${up ? 'improved' : 'got worse'}: $was → $now_',
-              'Best window ${r['window']}', '/activities/${r['sport']}'));
-        }
-      }
+  void save() {
+    prefs.setString('alerts:win', jsonEncode(windows));
+    prefs.setString('alerts:warn', jsonEncode(warned));
+    prefs.setStringList(
+      'alerts:changes',
+      changed.length > 200 ? changed.toList().sublist(changed.length - 200) : changed.toList(),
+    );
+    prefs.setString('alerts:ratings', jsonEncode(ratings));
+  }
+
+  // Good conditions.
+  for (final a in alerts.where((a) => a['kind'] == 'window')) {
+    final sport = '${a['sport']}';
+    final sc = cfg.sport(sport);
+    final rating = (a['rating'] as num?)?.toInt() ?? 4;
+    final ahead = (a['days_ahead'] as num?)?.toInt() ?? 0;
+    if (!sc.on || !mine.contains(sport) || rating < sc.minRating || ahead > sc.daysAhead) continue;
+    final key = '$sport:${a['day']}';
+    final was = (windows[key] as num?)?.toInt();
+    if (was != null && rating <= was) continue;
+    out.add(AlertNote('window:$key:$rating', '${a['title']}', '${a['body']}', '${a['route'] ?? '/activities/$sport'}'));
+    record.add(() => windows[key] = rating);
+  }
+  // Official warnings.
+  if (cfg.warnings != 'off') {
+    for (final a in alerts.where((a) => a['kind'] == 'warning')) {
+      if (NotifySettings.levelRank('${a['level']}') < NotifySettings.levelRank(cfg.warnings)) continue;
+      final key = '${a['title']}';
+      final at = (warned[key] as num?)?.toInt();
+      if (at != null && now.millisecondsSinceEpoch - at < const Duration(hours: 24).inMilliseconds) continue;
+      out.add(AlertNote('${a['id']}', key, '${a['body']}', '${a['route'] ?? '/today'}'));
+      record.add(() => warned[key] = now.millisecondsSinceEpoch);
     }
   }
-  // Morning summary at 07:00 (once a day).
-  final today = '${now.year}-${now.month}-${now.day}';
-  if (profile['alertMorning'] == true && now.hour >= 7 && now.hour < 11 && prefs.getString('alerts:morning') != today) {
-    final mine = [for (final s in profile['sports'] as List? ?? const []) '$s'];
+  // Plan changes (only sports with alerts on).
+  if (cfg.changes) {
+    for (final e in ratings.entries) {
+      final r = Map<String, dynamic>.from(e.value as Map);
+      if (!cfg.sport('${r['sport']}').on) continue;
+      final was = (before[e.key] as Map?)?['rating'] as num?;
+      final now_ = r['rating'] as num;
+      final id = 'change:${e.key}:$was>$now_';
+      if (was == null || (now_ - was).abs() < 1 || changed.contains(id)) continue;
+      out.add(
+        AlertNote(
+          id,
+          '${_title(r['sport'])} ${_day(r['day'] as String, now)} ${now_ > was ? 'improved' : 'got worse'}: $was → $now_',
+          'Best window ${r['window']}',
+          '/activities/${r['sport']}',
+        ),
+      );
+      record.add(() => changed.add(id));
+    }
+  }
+  // Morning summary (once a day, from the chosen hour until 11:00).
+  final today = _iso(now);
+  if (cfg.morning && now.hour >= cfg.morningHour && now.hour < 11 && prefs.getString('alerts:morning') != today) {
     final todays = [
       for (final e in ratings.entries)
-        if (e.key.endsWith(_iso(now)) && mine.contains((e.value as Map)['sport'])) Map<String, dynamic>.from(e.value as Map),
+        if (e.key.endsWith(today) && mine.contains((e.value as Map)['sport'])) Map<String, dynamic>.from(e.value as Map),
     ]..sort((a, b) => (b['rating'] as num).compareTo(a['rating'] as num));
     if (todays.isNotEmpty) {
       final best = todays.first;
-      out.add(AlertNote('morning:$today', 'Today: ${_title(best['sport'])} ${best['window']} (${best['rating']}/5)',
-          todays.skip(1).map((r) => '${_title(r['sport'])} ${r['rating']}/5').join(' · '), '/today'));
+      out.add(
+        AlertNote(
+          'morning:$today',
+          'Today: ${_title(best['sport'])} ${best['window']} (${best['rating']}/5)',
+          todays.skip(1).map((r) => '${_title(r['sport'])} ${r['rating']}/5').join(' · '),
+          '/today',
+        ),
+      );
+      record.add(() => prefs.setString('alerts:morning', today));
     }
-    prefs.setString('alerts:morning', today);
   }
 
-  // Remember everything current, notified or not, so nothing repeats.
-  final keep = {...seen, for (final a in alerts) '${a['id']}', for (final n in out) n.id}.toList();
-  prefs.setStringList('alerts:seen', keep.length > 400 ? keep.sublist(keep.length - 400) : keep);
-  prefs.setString('alerts:ratings', jsonEncode(ratings));
-  prefs.setBool('alerts:baseline', true);
-  return out;
+  // First run of this version: remember what exists, send nothing.
+  if (firstRun || !cfg.on) {
+    for (final r in record) {
+      r();
+    }
+    save();
+    prefs.setBool('alerts:v2', true);
+    return const [];
+  }
+  // Quiet hours: keep everything pending (the morning summary has its own hour).
+  if (cfg.isQuiet(now)) {
+    prefs.setString('alerts:ratings', jsonEncode({...before}));
+    return const [];
+  }
+  // Daily cap.
+  final countKey = 'alerts:count:$today';
+  final sentToday = prefs.getInt(countKey) ?? 0;
+  final room = cfg.maxPerDay == 0 ? out.length : (cfg.maxPerDay - sentToday).clamp(0, out.length);
+  for (final r in record) {
+    r();
+  }
+  save();
+  final send = out.take(room).toList();
+  prefs.setInt(countKey, sentToday + send.length);
+  // Log for Profile → Notifications ("Recently sent").
+  final log = [...(prefs.getStringList('alerts:log') ?? const <String>[])];
+  for (final n in send) {
+    log.add(jsonEncode({'t': now.toIso8601String(), 'title': n.title, 'body': n.body}));
+  }
+  prefs.setStringList('alerts:log', log.length > 30 ? log.sublist(log.length - 30) : log);
+  return send;
 }
 
 String _iso(DateTime d) => '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
-String _title(Object? s) => const {'wing': 'Wing foil', 'surf': 'Surf', 'bike': 'Bike', 'run': 'Run', 'hike': 'Hike'}['$s'] ?? '$s';
+String _title(Object? s) =>
+    const {'wing': 'Wing foil', 'surf': 'Surf', 'bike': 'Bike', 'run': 'Run', 'hike': 'Hike'}['$s'] ?? '$s';
 String _day(String iso, DateTime now) {
   final d = DateTime.parse(iso);
   final diff = DateTime(d.year, d.month, d.day).difference(DateTime(now.year, now.month, now.day)).inDays;
-  return diff == 0 ? 'today' : diff == 1 ? 'tomorrow' : const ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][d.weekday - 1];
+  return diff == 0
+      ? 'today'
+      : diff == 1
+      ? 'tomorrow'
+      : const ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][d.weekday - 1];
 }
 
 /// Fetches /v1/alerts with the device's settings and shows what is new. Works in the background isolate.
@@ -83,16 +165,17 @@ Future<int> checkAlerts(SharedPreferences prefs, {http.Client? client, FlutterLo
   await prefs.reload(); // the foreground may have changed settings
   final profile = Map<String, dynamic>.from(jsonDecode(prefs.getString('profile') ?? '{}') as Map);
   final p = {...defaultProfile, ...profile};
-  if (![p['alertWindow'], p['alertWarnings'], p['alertChange'], p['alertMorning']].contains(true)) return 0;
+  if (!NotifySettings.fromJson(p['notify']).any) return 0;
   final url = prefs.getString('server.url') ?? buildApi;
   final token = prefs.getString('server.token') ?? buildToken;
   if (url.isEmpty) return 0;
   final sports = [for (final s in p['sports'] as List? ?? const []) '$s'].join(',');
   final place = prefs.getString('place');
-  var q = 'sports=$sports';
+  var q = 'v=2&sports=$sports';
   if (place != null) {
     final pl = jsonDecode(place) as Map;
-    q += '&lat=${(pl['lat'] as num).toStringAsFixed(3)}&lon=${(pl['lon'] as num).toStringAsFixed(3)}&place=${Uri.encodeQueryComponent('${pl['name']}')}';
+    q +=
+        '&lat=${(pl['lat'] as num).toStringAsFixed(3)}&lon=${(pl['lon'] as num).toStringAsFixed(3)}&place=${Uri.encodeQueryComponent('${pl['name']}')}';
   }
   final c = client ?? http.Client();
   final r = await c
@@ -103,15 +186,23 @@ Future<int> checkAlerts(SharedPreferences prefs, {http.Client? client, FlutterLo
   if (notes.isEmpty) return 0;
   final n = plugin ?? await AlertService.plugin();
   const details = NotificationDetails(
-    android: AndroidNotificationDetails('oratge_alerts', 'Weather alerts',
-        channelDescription: 'Good windows, official warnings and plan changes', importance: Importance.high, priority: Priority.high),
+    android: AndroidNotificationDetails(
+      'oratge_alerts',
+      'Weather alerts',
+      channelDescription: 'Good windows, official warnings and plan changes',
+      importance: Importance.high,
+      priority: Priority.high,
+    ),
     macOS: DarwinNotificationDetails(),
   );
-  for (final (i, a) in notes.take(3).indexed) {
-    await n.show(id: (a.id.hashCode & 0x7fffffff) + i, title: a.title, body: a.body, notificationDetails: details, payload: a.route);
-  }
-  if (notes.length > 3) {
-    await n.show(id: 1, title: '${notes.length - 3} more updates', body: 'Open Oratge for details', notificationDetails: details, payload: '/today');
+  for (final (i, a) in notes.indexed) {
+    await n.show(
+      id: (a.id.hashCode & 0x7fffffff) + i,
+      title: a.title,
+      body: a.body,
+      notificationDetails: details,
+      payload: a.route,
+    );
   }
   return notes.length;
 }
@@ -146,7 +237,11 @@ class AlertService {
     await p.initialize(
       settings: const InitializationSettings(
         android: AndroidInitializationSettings('@drawable/ic_stat_oratge'),
-        macOS: DarwinInitializationSettings(requestAlertPermission: false, requestBadgePermission: false, requestSoundPermission: false),
+        macOS: DarwinInitializationSettings(
+          requestAlertPermission: false,
+          requestBadgePermission: false,
+          requestSoundPermission: false,
+        ),
       ),
       onDidReceiveNotificationResponse: (r) {
         if (r.payload != null) onOpen?.call(r.payload!);
@@ -155,7 +250,7 @@ class AlertService {
     return _plugin = p;
   }
 
-  bool get _wanted => ['alertWindow', 'alertWarnings', 'alertChange', 'alertMorning'].any((k) => app.profile[k] == true);
+  bool get _wanted => NotifySettings.fromJson(app.profile['notify']).any;
 
   Future<void> start() async {
     if (!supported) return;
@@ -182,10 +277,13 @@ class AlertService {
     await requestPermission();
     if (Platform.isAndroid) {
       await Workmanager().initialize(alertsDispatcher);
-      await Workmanager().registerPeriodicTask('oratge-alerts', 'alerts',
-          frequency: const Duration(hours: 1),
-          constraints: Constraints(networkType: NetworkType.connected),
-          existingWorkPolicy: ExistingPeriodicWorkPolicy.keep);
+      await Workmanager().registerPeriodicTask(
+        'oratge-alerts',
+        'alerts',
+        frequency: const Duration(hours: 1),
+        constraints: Constraints(networkType: NetworkType.connected),
+        existingWorkPolicy: ExistingPeriodicWorkPolicy.keep,
+      );
     } else {
       _timer ??= Timer.periodic(const Duration(minutes: 30), (_) => check());
       _life ??= AppLifecycleListener(onResume: check);
@@ -196,10 +294,16 @@ class AlertService {
   Future<bool> requestPermission() async {
     final n = await plugin();
     if (Platform.isAndroid) {
-      return await n.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()?.requestNotificationsPermission() ?? false;
+      return await n
+              .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+              ?.requestNotificationsPermission() ??
+          false;
     }
-    return await n.resolvePlatformSpecificImplementation<MacOSFlutterLocalNotificationsPlugin>()
-            ?.requestPermissions(alert: true, badge: false, sound: true) ??
+    return await n.resolvePlatformSpecificImplementation<MacOSFlutterLocalNotificationsPlugin>()?.requestPermissions(
+          alert: true,
+          badge: false,
+          sound: true,
+        ) ??
         false;
   }
 
@@ -213,7 +317,12 @@ class AlertService {
       title: 'Oratge notifications work',
       body: 'You’ll hear about good windows, warnings and plan changes here.',
       notificationDetails: const NotificationDetails(
-        android: AndroidNotificationDetails('oratge_alerts', 'Weather alerts', importance: Importance.high, priority: Priority.high),
+        android: AndroidNotificationDetails(
+          'oratge_alerts',
+          'Weather alerts',
+          importance: Importance.high,
+          priority: Priority.high,
+        ),
         macOS: DarwinNotificationDetails(),
       ),
       payload: '/today',

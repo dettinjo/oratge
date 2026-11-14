@@ -346,3 +346,11 @@ def test_alerts_have_stable_ids():
     assert [x['id'] for x in a['alerts']] == [x['id'] for x in b['alerts']]
     assert all(x['kind'] in ('window', 'warning') and x['title'] and x['route'] for x in a['alerts'])
     assert {r['sport'] for r in a['ratings'].values()} <= {'wing', 'bike'}
+
+
+def test_old_apps_only_get_default_alerts():
+    old = client.get('/v1/alerts?sports=wing,bike,run').json()
+    assert all((a['kind'] == 'window' and a['sport'] == 'wing') or a.get('level') in ('orange', 'red') for a in old['alerts'])
+    assert {r['sport'] for r in old['ratings'].values()} <= {'wing'}
+    new = client.get('/v1/alerts?sports=wing,bike,run&v=2').json()
+    assert all('rating' in a and 'days_ahead' in a for a in new['alerts'] if a['kind'] == 'window')

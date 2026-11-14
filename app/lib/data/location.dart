@@ -28,7 +28,8 @@ class LocationFollower {
       if (perm == LocationPermission.denied || perm == LocationPermission.deniedForever) return;
       if (!await Geolocator.isLocationServiceEnabled()) return;
       final pos = await Geolocator.getCurrentPosition(
-          locationSettings: const LocationSettings(accuracy: LocationAccuracy.low, timeLimit: Duration(seconds: 12)));
+        locationSettings: const LocationSettings(accuracy: LocationAccuracy.low, timeLimit: Duration(seconds: 12)),
+      );
       // Unnamed ("41.23, 1.82", when reverse geocoding failed earlier): try naming it again even without moving.
       final unnamed = RegExp(r'^-?\d+\.\d+, -?\d+\.\d+$').hasMatch(cur.name);
       if (!unnamed && Geolocator.distanceBetween(cur.lat, cur.lon, pos.latitude, pos.longitude) < 2000) return;

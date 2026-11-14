@@ -8,11 +8,11 @@ class Units {
   final String wind, temp;
 
   double windValue(num kn) => switch (wind) {
-        'km/h' => kn * 1.852,
-        'm/s' => kn * 0.514444,
-        'Bft' => beaufort(kn).toDouble(),
-        _ => kn.toDouble(),
-      };
+    'km/h' => kn * 1.852,
+    'm/s' => kn * 0.514444,
+    'Bft' => beaufort(kn).toDouble(),
+    _ => kn.toDouble(),
+  };
 
   String windUnit() => wind == 'Bft' ? 'Bft' : wind;
 
@@ -44,11 +44,16 @@ class Units {
         return b == null ? '$a $u' : '$a${m[2]}$b $u';
       });
       // "gusts 18" right after a converted wind keeps the same unit.
-      s = s.replaceAllMapped(RegExp(r'gusts (\d+(?:\.\d+)?)(?![\d.])(?!\s?(?:kn|km/h|m/s|Bft))'),
-          (m) => 'gusts ${windText(double.parse(m[1]!), unit: false)}');
+      s = s.replaceAllMapped(
+        RegExp(r'gusts (\d+(?:\.\d+)?)(?![\d.])(?!\s?(?:kn|km/h|m/s|Bft))'),
+        (m) => 'gusts ${windText(double.parse(m[1]!), unit: false)}',
+      );
     }
     if (temp == '°F') {
-      s = s.replaceAllMapped(RegExp(r'(?<![\d.])(-?\d+(?:\.\d+)?)°(?![CF\d])'), (m) => '${tempValue(double.parse(m[1]!)).round()}°');
+      s = s.replaceAllMapped(
+        RegExp(r'(?<![\d.])(-?\d+(?:\.\d+)?)°(?![CF\d])'),
+        (m) => '${tempValue(double.parse(m[1]!)).round()}°',
+      );
     }
     return s;
   }
