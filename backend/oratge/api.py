@@ -30,7 +30,8 @@ _store = Store(settings.db_path)
 _sources = Sources(_store)
 
 PROFILE_KEYS = {'windFrom', 'windTo', 'gustLimit', 'waveFrom', 'waveTo', 'minPeriod', 'maxWindBike', 'comfortFrom',
-                'comfortTo', 'maxStorm', 'maxSummitWind', 'weight', 'climbPace', 'daylightMargin', 'runDistance'}
+                'comfortTo', 'maxStorm', 'maxSummitWind', 'weight', 'climbPace', 'daylightMargin', 'runDistance',
+                'boardVolume', 'frontWing'}
 PROFILE_FLAGS = {'mudguards', 'lights', 'lightRainOk', 'crampons'}
 
 
@@ -53,6 +54,10 @@ def builder(request: Request) -> Builder:
         p['directions'] = q['directions'].split(',')
     if 'cold' in q:
         p['cold'] = q['cold']
+    if 'wings' in q:
+        p['wings'] = q['wings'].split(',')
+    if 'wingLevel' in q:
+        p['wingLevel'] = q['wingLevel']
     return Builder(_sources, p)
 
 

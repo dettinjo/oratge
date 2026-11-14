@@ -12,6 +12,7 @@ import 'ui/motion.dart';
 import 'ui/screens/map_full.dart';
 import 'ui/screens/notifications_screen.dart';
 import 'ui/screens/today_screen.dart';
+import 'ui/screens/wing_gear_screen.dart';
 
 const _tabs = [
   (route: '/today', label: 'Today', icon: Icons.wb_sunny_outlined),
@@ -49,6 +50,18 @@ GoRouter buildRouter() => GoRouter(
             GoRoute(
               path: ':sport',
               pageBuilder: (c, s) => _detail(s, PlannerScreen(sport: s.pathParameters['sport']!)),
+              routes: [
+                GoRoute(
+                  path: 'gear',
+                  pageBuilder: (c, s) => _detail(
+                    s,
+                    WingGearScreen(
+                      wind: double.tryParse(s.uri.queryParameters['wind'] ?? ''),
+                      gust: double.tryParse(s.uri.queryParameters['gust'] ?? ''),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),

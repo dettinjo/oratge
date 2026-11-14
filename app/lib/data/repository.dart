@@ -163,6 +163,11 @@ class ApiRepository implements ForecastRepository {
     'crampons',
     'cold',
     'directions',
+    // Wing gear (the gear calculator and the wing rating use them).
+    'boardVolume',
+    'frontWing',
+    'wings',
+    'wingLevel',
   ];
 
   String _query(String path) {

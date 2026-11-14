@@ -1,8 +1,11 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../data/models.dart';
 import '../../data/profile.dart';
+import '../../data/wing_calc.dart';
 import '../../theme/og_helpers.dart';
 import '../../theme/oratge_tokens.dart';
 import '../components/basics.dart';
@@ -142,6 +145,36 @@ class _PlannerScreenState extends State<PlannerScreen> {
             ],
           ),
         );
+      case 'gear':
+        if (widget.sport != 'wing') return null;
+        // The best-rated hours of the day (or all of them) decide which wing to take.
+        final rows = {for (final r in d.hourChart['rows'] as List) r['label']: r};
+        List<double> vals(String k) => [
+          for (final v in ((rows[k] as Map?)?['values'] as List? ?? const [])) (v as num).toDouble(),
+        ];
+        final wind = vals('Wind'), gust = vals('Gust'), rating = vals('Rating');
+        if (wind.isEmpty || gust.isEmpty) return null;
+        final top = rating.isEmpty ? 0.0 : rating.reduce(math.max);
+        final idx = [
+          for (var i = 0; i < math.min(wind.length, gust.length); i++)
+            if (top == 0 || (i < rating.length && rating[i] == top)) i,
+        ];
+        final w = idx.map((i) => wind[i]).reduce(math.max), g = idx.map((i) => gust[i]).reduce(math.max);
+        final gear = WingGear.of(AppScope.of(context).profile);
+        final ch = gear.pick(w, g);
+        final u = AppScope.of(context).units;
+        return ValueTile(
+          icon: Icons.sailing_outlined,
+          label: 'Wing gear',
+          value: ch.state == 'ok' ? 'Take your ${ch.text}' : ch.text,
+          sub: '${top > 0 ? 'Best hours' : 'Today'}: ${u.windText(w)}, gusts ${u.windText(g, unit: false)}',
+          color: ch.state == 'ok' ? null : c.sun,
+          extra: minimal
+              ? null
+              : [for (final r in gear.wings) '${WingGear.label(r.size)}: ${u.windText(r.low, unit: false)}–${u.windText(r.high)}']
+                    .join(' · '),
+          onTap: () => context.go('/activities/wing/gear?wind=${w.toStringAsFixed(0)}&gust=${g.toStringAsFixed(0)}'),
+        );
       case 'tuned':
         if (d.tuned.isEmpty) return null;
         return section('Tuned to you', _Tuned(minimal ? d.tuned.take(1).toList() : d.tuned));
@@ -194,6 +227,7 @@ const plannerModules = <ModuleDef>[
   ModuleDef('verdict', 'Verdict', Icons.emoji_events_outlined, wide: true),
   ModuleDef('facts', 'Key numbers', Icons.grid_view, wide: true),
   ModuleDef('hours', 'Hour by hour', Icons.schedule, wide: true),
+  ModuleDef('gear', 'Wing gear', Icons.sailing_outlined, wide: true, hint: 'Wing foil: which wing to take, from your quiver'),
   ModuleDef('tuned', 'Tuned to you', Icons.tune, wide: true),
   ModuleDef('spot', 'At the spot', Icons.place_outlined, wide: true, hint: 'Live wind, route, swell window, altitude'),
   ModuleDef(

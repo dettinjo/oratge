@@ -141,7 +141,7 @@ const setupSteps = <SetupStep>[
         FieldDef('wetsuits', 'Wetsuits'),
       ]),
     ],
-    changes: 'Your weight, board and level set the minimum rideable wind; wing size advice follows your gust limit.',
+    changes: 'Your weight, board volume, front wing, wings and level set the wind your gear works in (Wing foil → Wing gear) and lower the rating when your quiver can’t cover the hour.',
   ),
   SetupStep(
     id: 'surf',

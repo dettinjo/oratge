@@ -10,6 +10,7 @@ from zoneinfo import ZoneInfo
 from . import engine as E
 from .config import settings
 from .sources import WAVE_MODELS, WEATHER_MODELS, Sources
+from . import wingcalc as W
 from .meteocat import Meteocat
 from .spots import COMARCA_NAMES, HOME, SPORT_SPOT, SPOTS
 
@@ -529,7 +530,17 @@ class Builder:
         if sport == 'wing':
             hs = [r.hour for r in rated if w and w[0] <= r.hour.t.hour < w[1]] or [r.hour for r in rated if r.hour.daylight]
             g = max((h.gust for h in hs), default=0)
-            return [{'from': f'Wind range {n(p["windFrom"])}–{n(p["windTo"])} kn', 'effect': f'rideable from {n(p["windFrom"])} kn'},
+            gr = W.gear(p)
+            big = max(gr['wings'], key=lambda x: x['size'])
+            gear_line = {'from': f'{gr["weight"]:.0f} kg · {gr["board"]:.0f} l · {gr["front_wing"]:.0f} cm² · '
+                                 f'{", ".join(f"{x["size"]:g} m" for x in gr["wings"])} · {gr["level"].lower()}',
+                         'effect': f'foiling from about {big["low"]:.0f} kn on your {big["size"]:g} m; '
+                                   f'gusts up to {gr["max_gust"]:.0f} kn on the smallest wing'}
+            warn = ([{'from': 'Your wind range vs your gear',
+                      'effect': f'your range starts at {n(p["windFrom"])} kn, your gear needs about {gr["min_wind"]:.0f} kn'}]
+                    if float(p['windFrom']) < gr['min_wind'] - 1 else [])
+            return [gear_line, *warn,
+                    {'from': f'Wind range {n(p["windFrom"])}–{n(p["windTo"])} kn', 'effect': f'rideable from {n(p["windFrom"])} kn'},
                     {'from': f'Gust limit {n(p["gustLimit"])} kn', 'effect': f'peak {g:.0f} kn ' + ('stays inside' if g <= float(p['gustLimit']) else 'is over your limit')},
                     {'from': f'Directions: {", ".join(p["directions"])}', 'effect': 'offshore hours rate 0'}]
         if sport == 'surf':
@@ -650,7 +661,10 @@ class Builder:
         hs = [r.hour for r in rated if w and w[0] <= r.hour.t.hour < w[1]] or [r.hour for r in rated]
         if sport == 'wing':
             g = max(h.gust for h in hs)
-            return {'label': 'Plan', 'facts': [{'label': 'Wing', 'value': wing_size(g, self.p), 'sub': f'gusts up to {g:.0f} kn'},
+            avg = max(h.wind for h in hs)
+            choice = W.pick(W.gear(self.p), avg, g)
+            return {'label': 'Plan', 'facts': [{'label': 'Wing', 'value': f'{choice["size"]:g} m',
+                                                'sub': choice['text'] if choice['state'] != 'ok' else f'gusts up to {g:.0f} kn'},
                                                {'label': 'Water', 'value': f'{hs[0].sst:.1f}°' if hs[0].sst else '—', 'sub': wetsuit(hs[0].sst)},
                                                {'label': 'Sunset', 'value': ss, 'sub': f'last light {last_light(ss)}'},
                                                {'label': 'Storms', 'value': f'{max(h.storm for h in hs):.0f} %', 'sub': 'risk in the window'}]}
@@ -1120,12 +1134,6 @@ def last_light(hm: str) -> str:
 
 def road(h: E.Hour) -> str:
     return 'wet' if h.precip >= 0.3 or h.rain3h >= 1 else ('damp' if h.rain3h >= 0.1 else 'dry')
-
-
-def wing_size(gust: float, p: dict) -> str:
-    kg = float(p.get('weight', 78))
-    big = 6 if kg > 85 else 5
-    return f'{big} m' if gust < 20 else (f'{big} m → {big - 1} m' if gust < 26 else f'{big - 1} m')
 
 
 def layer(feels: float, p: dict) -> str:

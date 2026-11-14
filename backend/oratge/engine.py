@@ -9,6 +9,8 @@ import math
 from dataclasses import dataclass, field
 from datetime import date, datetime
 
+from . import wingcalc as W
+
 HOURS = list(range(7, 21))  # columns of every hour chart
 
 
@@ -171,8 +173,8 @@ class Rated:
 
 
 WEIGHTS = {
-    'wing': [('Wind in range', 'wind', 35), ('Gust factor', 'wind', 15), ('Direction', 'wind', 20),
-             ('Chop', 'water', 10), ('Rain', 'water', 10), ('Daylight', 'sun', 10)],
+    'wing': [('Wind in range', 'wind', 25), ('Your gear', 'wind', 15), ('Gust factor', 'wind', 15), ('Direction', 'wind', 20),
+             ('Chop', 'water', 10), ('Rain', 'water', 5), ('Daylight', 'sun', 10)],
     'surf': [('Swell height', 'water', 30), ('Period', 'water', 25), ('Wind vs shore', 'wind', 25),
              ('Swell direction', 'water', 10), ('Daylight', 'sun', 10)],
     'bike': [('Dry window', 'water', 35), ('Wind', 'wind', 20), ('Temperature', 'heat', 20), ('Roads', 'water', 15),
@@ -196,11 +198,18 @@ def rate(sport: str, h: Hour, spot: dict, p: dict) -> Rated:
         rel = shore_relation(h.wdir, spot.get('shore_facing', 180))
         allowed = {'on': 'Onshore', 'side-on': 'Side-on', 'side': 'Side', 'off': 'Offshore'}[rel] in p['directions']
         gf = h.gust / h.wind if h.wind > 1 else 1.0
+        g = W.gear(p)
+        fit = W.pick(g, h.wind, h.gust)
         scores = [in_range(h.wind, f(p['windFrom']), f(p['windTo']), 4, 6) * (0 if h.gust > f(p['gustLimit']) + 4 else 1),
+                  W.score(g, h.wind, h.gust),
                   ramp(gf, 1.8, 1.3), {'side-on': 1.0, 'side': 0.9, 'on': 0.7, 'off': 0.0}[rel] if allowed else 0.0,
                   ramp(h.wave or 0, 1.5, 0.5), 1 - h.pprob / 100, 1.0 if h.daylight else 0.0]
-        obs = [f'{h.wind:.0f} kn vs your {p["windFrom"]}–{p["windTo"]}', f'gusts × {gf:.2f}', f'{rel} {compass(h.wdir)}',
+        obs = [f'{h.wind:.0f} kn vs your {p["windFrom"]}–{p["windTo"]}',
+               f'{fit["text"]} · quiver works {g["min_wind"]:.0f}–{g["max_gust"]:.0f} kn',
+               f'gusts × {gf:.2f}', f'{rel} {compass(h.wdir)}',
                f'{(h.wave or 0):.1f} m', f'{h.pprob:.0f} %', 'day' if h.daylight else 'dark']
+        if h.wind < g['min_wind'] - 2:
+            cap = 2  # even the biggest wing won't get you foiling
         stop = rel == 'off' or not h.daylight
     elif sport == 'surf':
         rel = shore_relation(h.wdir, spot.get('shore_facing', 180))
