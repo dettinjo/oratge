@@ -5,7 +5,7 @@
 
 <p align="center"><img src="docs/screenshots/map.png" alt="Wetterkarte mit Windfeld, animierten Windpartikeln, Spot-Bewertungen und 48-Stunden-Zeitleiste" width="100%" /></p>
 
-Oratge ist ein Wetterplaner für Wingfoilen, Surfen, Radfahren, Laufen und Wandern in Katalonien. Eine Flutter-App bewertet jede Prognosestunde pro Sportart, gestützt auf ein FastAPI-Backend, das Open-Meteo-Modelle mit Live-Stationsdaten von Meteocat kombiniert.
+Oratge ist ein Wetterplaner für Wingfoilen, Surfen, Radfahren, Laufen und Wandern in Katalonien. Die Flutter-App bewertet jede Prognosestunde pro Sportart über ein FastAPI-Backend, das Open-Meteo-Modelle mit Live-Stationsdaten von Meteocat kombiniert.
 
 ## Highlights
 - **Bewertungs-Engine pro Sportart** — das Python-Backend bewertet jede Prognosestunde mit gewichteten Faktoren je Sportart (Wingfoil: Wind im eigenen Bereich, eigenes Material, Böenfaktor, Windrichtung zur Küste, Kabbelwasser, Regen, Tageslicht), wählt das beste Zeitfenster und leitet aus der Streuung des ECMWF-Ensembles eine Konfidenz ab.
