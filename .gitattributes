@@ -1,0 +1,5 @@
+# Design handoff, mockups and the design-system reference are documentation, not app code:
+# keep them out of GitHub's language statistics so the primary language reflects the Dart app.
+design/** linguist-documentation
+design-system/** linguist-documentation
+docs/** linguist-documentation
