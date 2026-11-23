@@ -39,10 +39,11 @@ SQLite: response cache · quota ledger · forecast/observation archive · sync s
 - **App** (`app/lib/`): `data/` holds the repository with caching and fallback, models, profile and sync; `ui/` holds the screens, CustomPainter charts and the map layers (`ui/map/`).
 - **Design**: `design/` and `design-system/` contain the design handoff and component reference the app was built from; `docs/` has the API analysis, architecture notes and the design-to-data check.
 
-## Tech stack
-Flutter · Dart · flutter_map · WorkManager · Python · FastAPI · httpx · SQLite · Docker · GitHub Actions · Open-Meteo · Meteocat API
+## Tech Stack
 
-## Running it
+Flutter · Dart · Android · Mobile App · Python · FastAPI · REST API · httpx · SQLite · flutter_map · WorkManager · Docker · GitHub Actions · Open-Meteo · Meteocat API
+
+## Getting Started
 **App** (needs the Flutter SDK; without a backend it runs on bundled sample data):
 ```bash
 cd app

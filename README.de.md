@@ -40,9 +40,10 @@ SQLite: Antwort-Cache · Kontingent-Ledger · Prognose-/Beobachtungsarchiv · Sy
 - **Design**: `design/` und `design-system/` enthalten die Design-Übergabe und Komponentenreferenz, nach der die App gebaut wurde; `docs/` die API-Analyse, Architekturnotizen und den Abgleich Design vs. Daten.
 
 ## Tech-Stack
-Flutter · Dart · flutter_map · WorkManager · Python · FastAPI · httpx · SQLite · Docker · GitHub Actions · Open-Meteo · Meteocat API
 
-## Ausführen
+Flutter · Dart · Android · Mobile App · Python · FastAPI · REST API · httpx · SQLite · flutter_map · WorkManager · Docker · GitHub Actions · Open-Meteo · Meteocat API
+
+## Einrichtung
 **App** (benötigt das Flutter SDK; ohne Backend läuft sie mit mitgelieferten Beispieldaten):
 ```bash
 cd app
