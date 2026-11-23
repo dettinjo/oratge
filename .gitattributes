@@ -1,5 +1,5 @@
-# Design handoff, mockups and the design-system reference are documentation, not app code:
-# keep them out of GitHub's language statistics so the primary language reflects the Dart app.
-design/** linguist-documentation
-design-system/** linguist-documentation
+# Mark HTML mockups/design handoff and generated build shells as vendored/docs so Dart is primary language.
+*.html linguist-vendored
+design/** linguist-vendored
+design-system/** linguist-vendored
 docs/** linguist-documentation
