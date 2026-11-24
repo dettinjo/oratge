@@ -11,13 +11,15 @@ import '../../theme/og_helpers.dart';
 import '../../theme/oratge_tokens.dart';
 
 /// Map layers.
-enum FieldLayer { wind, temp, rain, chance, thunder, rating }
+/// [radar] is measured rain (RainViewer tiles, last 2 h), not a forecast field: it has its own timeline.
+enum FieldLayer { wind, temp, rain, radar, chance, thunder, rating }
 
 extension FieldLayerX on FieldLayer {
   String get label => switch (this) {
     FieldLayer.wind => 'Wind',
     FieldLayer.temp => 'Temp',
     FieldLayer.rain => 'Rain',
+    FieldLayer.radar => 'Radar',
     FieldLayer.chance => 'Rain chance',
     FieldLayer.thunder => 'Thunder',
     FieldLayer.rating => 'Spots',
@@ -40,7 +42,6 @@ class FieldSampler {
   /// Grid extent incl. half a cell around the outer nodes.
   LatLng get nw => LatLng(north + dLat / 2, west - dLon / 2);
   LatLng get se => LatLng(south - dLat / 2, east + dLon / 2);
-
 
   // Catmull-Rom: smooth through the grid points (no visible cell edges, unlike bilinear blending).
   static double _cr(double p0, double p1, double p2, double p3, double x) =>
@@ -151,7 +152,7 @@ class FieldColors {
     FieldLayer.rain => rain(s.sample('precip', lat, lon)),
     FieldLayer.chance => chance(s.sample('pprob', lat, lon)),
     FieldLayer.thunder => s.f.fields.containsKey('storm') ? thunder(s.sample('storm', lat, lon)) : const Color(0x00000000),
-    FieldLayer.rating => const Color(0x00000000),
+    FieldLayer.radar || FieldLayer.rating => const Color(0x00000000),
   };
 
   /// Legend stops (value label, colour) for a layer.
@@ -171,6 +172,14 @@ class FieldColors {
     FieldLayer.thunder => [
       for (final p in [15, 30, 50, 80]) ('$p', thunder(p.toDouble()).withValues(alpha: 1)),
     ],
+    // RainViewer "Universal Blue" at 20/30/40/50/55 dBZ, labelled with Marshall-Palmer rain rates.
+    FieldLayer.radar => const [
+      ('0.6', Color(0xFF00A3E0)),
+      ('3', Color(0xFF005588)),
+      ('12', Color(0xFFFFAA00)),
+      ('50', Color(0xFFC10000)),
+      ('100', Color(0xFFFFAAFF)),
+    ],
     FieldLayer.rating => [for (var r = 1; r <= 5; r++) ('$r', c.ratingColor(r))],
   };
 
@@ -180,6 +189,7 @@ class FieldColors {
     FieldLayer.rain => 'mm/h',
     FieldLayer.chance => '%',
     FieldLayer.thunder => '% storm risk · ⚡ strikes, last 2 h',
+    FieldLayer.radar => 'mm/h, approx. · measured, last 2 h',
     FieldLayer.rating => '',
   };
 }

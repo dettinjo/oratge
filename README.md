@@ -10,7 +10,7 @@ Oratge is a weather planner for wing foiling, surfing, cycling, running and hiki
 ## Highlights
 - **Per-sport rating engine** — the Python backend scores every forecast hour with weighted factors per sport (wing foil: wind in your range, your gear, gust factor, wind direction against the shore, chop, rain, daylight), picks the best window and derives a confidence level from the ECMWF ensemble spread.
 - **Quota-governed data layer** — Meteocat's free plan allows 100 forecast, 750 station and 250 lightning calls a month; a SQLite ledger splits what is left into a daily share, reconciles it with Meteocat's own usage counter and serves the last cached answer once the share is spent.
-- **Viewport-driven weather map** — after the camera settles, the app requests a grid for the visible area (0.25° up close, up to 3° zoomed out, at most 360 points) and renders wind, temperature, rain and thunder fields with clamped Catmull-Rom interpolation, animated wind particles and a 48-hour timeline.
+- **Viewport-driven weather map** — after the camera settles, the app requests a grid for the visible area (0.25° up close, up to 3° zoomed out, at most 360 points) and renders wind, temperature, rain and thunder fields with clamped Catmull-Rom interpolation, animated wind particles and a 48-hour timeline; a radar layer plays the last 2 hours of measured rain in 10-minute steps.
 - **Activities and GPX routes** — custom spots get their shore orientation from terrain elevation; GPX tracks are simplified, resampled about every 2 km and timed by sport (cycling and running add time per metre climbed, hiking uses a Naismith-style pace) to rate the weather along the route.
 - **Offline-tolerant client** — a stale-while-revalidate cache (in memory and on disk), a 6 s timeout and a 45 s back-off keep screens fast on a bad connection, with bundled sample data as the last fallback.
 - **Wing gear calculator** — rules of thumb for wing size and wind range, implemented in both Python and Dart and kept in step by shared reference test cases.
@@ -63,4 +63,4 @@ ORATGE_TOKEN=… METEOCAT_API_KEY=… uvicorn oratge.api:app --port 8000
 Without `METEOCAT_API_KEY` the backend runs on Open-Meteo alone.
 
 ## Data sources
-Forecasts from [Open-Meteo](https://open-meteo.com) (CC BY 4.0). Station readings, warnings and lightning from the Servei Meteorològic de Catalunya (SMC / Meteocat). Map tiles © OpenStreetMap contributors.
+Forecasts from [Open-Meteo](https://open-meteo.com) (CC BY 4.0). Station readings, warnings and lightning from the Servei Meteorològic de Catalunya (SMC / Meteocat). Rain radar from [RainViewer](https://www.rainviewer.com/). Map tiles © OpenStreetMap contributors.

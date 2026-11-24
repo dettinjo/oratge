@@ -272,7 +272,7 @@ class ValueLabelsLayer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cam = MapCamera.of(context);
-    if (layer == FieldLayer.rating) return const SizedBox.shrink();
+    if (layer == FieldLayer.rating || layer == FieldLayer.radar) return const SizedBox.shrink();
     // Spaced by what's on screen (the grid's resolution changes with the view): about 70 px apart.
     final f0 = sampler.f;
     final dx = f0.lons.length < 2
@@ -297,7 +297,7 @@ class ValueLabelsLayer extends StatelessWidget {
           FieldLayer.rain => field['precip']![sampler.t][i] >= 0.1 ? field['precip']![sampler.t][i].toStringAsFixed(1) : '',
           FieldLayer.chance => '${field['pprob']![sampler.t][i].round()}',
           FieldLayer.thunder => (field['storm']?[sampler.t][i] ?? 0) >= 15 ? '${field['storm']![sampler.t][i].round()}' : '',
-          FieldLayer.rating => '',
+          FieldLayer.radar || FieldLayer.rating => '',
         };
         if (text.isEmpty) continue;
         markers.add(

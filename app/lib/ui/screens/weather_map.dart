@@ -10,9 +10,11 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart' show LatLng;
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../data/models.dart';
 import '../../data/profile.dart';
+import '../../data/radar.dart';
 import '../../data/units.dart';
 import '../../theme/og_helpers.dart';
 import '../../theme/oratge_tokens.dart';
@@ -28,6 +30,9 @@ import 'common.dart';
 
 bool get _inTest => !kIsWeb && Platform.environment.containsKey('FLUTTER_TEST');
 const _wd = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+/// Shared so the radar index is cached across visits to the map.
+final _radarSource = RainRadar();
 
 /// A place shown on the map: a built-in spot or one of the user's activities.
 class _Pin {
@@ -70,6 +75,42 @@ class _WeatherMapScreenState extends State<WeatherMapScreen> {
   final Map<(FieldLayer, int, Brightness), ui.Image> _images = {};
   bool _rendering = false;
   int _seenVersion = -1;
+  List<RadarFrame> _radar = const [];
+  int _rt = 0; // radar frame shown
+  String? _radarError;
+  Timer? _radarTimer;
+
+  bool get _isRadar => _layer == FieldLayer.radar;
+
+  void _selectLayer(FieldLayer l) {
+    if (l == _layer) return;
+    _play?.cancel();
+    setState(() {
+      _layer = l;
+      _playing = false;
+    });
+    _radarTimer?.cancel();
+    if (l == FieldLayer.radar && !_inTest) {
+      _loadRadar();
+      // New frames arrive every 10 minutes; check every 5 while the radar is on screen.
+      _radarTimer = Timer.periodic(const Duration(minutes: 5), (_) => _loadRadar(force: true));
+    }
+  }
+
+  Future<void> _loadRadar({bool force = false}) async {
+    try {
+      final frames = await _radarSource.frames(force: force);
+      if (!mounted) return;
+      setState(() {
+        final atLatest = _radar.isEmpty || _rt == _radar.length - 1;
+        _radar = frames;
+        _radarError = null;
+        _rt = atLatest ? frames.length - 1 : _rt.clamp(0, math.max(0, frames.length - 1));
+      });
+    } catch (_) {
+      if (mounted && _radar.isEmpty) setState(() => _radarError = 'Radar unavailable right now.');
+    }
+  }
 
   @override
   void didChangeDependencies() {
@@ -158,6 +199,7 @@ class _WeatherMapScreenState extends State<WeatherMapScreen> {
   void dispose() {
     _play?.cancel();
     _viewTimer?.cancel();
+    _radarTimer?.cancel();
     for (final img in _images.values) {
       img.dispose();
     }
@@ -168,7 +210,7 @@ class _WeatherMapScreenState extends State<WeatherMapScreen> {
 
   void _ensureImage(OratgeColors c, Brightness b) {
     final s = _sampler;
-    if (s == null || _layer == FieldLayer.rating || _rendering) return;
+    if (s == null || _layer == FieldLayer.rating || _isRadar || _rendering) return;
     final key = (_layer, _t, b);
     if (_images.containsKey(key)) return;
     _rendering = true;
@@ -180,13 +222,15 @@ class _WeatherMapScreenState extends State<WeatherMapScreen> {
   }
 
   void _togglePlay() {
-    final n = _fc?.times.length ?? 0;
+    final radar = _isRadar;
+    final n = radar ? _radar.length : _fc?.times.length ?? 0;
     if (n == 0) return;
     setState(() => _playing = !_playing);
     _play?.cancel();
     if (_playing) {
-      _play = Timer.periodic(const Duration(milliseconds: 650), (_) {
-        if (mounted) setState(() => _t = (_t + 1) % n);
+      _play = Timer.periodic(Duration(milliseconds: radar ? 450 : 650), (_) {
+        if (!mounted) return;
+        setState(() => radar ? _rt = (_rt + 1) % _radar.length : _t = (_t + 1) % n);
       });
     }
   }
@@ -194,6 +238,11 @@ class _WeatherMapScreenState extends State<WeatherMapScreen> {
   void _setT(int v) {
     if (v != _t) HapticFeedback.selectionClick();
     setState(() => _t = v);
+  }
+
+  void _setRt(int v) {
+    if (v != _rt) HapticFeedback.selectionClick();
+    setState(() => _rt = v);
   }
 
   Future<void> _locate() async {
@@ -265,8 +314,27 @@ class _WeatherMapScreenState extends State<WeatherMapScreen> {
     final wide = MediaQuery.sizeOf(context).width >= 900;
     final n = _fc?.times.length ?? 0;
     void step(int d) {
-      if (n > 0) _setT((_t + d).clamp(0, n - 1));
+      if (_isRadar) {
+        if (_radar.isNotEmpty) _setRt((_rt + d).clamp(0, _radar.length - 1));
+      } else if (n > 0) {
+        _setT((_t + d).clamp(0, n - 1));
+      }
     }
+
+    // Radar mode: its own timeline (the last 2 h) replaces the forecast one.
+    Widget radarBar({bool bare = false, VoidCallback? onMinimize}) => _radar.isEmpty
+        ? _Glass(
+            child: Text(_radarError ?? 'Loading the radar…', style: OgText.chip.copyWith(color: c.text2)),
+          )
+        : _RadarTimeline(
+            frames: _radar,
+            t: _rt,
+            playing: _playing,
+            onPlay: _togglePlay,
+            onChanged: _setRt,
+            bare: bare,
+            onMinimize: onMinimize,
+          );
 
     final selected = _pin != null ? LatLng(_pin!.lat, _pin!.lon) : _probe;
     final map = _inTest
@@ -302,7 +370,24 @@ class _WeatherMapScreenState extends State<WeatherMapScreen> {
                 ),
                 children: [
                   oratgeTiles(context),
-                  if (s != null && img != null && _layer != FieldLayer.rating) FieldImageLayer(image: img, nw: s.nw, se: s.se),
+                  if (s != null && img != null && _layer != FieldLayer.rating && !_isRadar)
+                    FieldImageLayer(image: img, nw: s.nw, se: s.se),
+                  // RainViewer allows about 500 tiles a minute per device, so only the shown frame is drawn
+                  // (512 px tiles, no pan buffer) and, while playing, the next one is fetched invisibly.
+                  // Loaded frames stay in the image cache, so later loops cost nothing.
+                  if (_isRadar && _radar.isNotEmpty)
+                    for (final i in {_rt, if (_playing) (_rt + 1) % _radar.length})
+                      TileLayer(
+                        key: ValueKey(_radar[i].url),
+                        urlTemplate: _radar[i].url,
+                        // Own provider per layer: a TileLayer disposes its provider when it goes away.
+                        tileDimension: 512,
+                        zoomOffset: -1,
+                        maxNativeZoom: RainRadar.maxNativeZoom + 1, // tile grid zoom; the URL zoom is one lower
+                        panBuffer: 0,
+                        userAgentPackageName: 'cat.oratge.oratge',
+                        tileDisplay: TileDisplay.instantaneous(opacity: i == _rt ? 0.75 : 0),
+                      ),
                   if (s != null && _layer == FieldLayer.wind && motionOn) WindParticleLayer(sampler: s),
                   if (s != null && (_layer == FieldLayer.rain || _layer == FieldLayer.chance)) RainLayer(sampler: s),
                   if (_layer == FieldLayer.thunder)
@@ -409,7 +494,11 @@ class _WeatherMapScreenState extends State<WeatherMapScreen> {
                     ],
                   ),
                   // Phones show the attribution inside the panel (it would sit under it).
-                  if (wide) const SimpleAttributionWidget(source: Text('OpenStreetMap contributors · Open-Meteo')),
+                  if (wide)
+                    SimpleAttributionWidget(
+                      source: Text('OpenStreetMap contributors · Open-Meteo${_isRadar ? ' · RainViewer' : ''}'),
+                      onTap: _isRadar ? _openRainViewer : null,
+                    ),
                 ],
               );
             },
@@ -431,6 +520,7 @@ class _WeatherMapScreenState extends State<WeatherMapScreen> {
       error: _error,
       onPlay: _togglePlay,
       onTime: _setT,
+      radarBar: _isRadar ? radarBar(bare: true) : null,
       onPick: (p) {
         setState(() {
           _pin = p;
@@ -467,7 +557,7 @@ class _WeatherMapScreenState extends State<WeatherMapScreen> {
                       child: OgChipGroup(
                         options: [for (final l in FieldLayer.values) l.label],
                         selected: _layer.label,
-                        onSelect: (o) => setState(() => _layer = FieldLayer.values.firstWhere((l) => l.label == o)),
+                        onSelect: (o) => _selectLayer(FieldLayer.values.firstWhere((l) => l.label == o)),
                       ),
                     ),
                   ),
@@ -550,7 +640,14 @@ class _WeatherMapScreenState extends State<WeatherMapScreen> {
                                 onTap: () => setState(() => _sideOpen = true),
                               ),
                             ),
-                          if (_fc != null && !_fc!.isEmpty)
+                          if (_isRadar)
+                            Positioned(
+                              left: 12,
+                              right: 12,
+                              bottom: 24,
+                              child: Align(alignment: Alignment.bottomLeft, child: radarBar()),
+                            )
+                          else if (_fc != null && !_fc!.isEmpty)
                             Positioned(
                               left: 12,
                               right: _timelineMini ? null : 12,
@@ -601,7 +698,9 @@ class _WeatherMapScreenState extends State<WeatherMapScreen> {
                           Padding(padding: const EdgeInsets.only(right: 12, bottom: 10), child: buttons),
                           Padding(
                             padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
-                            child: _size == _PanelSize.hidden && _fc != null && !_fc!.isEmpty
+                            child: _size == _PanelSize.hidden && _isRadar
+                                ? radarBar()
+                                : _size == _PanelSize.hidden && _fc != null && !_fc!.isEmpty
                                 ? Align(
                                     alignment: Alignment.centerLeft,
                                     child: _MiniTimeline(
@@ -623,6 +722,8 @@ class _WeatherMapScreenState extends State<WeatherMapScreen> {
       ),
     );
   }
+
+  static void _openRainViewer() => launchUrl(Uri.parse('https://www.rainviewer.com/'));
 
   static Color _warnColor(OratgeColors c, String level) => switch (level) {
     'red' => c.warnRed,
@@ -675,7 +776,11 @@ class _Panel extends StatelessWidget {
     required this.onTime,
     required this.onPick,
     required this.onClear,
+    this.radarBar,
   });
+
+  /// Radar mode: the radar timeline replaces the forecast one (phone).
+  final Widget? radarBar;
   final MapForecast? fc;
   final int t;
   final FieldLayer layer;
@@ -743,11 +848,26 @@ class _Panel extends StatelessWidget {
         if (expanded) ...[
           const SizedBox(height: 12),
           Text(
-            '${layer == FieldLayer.rating ? 'WIND' : layer.label.toUpperCase()} · NEXT 48 HOURS',
+            '${switch (layer) {
+              FieldLayer.rating => 'WIND',
+              FieldLayer.radar => 'RAIN',
+              _ => layer.label.toUpperCase(),
+            }} · NEXT 48 HOURS',
             style: OgText.label.copyWith(color: c.text2),
           ),
           const SizedBox(height: 6),
-          _PointChart(f: f, t: t, at: at!, layer: layer == FieldLayer.rating ? FieldLayer.wind : layer, u: u, onTime: onTime),
+          _PointChart(
+            f: f,
+            t: t,
+            at: at!,
+            layer: switch (layer) {
+              FieldLayer.rating => FieldLayer.wind,
+              FieldLayer.radar => FieldLayer.rain,
+              _ => layer,
+            },
+            u: u,
+            onTime: onTime,
+          ),
           const SizedBox(height: 10),
           _Days(f: f, at: at!, u: u),
           if (pin?.route != null) ...[
@@ -839,7 +959,7 @@ class _Panel extends StatelessWidget {
                 ),
                 Padding(
                   padding: const EdgeInsets.only(right: 8),
-                  child: _Timeline(fc: f, t: t, playing: playing, onPlay: onPlay, onChanged: onTime, bare: true),
+                  child: radarBar ?? _Timeline(fc: f, t: t, playing: playing, onPlay: onPlay, onChanged: onTime, bare: true),
                 ),
                 if (!expanded && at != null)
                   InkWell(
@@ -858,7 +978,7 @@ class _Panel extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.only(top: 6),
                     child: Text(
-                      '© OpenStreetMap contributors · Open-Meteo',
+                      '© OpenStreetMap contributors · Open-Meteo${layer == FieldLayer.radar ? ' · Radar: RainViewer' : ''}',
                       style: OgText.src.copyWith(color: c.text3, fontSize: 10),
                     ),
                   ),
@@ -1331,6 +1451,94 @@ class _Timeline extends StatelessWidget {
       ],
     );
     return bare ? content : _Glass(padding: const EdgeInsets.fromLTRB(6, 6, 14, 8), child: content);
+  }
+}
+
+/// Radar timeline: the last 2 hours of measured rain in 10-minute steps; scrub or play.
+class _RadarTimeline extends StatelessWidget {
+  const _RadarTimeline({
+    required this.frames,
+    required this.t,
+    required this.playing,
+    required this.onPlay,
+    required this.onChanged,
+    this.bare = false,
+    this.onMinimize,
+  });
+  final List<RadarFrame> frames;
+  final int t;
+  final bool playing, bare;
+  final VoidCallback onPlay;
+  final VoidCallback? onMinimize;
+  final ValueChanged<int> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.og;
+    final n = frames.length;
+    final cur = frames[t].time.toLocal();
+    final ago = DateTime.now().difference(cur).inMinutes;
+    final hhmm = '${cur.hour.toString().padLeft(2, '0')}:${cur.minute.toString().padLeft(2, '0')}';
+    final content = Row(
+      children: [
+        IconButton(
+          tooltip: playing ? 'Pause' : 'Play radar',
+          iconSize: 30,
+          onPressed: onPlay,
+          icon: Icon(playing ? Icons.pause_circle_filled : Icons.play_circle_fill, color: c.text),
+        ),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                children: [
+                  Text('Radar $hhmm', style: OgText.actWindow.copyWith(color: c.text)),
+                  const Spacer(),
+                  Text('${t == n - 1 ? 'latest · ' : ''}$ago min ago', style: OgText.chip.copyWith(color: c.text2)),
+                ],
+              ),
+              if (n > 1)
+                SliderTheme(
+                  data: SliderTheme.of(context).copyWith(
+                    trackHeight: 2,
+                    activeTrackColor: c.water,
+                    inactiveTrackColor: c.line,
+                    thumbColor: c.text,
+                    overlayColor: c.text.withValues(alpha: 0.12),
+                    thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
+                    tickMarkShape: const RoundSliderTickMarkShape(tickMarkRadius: 1.5),
+                    activeTickMarkColor: c.bg,
+                    inactiveTickMarkColor: c.text3,
+                  ),
+                  child: Semantics(
+                    label: 'Radar time',
+                    value: hhmm,
+                    child: Slider(
+                      value: t.toDouble(),
+                      min: 0,
+                      max: (n - 1).toDouble(),
+                      divisions: n - 1,
+                      onChanged: (v) => onChanged(v.round()),
+                    ),
+                  ),
+                ),
+              Text(
+                'Measured rain, 10-min steps. Radar data: RainViewer',
+                style: OgText.src.copyWith(color: c.text3, fontSize: 10),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+    return bare
+        ? content
+        : _Glass(
+            padding: const EdgeInsets.fromLTRB(6, 6, 14, 8),
+            child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 560), child: content),
+          );
   }
 }
 
