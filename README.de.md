@@ -10,7 +10,7 @@ Oratge ist ein Wetterplaner für Wingfoilen, Surfen, Radfahren, Laufen und Wande
 ## Highlights
 - **Bewertungs-Engine pro Sportart** — das Python-Backend bewertet jede Prognosestunde mit gewichteten Faktoren je Sportart (Wingfoil: Wind im eigenen Bereich, eigenes Material, Böenfaktor, Windrichtung zur Küste, Kabbelwasser, Regen, Tageslicht), wählt das beste Zeitfenster und leitet aus der Streuung des ECMWF-Ensembles eine Konfidenz ab.
 - **Datenschicht mit Kontingentsteuerung** — der kostenlose Meteocat-Plan erlaubt 100 Prognose-, 750 Stations- und 250 Blitzabfragen pro Monat; ein SQLite-Ledger teilt das Restkontingent in Tagesanteile auf, gleicht es mit dem offiziellen Verbrauchszähler von Meteocat ab und liefert die letzte gecachte Antwort, sobald der Tagesanteil verbraucht ist.
-- **Wetterkarte nach Sichtbereich** — sobald die Karte stillsteht, lädt die App ein Gitter für den sichtbaren Ausschnitt (0,25° nah, bis 3° weit herausgezoomt, höchstens 360 Punkte) und zeichnet Wind-, Temperatur-, Regen- und Gewitterfelder mit begrenzter Catmull-Rom-Interpolation, animierten Windpartikeln und einer 48-Stunden-Zeitleiste.
+- **Wetterkarte nach Sichtbereich** — sobald die Karte stillsteht, lädt die App ein Gitter für den sichtbaren Ausschnitt (0,25° nah, bis 3° weit herausgezoomt, höchstens 360 Punkte) und zeichnet Wind-, Temperatur-, Regen- und Gewitterfelder mit begrenzter Catmull-Rom-Interpolation, animierten Windpartikeln und einer 48-Stunden-Zeitleiste; eine Radarebene spielt die gemessenen Niederschläge der letzten 2 Stunden in 10-Minuten-Schritten ab.
 - **Aktivitäten und GPX-Routen** — eigene Spots erhalten ihre Küstenausrichtung aus Geländehöhen; GPX-Tracks werden vereinfacht, etwa alle 2 km abgetastet und je Sportart zeitlich eingeplant (Rad und Lauf mit Zuschlag pro Höhenmeter, Wandern nach Naismith), um das Wetter entlang der Route zu bewerten.
 - **Offline-tolerante App** — Stale-while-revalidate-Cache (Speicher und Festplatte), 6 s Timeout und 45 s Back-off halten die Screens auch bei schlechter Verbindung schnell; mitgelieferte Beispieldaten dienen als letzte Rückfallebene.
 - **Wing-Materialrechner** — Faustregeln für Wing-Größe und Windbereich, in Python und Dart umgesetzt und über gemeinsame Referenz-Testfälle synchron gehalten.
@@ -63,4 +63,4 @@ ORATGE_TOKEN=… METEOCAT_API_KEY=… uvicorn oratge.api:app --port 8000
 Ohne `METEOCAT_API_KEY` läuft das Backend nur mit Open-Meteo.
 
 ## Datenquellen
-Prognosen von [Open-Meteo](https://open-meteo.com) (CC BY 4.0). Stationswerte, Warnungen und Blitze vom Servei Meteorològic de Catalunya (SMC / Meteocat). Kartenkacheln © OpenStreetMap-Mitwirkende.
+Prognosen von [Open-Meteo](https://open-meteo.com) (CC BY 4.0). Stationswerte, Warnungen und Blitze vom Servei Meteorològic de Catalunya (SMC / Meteocat). Regenradar von [RainViewer](https://www.rainviewer.com/). Kartenkacheln © OpenStreetMap-Mitwirkende.
